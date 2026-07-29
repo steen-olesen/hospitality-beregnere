@@ -1,0 +1,320 @@
+<!-- ============================================================
+     E-mail Value Calculator — embed-snippet
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     Brug uden tilladelse er ikke tilladt.
+     ============================================================ -->
+
+<style>
+  .evc-root {
+    --accent:  #C4581E;
+    --text:    #0d1b2a;
+    --muted:   #5c6b7a;
+    --border:  #ddd7cc;
+    --bg:      #ede8de;
+    --white:   #ffffff;
+    --navy:    #0d1b2a;
+    --creme:   #f5f0e8;
+    --red:     #dc2626;
+    max-width: 620px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+  }
+  .evc-card {
+    background: var(--creme);
+    border-radius: 24px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .evc-dogear {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+  .evc-title {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .evc-intro {
+    margin: 0 0 28px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .evc-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .evc-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .evc-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .evc-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,0.12);
+    background: var(--white);
+  }
+  .evc-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 24px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .evc-input::placeholder { font-weight: 400; color: #c4c9d4; }
+  .evc-input-prefix,
+  .evc-input-suffix {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .evc-help {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .evc-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 24px;
+  }
+  .evc-results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .evc-result-card--short {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    color: var(--white);
+  }
+  .evc-result-card--life {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 22px 24px 20px;
+    color: var(--text);
+  }
+  .evc-result-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 12px;
+  }
+  .evc-result-eyebrow--accent {
+    color: var(--accent);
+    opacity: 1;
+  }
+  .evc-result-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .evc-result-main {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .evc-result-main--dark {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .evc-result-label {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .evc-result-label--dark { color: var(--muted); opacity: 1; }
+  .evc-result-right { text-align: right; }
+  .evc-result-secondary {
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.9;
+  }
+  .evc-result-secondary--dark {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .evc-result-sub {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+  .evc-result-sub--dark { color: var(--muted); opacity: 1; }
+  .evc-helper {
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .evc-footer {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  @media (max-width: 540px) {
+    .evc-card   { padding: 28px 20px 24px; }
+    .evc-fields { grid-template-columns: 1fr; }
+    .evc-result-main { font-size: 34px; }
+  }
+</style>
+
+<div id="evc-email-value" class="evc-root">
+  <div class="evc-card">
+
+    <h2 class="evc-title">Værdien af 1 e-mail</h2>
+    <p class="evc-intro">Estimér hvor meget omsætning og profit én e-mail-abonnent repræsenterer i det første år og over hele kundeforholdet.</p>
+
+    <div class="evc-fields">
+
+      <label class="evc-label">
+        Gennemsnitlig ordreværdi
+        <div class="evc-input-shell">
+          <span class="evc-input-prefix">kr.</span>
+          <input id="evc-avg-purchase" type="number" min="0" step="1"
+            placeholder="500" class="evc-input" inputmode="decimal" />
+        </div>
+        <span class="evc-help">Dit typiske ordregennemsnit.</span>
+      </label>
+
+      <label class="evc-label">
+        Bruttoavance
+        <div class="evc-input-shell">
+          <input id="evc-gross-margin" type="number" min="0" max="100" step="0.5"
+            placeholder="70" class="evc-input" inputmode="decimal" />
+          <span class="evc-input-suffix">%</span>
+        </div>
+        <span class="evc-help">Profit efter vareforbrug, som % af omsætningen.</span>
+      </label>
+
+      <label class="evc-label">
+        Konverteringsrate
+        <div class="evc-input-shell">
+          <input id="evc-conversion-rate" type="number" min="0" max="100" step="0.1"
+            placeholder="10" class="evc-input" inputmode="decimal" />
+          <span class="evc-input-suffix">%</span>
+        </div>
+        <span class="evc-help">Andel af abonnenter der ender med at købe.</span>
+      </label>
+
+      <label class="evc-label">
+        Køb pr. år
+        <div class="evc-input-shell">
+          <input id="evc-annual-multiplier" type="number" min="0" max="100" step="0.1"
+            value="4" placeholder="4" class="evc-input" inputmode="decimal" />
+          <span class="evc-input-suffix">køb/år</span>
+        </div>
+        <span class="evc-help">Antal køb pr. år for en typisk kunde.</span>
+      </label>
+
+      <label class="evc-label">
+        Kundeforholdets længde
+        <div class="evc-input-shell">
+          <input id="evc-lifetime-multiplier" type="number" min="0" max="100" step="0.5"
+            value="5" placeholder="5" class="evc-input" inputmode="decimal" />
+          <span class="evc-input-suffix">år</span>
+        </div>
+        <span class="evc-help">Samlet køb = køb/år × antal år.</span>
+      </label>
+
+    </div>
+
+    <div class="evc-divider"></div>
+
+    <div class="evc-results">
+
+      <div class="evc-result-card evc-result-card--short">
+        <div class="evc-result-eyebrow">Kort sigt — første år pr. e-mail</div>
+        <div class="evc-result-row">
+          <div>
+            <div id="evc-short-profit" class="evc-result-main">–</div>
+            <div class="evc-result-label">Profit pr. e-mail</div>
+          </div>
+          <div class="evc-result-right">
+            <div id="evc-short-revenue" class="evc-result-secondary">–</div>
+            <div class="evc-result-sub">Omsætning pr. e-mail</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="evc-result-card evc-result-card--life">
+        <div class="evc-result-eyebrow evc-result-eyebrow--accent">Livstidsværdi pr. e-mail</div>
+        <div class="evc-result-row">
+          <div>
+            <div id="evc-life-profit" class="evc-result-main--dark">–</div>
+            <div class="evc-result-label evc-result-label--dark">Samlet profit pr. e-mail</div>
+          </div>
+          <div class="evc-result-right">
+            <div id="evc-life-revenue" class="evc-result-secondary--dark">–</div>
+            <div class="evc-result-sub evc-result-sub--dark">Samlet omsætning pr. e-mail</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="evc-helper" class="evc-helper"></div>
+
+    <div class="evc-footer">
+      Baseret på: AOV × bruttoavance × konverteringsrate × køb/år × antal år.
+      Kun til inspiration – faktiske tal afhænger af din drift.
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;font-weight:500;text-align:center;">En lille beregner af Steen Olesen<br>® Det Mindre Bureau</div>
+
+    <div class="evc-dogear" aria-hidden="true"></div>
+
+  </div>
+</div>
+
+<script>
+function a0_0x54ba(_0x266d7e,_0x4d7f7d){_0x266d7e=_0x266d7e-0xe5;var _0x54bf6b=a0_0x54bf();var _0x54baa9=_0x54bf6b[_0x266d7e];if(a0_0x54ba['reIHdk']===undefined){var _0x363464=function(_0x12d48b){var _0x36da56='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x5d3a2b='',_0x2103e8='';for(var _0x3cd376=0x0,_0x58f137,_0x1a77a8,_0xd4729d=0x0;_0x1a77a8=_0x12d48b['charAt'](_0xd4729d++);~_0x1a77a8&&(_0x58f137=_0x3cd376%0x4?_0x58f137*0x40+_0x1a77a8:_0x1a77a8,_0x3cd376++%0x4)?_0x5d3a2b+=String['fromCharCode'](0xff&_0x58f137>>(-0x2*_0x3cd376&0x6)):0x0){_0x1a77a8=_0x36da56['indexOf'](_0x1a77a8);}for(var _0x3f4640=0x0,_0x34d02d=_0x5d3a2b['length'];_0x3f4640<_0x34d02d;_0x3f4640++){_0x2103e8+='%'+('00'+_0x5d3a2b['charCodeAt'](_0x3f4640)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x2103e8);};var _0x192539=function(_0x49ec5e,_0x2b33dd){var _0x397890=[],_0x32aebd=0x0,_0x401e2b,_0x271764='';_0x49ec5e=_0x363464(_0x49ec5e);var _0xa085b5;for(_0xa085b5=0x0;_0xa085b5<0x100;_0xa085b5++){_0x397890[_0xa085b5]=_0xa085b5;}for(_0xa085b5=0x0;_0xa085b5<0x100;_0xa085b5++){_0x32aebd=(_0x32aebd+_0x397890[_0xa085b5]+_0x2b33dd['charCodeAt'](_0xa085b5%_0x2b33dd['length']))%0x100,_0x401e2b=_0x397890[_0xa085b5],_0x397890[_0xa085b5]=_0x397890[_0x32aebd],_0x397890[_0x32aebd]=_0x401e2b;}_0xa085b5=0x0,_0x32aebd=0x0;for(var _0x3eac2e=0x0;_0x3eac2e<_0x49ec5e['length'];_0x3eac2e++){_0xa085b5=(_0xa085b5+0x1)%0x100,_0x32aebd=(_0x32aebd+_0x397890[_0xa085b5])%0x100,_0x401e2b=_0x397890[_0xa085b5],_0x397890[_0xa085b5]=_0x397890[_0x32aebd],_0x397890[_0x32aebd]=_0x401e2b,_0x271764+=String['fromCharCode'](_0x49ec5e['charCodeAt'](_0x3eac2e)^_0x397890[(_0x397890[_0xa085b5]+_0x397890[_0x32aebd])%0x100]);}return _0x271764;};a0_0x54ba['dFWhBc']=_0x192539,a0_0x54ba['bqylYR']={},a0_0x54ba['reIHdk']=!![];}var _0x41bbf3=_0x54bf6b[0x0],_0x7d422b=_0x266d7e+_0x41bbf3,_0x535870=a0_0x54ba['bqylYR'][_0x7d422b];return!_0x535870?(a0_0x54ba['REMiqW']===undefined&&(a0_0x54ba['REMiqW']=!![]),_0x54baa9=a0_0x54ba['dFWhBc'](_0x54baa9,_0x4d7f7d),a0_0x54ba['bqylYR'][_0x7d422b]=_0x54baa9):_0x54baa9=_0x535870,_0x54baa9;}(function(_0x50a8ed,_0xd3e7d4){var _0x1ad9e4=a0_0x54ba,_0x3e6fee=_0x50a8ed();while(!![]){try{var _0x38d967=-parseInt(_0x1ad9e4(0xfc,'@u61'))/0x1+-parseInt(_0x1ad9e4(0x129,'7)mW'))/0x2*(-parseInt(_0x1ad9e4(0xee,'Yccq'))/0x3)+parseInt(_0x1ad9e4(0x108,'SocG'))/0x4*(parseInt(_0x1ad9e4(0x11e,'Az26'))/0x5)+parseInt(_0x1ad9e4(0xfb,'ugJR'))/0x6+-parseInt(_0x1ad9e4(0x11f,'bRlu'))/0x7*(-parseInt(_0x1ad9e4(0x118,'[Tt]'))/0x8)+-parseInt(_0x1ad9e4(0x101,'(#IQ'))/0x9*(-parseInt(_0x1ad9e4(0xf8,'&h1z'))/0xa)+-parseInt(_0x1ad9e4(0x121,'@01&'))/0xb;if(_0x38d967===_0xd3e7d4)break;else _0x3e6fee['push'](_0x3e6fee['shift']());}catch(_0x25826c){_0x3e6fee['push'](_0x3e6fee['shift']());}}}(a0_0x54bf,0x44f28),(function(){var _0x3ca9c2=a0_0x54ba,_0x36da56=[_0x3ca9c2(0xfd,'Az26'),_0x3ca9c2(0xed,'d(G%'),_0x3ca9c2(0x11b,'kQX$'),_0x3ca9c2(0x10a,'mpu6'),'mundtilmund.com',_0x3ca9c2(0xeb,'(#IQ'),_0x3ca9c2(0xff,'9M6k'),''],_0x5d3a2b=(window[_0x3ca9c2(0xf0,'qu&n')][_0x3ca9c2(0x124,'lsw(')]||'')[_0x3ca9c2(0xfa,'kQX$')]();if(!_0x36da56[_0x3ca9c2(0x11a,'(#IQ')](function(_0xd4729d){return _0x5d3a2b===_0xd4729d||_0xd4729d&&_0x5d3a2b['endsWith']('.'+_0xd4729d);})){var _0x2103e8=document[_0x3ca9c2(0x10f,'lsw(')](_0x3ca9c2(0x106,'V3*T'));if(_0x2103e8)_0x2103e8[_0x3ca9c2(0x102,'p4qE')]='<div\x20style=\x22background:#f5f0e8;border-radius:16px;padding:24px\x2020px;border:1px\x20solid\x20#ddd7cc;color:#0d1b2a;font-size:14px;font-family:system-ui,sans-serif;\x22>Denne\x20beregner\x20er\x20udviklet\x20af\x20Steen\x20Olesen.</div>';return;}function _0x3cd376(_0x3f4640){var _0x3775e2=_0x3ca9c2,_0x34d02d=document[_0x3775e2(0x11c,'IUdf')](_0x3f4640);if(!_0x34d02d)return 0x0;var _0x49ec5e=parseFloat(String(_0x34d02d[_0x3775e2(0x10b,'EmX(')])[_0x3775e2(0x112,'p4qE')](',','.'));return isNaN(_0x49ec5e)?0x0:_0x49ec5e;}function _0x58f137(_0x2b33dd){var _0x2442bf=_0x3ca9c2;if(!isFinite(_0x2b33dd)||_0x2b33dd<=0x0)return'–';return new Intl[(_0x2442bf(0xf9,'[s4O'))](_0x2442bf(0x105,'4xx$'),{'style':'currency','currency':'DKK','maximumFractionDigits':_0x2b33dd<0x1?0x2:0x0})[_0x2442bf(0x109,'Webm')](_0x2b33dd);}function _0x1a77a8(){var _0x788ded=_0x3ca9c2,_0x397890=document['getElementById']('evc-helper'),_0x32aebd=document[_0x788ded(0x125,'YmL[')](_0x788ded(0x100,'#2DO')),_0x401e2b=document[_0x788ded(0xf6,'&&Ec')](_0x788ded(0x117,'n)C)')),_0x271764=document[_0x788ded(0xe5,'$[Dq')]('evc-life-profit'),_0xa085b5=document['getElementById'](_0x788ded(0x115,'t!sM'));if(!_0x32aebd)return;var _0x3eac2e=_0x3cd376(_0x788ded(0xfe,'&h1z')),_0x340ba4=_0x3cd376(_0x788ded(0xec,'Webm')),_0x505805=_0x3cd376(_0x788ded(0x127,'EmX(')),_0x1ea912=_0x3cd376(_0x788ded(0x104,'#OWc')),_0x368193=_0x3cd376('evc-lifetime-multiplier');_0x397890[_0x788ded(0x10e,'d(G%')]='';if(_0x3eac2e<=0x0||_0x340ba4<=0x0||_0x505805<=0x0||_0x1ea912<=0x0||_0x368193<=0x0){_0x32aebd[_0x788ded(0x107,'gBIh')]='–',_0x401e2b['textContent']='–',_0x271764[_0x788ded(0x111,'mpu6')]='–',_0xa085b5[_0x788ded(0x11d,'[Tt]')]='–';var _0xdd3ed7=[];if(_0x3eac2e<=0x0)_0xdd3ed7[_0x788ded(0x123,'7Nxz')](_0x788ded(0x119,'V3*T'));if(_0x340ba4<=0x0)_0xdd3ed7['push'](_0x788ded(0x120,'mpu6'));if(_0x505805<=0x0)_0xdd3ed7[_0x788ded(0xe9,'SocG')](_0x788ded(0xf7,'y6Uw'));if(_0x1ea912<=0x0)_0xdd3ed7[_0x788ded(0x103,'y$c@')]('køb\x20pr.\x20år');if(_0x368193<=0x0)_0xdd3ed7[_0x788ded(0x10d,'pCt0')](_0x788ded(0x114,'Qb&l'));if(_0xdd3ed7['length'])_0x397890[_0x788ded(0xf1,'SocG')]=_0x788ded(0xe8,'tgQw')+_0xdd3ed7['join'](',\x20')+'.';return;}var _0x1260ac=_0x505805/0x64,_0x5d36c8=_0x3eac2e*_0x1260ac*_0x1ea912,_0x2623cb=_0x5d36c8*(_0x340ba4/0x64),_0x4b5775=_0x3eac2e*_0x1260ac*_0x1ea912*_0x368193,_0x629e0f=_0x4b5775*(_0x340ba4/0x64);_0x32aebd[_0x788ded(0xef,'Webm')]=_0x58f137(_0x2623cb),_0x401e2b[_0x788ded(0xf4,'@u61')]=_0x58f137(_0x5d36c8),_0x271764[_0x788ded(0x128,'qu&n')]=_0x58f137(_0x629e0f),_0xa085b5[_0x788ded(0x12a,'#2DO')]=_0x58f137(_0x4b5775);}[_0x3ca9c2(0xe7,'@01&'),'evc-gross-margin',_0x3ca9c2(0x127,'EmX('),_0x3ca9c2(0xea,'4xx$'),'evc-lifetime-multiplier']['forEach'](function(_0x5eddbf){var _0x3abd17=_0x3ca9c2,_0x5b1971=document[_0x3abd17(0xf6,'&&Ec')](_0x5eddbf);if(!_0x5b1971)return;_0x5b1971[_0x3abd17(0xf2,'Az26')]('input',_0x1a77a8),_0x5b1971['addEventListener'](_0x3abd17(0x10c,'SocG'),_0x1a77a8);}),_0x1a77a8();}()));function a0_0x54bf(){var _0x1b9bb0=['W7RcS8ouW7tcNa','WR87WOntbe48W5vRW65HWRnis3a','W5KvWRldNLhcJN4EeNBdNG','xqRcGSo+WQeZW7tdG8kqWP4z','Euy0W4hdRSk4','WRZdRmk6W4FcMZpdMCoNWQitWR0dWOSz','WQjgomoOW5C','bL/dHCk8','AmkbWROf','w8kJFCkyW4GVwumPWPzj','WP7cGmk9oxaciHjuWQ8pWPTXW7G','aCoyqmkyBg0iCZXnWOddLSoz','WQxdVmkSW5FcRdxdM8o+WRitWQ0','qmkpbCoant5v','fCkcn0fRW4FcQmkRDxu','zSk3WPFdGSkSWOtcLbJcTSkIWQaNb8k0WQRcQCk7W408','vmoEW5TjWPmSkW9gWQ5cW41BbSkjWOi','hJ1GWP46jNfbdCkmpG','WQZcPY/dMSocy8kgWRfMrCo7xcnlyh/cNq','tCk3lhBcPdWVtaJdVSkvW40l','WRu/WOqmbfxcU8ooy8kQ','jmowW5dcTG','mmkjz8kbbWtcSCk+e2lcOIJcMZXjzSkNnG','WPiexSk+W7vxiuiJtNLHW5lcLG','cSoGytBdN2n5vs/dV8kf','W5iZefddUCo9uG','x8oZWRZcU2HVW7m','WRpdQ8kHW5FcMZxdLmo8WRytWRPi','WPfmgqvlW5HBWQdcIs7cN0VcIW','rhlcRmkdW53cH1ZdJJhcQmk2','eSogWQxdLa','WPhcISk6chigiHi','W5S1mCoBtxb8nuNdN8kUWPRdJvC','a8oBtmkDygSiAtzBWRxdUSoq','WRfrn8kWW5e3odjKWQ3cICkhW7hdLhKvW59IWO0','uSk+A8o6WOv2nWJdPeldIG','W4HdtuyJw0PBW4q1W6u','qCoAW6LLsNFcH1jeW5pcJG','r8ovDJjpW7lcTmk8D2VdMY5nza','w8kaW4hdMe1wW6JdLSkLCG','W40mtXeCWPCiW5/cTYJcGwtcP0ZcOCkI','W5hdOSk3CSoIW5yEt8o5','feBdG8kM','W7VcPmkAWP3cTSoOn8oCFCk4eeVcQgRcNKZdNCoufCkxpW','m8oqW5pcVGDzW7TAfXNdMSoY','EL8LWOhdQmk+WOWOW7FcVCokrcJcI8kDdG','tCkPASkdW7G0gvmN','A8kCW6Wri8ktW5PgWQe','A0W+W5JdJmkJWO0VW6hdVSot','sSk0CmoVWRjWnHi','efBdImk6W5yQW43dOSkKWRS+','WOyspfZdGSo/wIPPW4ZcM8kdWP3cQCoMAW','WP5dW6RdJMtcHLW','w2SOW59lo3rApmkPgG','WO5JDmoAB11Obe0','W7ddLSowW4zDW55kW6lcTqtdG8knp8oO','W7/dL106WQZcVbCdtJW4d8onWPHAWOBcUq','sJDzWRVdLqJcTSoEW649','WQtcP2rYidNcLg8KWOCTW40','imkdx8kdgq/cP8kpf3pcSG','W4rpWPr9E0xdRSkTWRmoWPJcLtS','hJLNWPW7BfHfi8kXcci','WPqcpxZdMSo1wdTwW4dcHSozWPVcQmoU','hhqiWQBdTtdcP8kaW4SKW4mSf8oAW4ap','qSoGW4OjW49rW6udxa','umojW7i8ENdcHLrvWPdcIJBcMw4zmG','ySklWOJdPsPNW6nghf0','w8keg8ojjHvKuZi','cv4KrG','iexcQs9JW58QWPJdGSovWRpcJ8oOfCoQamkismo6zKy'];a0_0x54bf=function(){return _0x1b9bb0;};return a0_0x54bf();}
+</script>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kundens livstidsværdi</title>
+</head>
+<body>
+
+<style>
+  /* ── tokens ── */
+  .clv-root {
+    --accent:       #C4581E;
+    --accent-light: #f7ebe3;
+    --accent-mid:   #d4723d;
+    --text:         #0d1b2a;
+    --muted:        #5c6b7a;
+    --border:       #ddd7cc;
+    --bg:           #ede8de;
+    --white:        #ffffff;
+    --navy:         #0d1b2a;
+    --creme:        #f5f0e8;
+    --red:          #dc2626;
+    --green:        #059669;
+    --amber:        #d97706;
+
+    max-width: 620px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+  }
+
+  /* ── card ── */
+  .clv-card {
+    background: var(--creme);
+    border-radius: 24px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── dog-ear brand mark ── */
+  .clv-dogear {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+
+  /* ── header ── */
+  .clv-title {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .clv-intro {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .clv-required-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+
+  .clv-required-note em { color: var(--red); font-style: normal; font-weight: 700; }
+
+  /* ── fields grid ── */
+  .clv-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 28px;
+  }
+
+  .clv-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .clv-label-text {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .clv-required-star { color: var(--red); font-weight: 700; }
+
+  .clv-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  .clv-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
+    background: var(--white);
+  }
+
+  .clv-input-shell--error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+    background: #fff5f5 !important;
+  }
+
+  .clv-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 24px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .clv-input::placeholder { font-weight: 400; color: #c4c9d4; }
+
+  .clv-input-prefix,
+  .clv-input-suffix {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .clv-help {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .clv-input-warning {
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* ── divider ── */
+  .clv-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 24px;
+  }
+
+  /* ── results ── */
+  .clv-results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  /* main LTV card */
+  .clv-result-card--main {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    color: var(--white);
+  }
+
+  .clv-ltv-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 12px;
+  }
+
+  .clv-ltv-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .clv-ltv-profit {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .clv-ltv-profit-label {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .clv-ltv-right { text-align: right; }
+
+  .clv-ltv-revenue {
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.9;
+  }
+
+  .clv-ltv-revenue-label {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  .clv-ltv-note {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+
+  /* empty hint */
+  .clv-empty-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    min-height: 18px;
+  }
+
+  .clv-empty-hint.clv-visible { opacity: 1; }
+
+  /* segments card */
+  .clv-result-card--segments {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 22px 22px 18px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  .clv-result-card--segments.clv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .clv-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* donut row */
+  .clv-donuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .clv-donut-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .clv-donut-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .clv-donut-svg {
+    width: 96px;
+    height: 96px;
+    display: block;
+  }
+
+  .clv-donut-bg { fill: none; stroke: var(--border); }
+  .clv-donut-arc { fill: none; stroke: var(--accent); stroke-linecap: butt; }
+  .clv-donut-arc--one { stroke: #e8b49a; }
+
+  .clv-donut-label {
+    font-size: 17px;
+    font-weight: 800;
+    fill: var(--text);
+  }
+
+  .clv-donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .clv-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .clv-dot--loyal { background: var(--accent); }
+  .clv-dot--one   { background: #e8b49a; }
+
+  /* segment table */
+  .clv-seg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .clv-seg {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--border);
+  }
+
+  .clv-seg-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .clv-seg-share {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .clv-seg-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 3px 0;
+    font-weight: 500;
+  }
+
+  .clv-seg-row strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ratio card */
+  .clv-result-card--ratio {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 20px 22px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  .clv-result-card--ratio.clv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .clv-ratio-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .clv-ratio-number {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .clv-ratio-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-top: 5px;
+  }
+
+  .clv-ratio-badge--great  { background: #d1fae5; color: #065f46; }
+  .clv-ratio-badge--good   { background: #fef3c7; color: #92400e; }
+  .clv-ratio-badge--break  { background: #fee2e2; color: #991b1b; }
+  .clv-ratio-badge--danger { background: #fee2e2; color: #991b1b; }
+
+  .clv-ratio-right { text-align: right; }
+
+  .clv-ratio-cac {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .clv-ratio-cac-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* helper / footer */
+  .clv-helper {
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .clv-footer {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── responsive ── */
+  @media (max-width: 540px) {
+    .clv-card         { padding: 28px 20px 24px; }
+    .clv-fields       { grid-template-columns: 1fr; }
+    .clv-donuts       { grid-template-columns: 1fr 1fr; }
+    .clv-seg-grid     { grid-template-columns: 1fr; }
+    .clv-ltv-profit   { font-size: 34px; }
+  }
+
+  @media (max-width: 380px) {
+    .clv-donuts       { grid-template-columns: 1fr; }
+    .clv-ltv-profit   { font-size: 28px; }
+  }
+</style>
+
+<div id="clv-widget" class="clv-root">
+  <div class="clv-card">
+
+    <h2 class="clv-title">Kundens livstidsværdi</h2>
+    <p class="clv-intro">Beregn hvor meget profit én gennemsnitskunde skaber over hele kundeforholdet – og se din LTV:CAC‑ratio.</p>
+    <p class="clv-required-note"><em>*</em> Påkrævet felt</p>
+
+    <div class="clv-fields">
+
+      <label class="clv-label">
+        <span class="clv-label-text">Gennemsnitlig ordreværdi<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <span class="clv-input-prefix">kr.</span>
+          <input id="clv-avg-purchase" type="number" min="0" step="1"
+            placeholder="500" class="clv-input" inputmode="decimal" />
+        </div>
+        <span class="clv-help">Dit typiske ordregennemsnit.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Bruttoavance<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-gross-margin" type="number" min="0" max="100" step="0.5"
+            placeholder="70" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">%</span>
+        </div>
+        <span id="clv-gross-margin-warn" class="clv-input-warning"></span>
+        <span class="clv-help">Profit efter vareforbrug, som % af omsætningen.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Køb pr. år<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-purchases-per-year" type="number" min="0" max="100" step="0.1"
+            value="4" placeholder="4" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">køb/år</span>
+        </div>
+        <span class="clv-help">Antal køb pr. år for en typisk kunde.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Kundeforholdets længde<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-years" type="number" min="0" max="100" step="0.5"
+            value="5" placeholder="5" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">år</span>
+        </div>
+        <span class="clv-help">E-handel: typisk 1–3 år. Tip: 1 ÷ månedlig churn × 1/12.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Andel loyale kunder</span>
+        <div class="clv-input-shell">
+          <input id="clv-loyal-pct" type="number" min="0" max="100" step="1"
+            value="20" placeholder="20" class="clv-input" inputmode="numeric" />
+          <span class="clv-input-suffix">%</span>
+        </div>
+        <span id="clv-loyal-pct-warn" class="clv-input-warning"></span>
+        <span class="clv-help">Kunder der køber mere end én gang. Usikker? Brug 20–30%.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">CAC <span style="font-weight:400;color:var(--muted)">(valgfri)</span></span>
+        <div class="clv-input-shell">
+          <span class="clv-input-prefix">kr.</span>
+          <input id="clv-cac" type="number" min="0" step="1"
+            placeholder="500" class="clv-input" inputmode="numeric" />
+        </div>
+        <span class="clv-help">Udgift pr. ny kunde – bruges til LTV:CAC‑forholdet.</span>
+      </label>
+
+    </div>
+
+    <div class="clv-divider"></div>
+
+    <div class="clv-results">
+
+      <!-- Main LTV -->
+      <div class="clv-result-card clv-result-card--main">
+        <div class="clv-ltv-eyebrow">Estimeret livstidsværdi (LTV)</div>
+        <div class="clv-ltv-row">
+          <div>
+            <div id="clv-ltv-profit" class="clv-ltv-profit">–</div>
+            <div class="clv-ltv-profit-label">Profit pr. kunde</div>
+          </div>
+          <div class="clv-ltv-right">
+            <div id="clv-ltv-revenue" class="clv-ltv-revenue">–</div>
+            <div class="clv-ltv-revenue-label">Omsætning pr. kunde</div>
+          </div>
+        </div>
+        <div id="clv-total-purchases" class="clv-ltv-note"></div>
+      </div>
+
+      <div id="clv-empty-hint" class="clv-empty-hint"></div>
+
+      <!-- Segments -->
+      <div id="clv-segments-card" class="clv-result-card clv-result-card--segments" style="display:none;">
+        <div class="clv-section-label">Fordeling — engang vs. loyale kunder</div>
+
+        <div class="clv-donuts">
+          <div class="clv-donut-block">
+            <div class="clv-donut-title">Antal kunder</div>
+            <svg viewBox="0 0 100 100" class="clv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-bg" />
+              <circle id="clv-pie-count-one" cx="50" cy="50" r="38" stroke-width="13"
+                class="clv-donut-arc clv-donut-arc--one"
+                stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="clv-pie-count-loyal" cx="50" cy="50" r="38" stroke-width="13"
+                class="clv-donut-arc"
+                stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="clv-pie-count-label" x="50" y="56" text-anchor="middle" class="clv-donut-label">–</text>
+            </svg>
+            <div class="clv-donut-legend">
+              <span><span class="clv-dot clv-dot--loyal"></span>Loyale</span>
+              <span><span class="clv-dot clv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+
+          <div class="clv-donut-block">
+            <div class="clv-donut-title">Andel af værdi</div>
+            <svg viewBox="0 0 100 100" class="clv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-bg" />
+              <circle id="clv-pie-sales-one" cx="50" cy="50" r="38" stroke-width="13"
+                class="clv-donut-arc clv-donut-arc--one"
+                stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="clv-pie-sales-loyal" cx="50" cy="50" r="38" stroke-width="13"
+                class="clv-donut-arc"
+                stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="clv-pie-sales-label" x="50" y="56" text-anchor="middle" class="clv-donut-label">–</text>
+            </svg>
+            <div class="clv-donut-legend">
+              <span><span class="clv-dot clv-dot--loyal"></span>Loyale</span>
+              <span><span class="clv-dot clv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="clv-seg-grid">
+          <div class="clv-seg">
+            <div class="clv-seg-name">Engangskunder</div>
+            <div id="clv-one-time-share" class="clv-seg-share">–</div>
+            <div class="clv-seg-row"><span>Andel af kunder</span><strong id="clv-one-time-pct-text">–</strong></div>
+            <div class="clv-seg-row"><span>Køb pr. kunde</span><strong>1</strong></div>
+            <div class="clv-seg-row"><span>LTV pr. kunde</span><strong id="clv-one-time-ltv">–</strong></div>
+          </div>
+          <div class="clv-seg">
+            <div class="clv-seg-name">Loyale kunder</div>
+            <div id="clv-loyal-share" class="clv-seg-share">–</div>
+            <div class="clv-seg-row"><span>Andel af kunder</span><strong id="clv-loyal-pct-text">–</strong></div>
+            <div class="clv-seg-row"><span>Køb pr. kunde</span><strong id="clv-loyal-purchases">–</strong></div>
+            <div class="clv-seg-row"><span>LTV pr. kunde</span><strong id="clv-loyal-ltv">–</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ratio -->
+      <div id="clv-ratio-card" class="clv-result-card clv-result-card--ratio" style="display:none;">
+        <div class="clv-section-label">LTV:CAC‑forhold</div>
+        <div class="clv-ratio-inner">
+          <div>
+            <div id="clv-ratio" class="clv-ratio-number">–</div>
+            <span id="clv-ratio-badge" class="clv-ratio-badge"></span>
+          </div>
+          <div class="clv-ratio-right">
+            <div id="clv-cac-display" class="clv-ratio-cac">–</div>
+            <div class="clv-ratio-cac-label">CAC pr. kunde</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="clv-helper" class="clv-helper"></div>
+
+    <div class="clv-footer">
+      Baseret på: AOV × bruttoavance × køb/år × kundeår. Engangskunder = 1 køb.
+      Kun til inspiration – faktiske tal afhænger af din drift.
+    </div>
+
+    <div class="clv-dogear" aria-hidden="true"></div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  function num(id) {
+    var el = document.getElementById(id);
+    if (!el) return 0;
+    var v = parseFloat(String(el.value).replace(",", "."));
+    return isNaN(v) ? 0 : v;
+  }
+
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+  function fmtCurrency(v) {
+    if (!isFinite(v) || v <= 0) return "–";
+    return new Intl.NumberFormat("da-DK", {
+      style: "currency", currency: "DKK",
+      maximumFractionDigits: v < 1 ? 2 : 0
+    }).format(v);
+  }
+
+  function fmtNumber(v, d) {
+    if (!isFinite(v)) return "–";
+    return new Intl.NumberFormat("da-DK", { maximumFractionDigits: d ?? 1 }).format(v);
+  }
+
+  /* ── donut chart ── */
+  var DONUT_R    = 38;
+  var DONUT_CIRC = 2 * Math.PI * DONUT_R; // ≈ 238.76
+
+  function updateDonut(pctLoyal, loyalId, oneId, labelId) {
+    var loyalEl = document.getElementById(loyalId);
+    var oneEl   = document.getElementById(oneId);
+    var labelEl = document.getElementById(labelId);
+    if (!loyalEl || !labelEl) return;
+
+    var p   = clamp(pctLoyal, 0.001, 0.999);
+    var arc = p * DONUT_CIRC;
+    var gap = DONUT_CIRC;
+
+    loyalEl.setAttribute("stroke-dasharray", arc + " " + gap);
+
+    if (oneEl) {
+      var oneArc = (1 - p) * DONUT_CIRC;
+      oneEl.setAttribute("stroke-dasharray",  oneArc + " " + gap);
+      /* offset so the gray arc starts right after the purple one */
+      oneEl.setAttribute("stroke-dashoffset", -arc);
+    }
+
+    labelEl.textContent = fmtNumber(p * 100, 0) + "%";
+  }
+
+  /* ── show/hide with transition ── */
+  function showCard(el) {
+    el.style.display = "block";
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("clv-visible"); });
+    });
+  }
+
+  function hideCard(el) {
+    el.classList.remove("clv-visible");
+    setTimeout(function () {
+      if (!el.classList.contains("clv-visible")) el.style.display = "none";
+    }, 260);
+  }
+
+  /* ── recalc ── */
+  function recalc() {
+    var helperEl         = document.getElementById("clv-helper");
+    var ltvProfitEl      = document.getElementById("clv-ltv-profit");
+    var ltvRevenueEl     = document.getElementById("clv-ltv-revenue");
+    var totalPurchasesEl = document.getElementById("clv-total-purchases");
+    var segmentsCard     = document.getElementById("clv-segments-card");
+    var ratioCard        = document.getElementById("clv-ratio-card");
+    var ratioEl          = document.getElementById("clv-ratio");
+    var ratioBadgeEl     = document.getElementById("clv-ratio-badge");
+    var cacDisplayEl     = document.getElementById("clv-cac-display");
+    var emptyHint        = document.getElementById("clv-empty-hint");
+
+    var oneTimeShareEl   = document.getElementById("clv-one-time-share");
+    var loyalShareEl     = document.getElementById("clv-loyal-share");
+    var oneTimePctTextEl = document.getElementById("clv-one-time-pct-text");
+    var loyalPctTextEl   = document.getElementById("clv-loyal-pct-text");
+    var oneTimeLtvEl     = document.getElementById("clv-one-time-ltv");
+    var loyalLtvEl       = document.getElementById("clv-loyal-ltv");
+    var loyalPurchasesEl = document.getElementById("clv-loyal-purchases");
+
+    if (!ltvProfitEl) return;
+
+    var avgPurchase      = num("clv-avg-purchase");
+    var grossMarginPct   = num("clv-gross-margin");
+    var purchasesPerYear = num("clv-purchases-per-year");
+    var yearsAsCustomer  = num("clv-years");
+    var loyalPctInput    = num("clv-loyal-pct");
+    var cac              = num("clv-cac");
+
+    helperEl.textContent = "";
+    hideCard(ratioCard);
+    emptyHint.classList.remove("clv-visible");
+
+    if (avgPurchase <= 0 || grossMarginPct <= 0 || purchasesPerYear <= 0 || yearsAsCustomer <= 0) {
+      ltvProfitEl.textContent  = "–";
+      ltvRevenueEl.textContent = "–";
+      totalPurchasesEl.textContent = "";
+      hideCard(segmentsCard);
+
+      var missing = [];
+      if (avgPurchase <= 0)      missing.push("ordreværdi");
+      if (grossMarginPct <= 0)   missing.push("bruttoavance");
+      if (purchasesPerYear <= 0) missing.push("køb pr. år");
+      if (yearsAsCustomer <= 0)  missing.push("kundeforholdslængde");
+
+      if (missing.length) {
+        if (missing.length <= 2 && (avgPurchase <= 0 || grossMarginPct <= 0)) {
+          emptyHint.textContent = "Udfyld " + missing.join(" og ") + " for at se dit resultat";
+          emptyHint.classList.add("clv-visible");
+        } else {
+          helperEl.textContent = "Mangler: " + missing.join(", ") + ".";
+        }
+      }
+      return;
+    }
+
+    var loyalPct  = clamp(loyalPctInput, 0, 100) / 100;
+    var oneTimePct = 1 - loyalPct;
+
+    var loyalPurchasesPerCustomer = purchasesPerYear * yearsAsCustomer;
+    var totalPurchasesAvg = oneTimePct * 1 + loyalPct * loyalPurchasesPerCustomer;
+
+    var gpp         = avgPurchase * (grossMarginPct / 100);
+    var oneTimeLtv  = gpp * 1;
+    var loyalLtv    = gpp * loyalPurchasesPerCustomer;
+    var customerLTV = oneTimePct * oneTimeLtv + loyalPct * loyalLtv;
+    var revLifetime = oneTimePct * avgPurchase + loyalPct * loyalPurchasesPerCustomer * avgPurchase;
+
+    ltvProfitEl.textContent  = fmtCurrency(customerLTV);
+    ltvRevenueEl.textContent = fmtCurrency(revLifetime);
+    totalPurchasesEl.textContent =
+      "Ca. " + fmtNumber(totalPurchasesAvg, 1) + " køb pr. kunde over hele kundeforholdet";
+
+    var otVal  = oneTimePct * oneTimeLtv;
+    var loyVal = loyalPct  * loyalLtv;
+    var totVal = otVal + loyVal;
+    var otShare  = totVal > 0 ? otVal  / totVal : 0;
+    var loyShare = totVal > 0 ? loyVal / totVal : 0;
+
+    oneTimeShareEl.textContent   = fmtNumber(otShare  * 100, 1) + "% af værdien";
+    loyalShareEl.textContent     = fmtNumber(loyShare * 100, 1) + "% af værdien";
+    oneTimePctTextEl.textContent = fmtNumber(oneTimePct  * 100, 0) + "%";
+    loyalPctTextEl.textContent   = fmtNumber(loyalPct   * 100, 0) + "%";
+    oneTimeLtvEl.textContent     = fmtCurrency(oneTimeLtv);
+    loyalLtvEl.textContent       = fmtCurrency(loyalLtv);
+    loyalPurchasesEl.textContent = fmtNumber(loyalPurchasesPerCustomer, 1);
+
+    showCard(segmentsCard);
+    updateDonut(loyalPct,  "clv-pie-count-loyal", "clv-pie-count-one", "clv-pie-count-label");
+    updateDonut(loyShare,  "clv-pie-sales-loyal", "clv-pie-sales-one", "clv-pie-sales-label");
+
+    if (cac > 0) {
+      var ratio = customerLTV / cac;
+      showCard(ratioCard);
+      ratioEl.textContent      = fmtNumber(ratio, 1) + ":1";
+      cacDisplayEl.textContent = fmtCurrency(cac);
+
+      var badge, cls;
+      if (ratio >= 3)      { badge = "Stærkt";        cls = "clv-ratio-badge--great"; }
+      else if (ratio >= 2) { badge = "Godt";           cls = "clv-ratio-badge--good";  }
+      else if (ratio >= 1) { badge = "Break-even";     cls = "clv-ratio-badge--break"; }
+      else                 { badge = "CAC > LTV";      cls = "clv-ratio-badge--danger"; }
+
+      ratioBadgeEl.textContent = badge;
+      ratioBadgeEl.className   = "clv-ratio-badge " + cls;
+    }
+  }
+
+  /* ── range validation ── */
+  function addRangeValidation(inputId, warnId, lo, hi) {
+    var el   = document.getElementById(inputId);
+    var warn = document.getElementById(warnId);
+    if (!el || !warn) return;
+
+    el.addEventListener("blur", function () {
+      var raw = String(el.value).replace(",", ".");
+      if (raw === "" || isNaN(parseFloat(raw))) {
+        warn.textContent = "";
+        el.parentElement.classList.remove("clv-input-shell--error");
+        return;
+      }
+      var v = parseFloat(raw);
+      if (v < lo || v > hi) {
+        el.value = clamp(v, lo, hi);
+        warn.textContent = "Justeret til " + el.value + " (tilladt: " + lo + "–" + hi + ")";
+        el.parentElement.classList.add("clv-input-shell--error");
+        recalc();
+      } else {
+        warn.textContent = "";
+        el.parentElement.classList.remove("clv-input-shell--error");
+      }
+    });
+
+    el.addEventListener("input", function () {
+      warn.textContent = "";
+      el.parentElement.classList.remove("clv-input-shell--error");
+    });
+  }
+
+  addRangeValidation("clv-gross-margin", "clv-gross-margin-warn", 0, 100);
+  addRangeValidation("clv-loyal-pct",    "clv-loyal-pct-warn",    0, 100);
+
+  ["clv-avg-purchase","clv-gross-margin","clv-purchases-per-year","clv-years","clv-loyal-pct","clv-cac"]
+    .forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", recalc);
+      el.addEventListener("blur",  recalc);
+    });
+
+  recalc();
+}());
+</script>
+
+</body>
+</html>

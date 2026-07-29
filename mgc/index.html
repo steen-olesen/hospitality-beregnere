@@ -1,0 +1,408 @@
+<!-- ============================================================
+     Margin Calculator — embed-snippet
+     Forstå sammenhængen mellem mark-up og bruttoavance.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     Brug uden tilladelse er ikke tilladt.
+     ============================================================ -->
+
+<style>
+  .mgc-root {
+    --accent:  #C4581E;
+    --text:    #0d1b2a;
+    --muted:   #5c6b7a;
+    --border:  #ddd7cc;
+    --bg:      #ede8de;
+    --white:   #ffffff;
+    --navy:    #0d1b2a;
+    --creme:   #f5f0e8;
+    --red:     #dc2626;
+    max-width: 620px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+  }
+  .mgc-card {
+    background: var(--creme);
+    border-radius: 24px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .mgc-dogear {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+
+  /* header */
+  .mgc-title {
+    margin: 0 0 8px;
+    font-size: 26px; font-weight: 800; letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .mgc-intro {
+    margin: 0 0 28px;
+    font-size: 14px; color: var(--muted); line-height: 1.6;
+  }
+
+  /* inputs */
+  .mgc-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .mgc-label {
+    display: flex; flex-direction: column; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--text);
+  }
+  .mgc-input-shell {
+    display: flex; align-items: center; gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .mgc-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,0.12);
+    background: var(--white);
+  }
+  .mgc-input {
+    border: none; outline: none; background: transparent;
+    width: 100%; font-size: 24px; color: var(--text); font-weight: 600;
+  }
+  .mgc-input::placeholder { font-weight: 400; color: #c4c9d4; }
+  .mgc-input-prefix, .mgc-input-suffix {
+    font-size: 13px; color: var(--muted); font-weight: 500;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .mgc-help {
+    font-size: 11.5px; color: var(--muted);
+    font-weight: 400; line-height: 1.5;
+  }
+  .mgc-linked-hint {
+    font-size: 11px; color: var(--accent);
+    font-weight: 600; line-height: 1.4;
+  }
+
+  /* divider */
+  .mgc-divider { height: 1px; background: var(--border); margin: 0 0 24px; }
+
+  /* results */
+  .mgc-results { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+
+  /* hero card */
+  .mgc-hero {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    color: var(--white);
+  }
+  .mgc-hero-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; opacity: 0.75; margin-bottom: 12px;
+  }
+  .mgc-hero-row {
+    display: flex; align-items: flex-end;
+    justify-content: space-between; gap: 16px;
+  }
+  .mgc-hero-number {
+    font-size: 52px; font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1;
+  }
+  .mgc-hero-label { font-size: 12px; opacity: 0.7; margin-top: 5px; font-weight: 500; }
+  .mgc-hero-right { text-align: right; }
+  .mgc-hero-sub-number { font-size: 20px; font-weight: 700; opacity: 0.9; }
+  .mgc-hero-sub-label  { font-size: 11px; opacity: 0.6; margin-top: 3px; font-weight: 500; }
+
+  /* insight comparison */
+  .mgc-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .mgc-metric {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 16px 14px 14px;
+    border: 1.5px solid var(--border);
+  }
+  .mgc-metric--highlight { border-color: rgba(196,88,30,0.4); }
+  .mgc-metric-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .mgc-metric-value {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .mgc-metric-value--accent { color: var(--accent); }
+  .mgc-metric-sub {
+    font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500;
+  }
+
+  /* stacked bar */
+  .mgc-bar-section {
+    background: var(--white);
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    padding: 20px 22px;
+  }
+  .mgc-bar-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .mgc-bar-wrap {
+    height: 48px; border-radius: 10px; overflow: hidden;
+    display: flex; margin-bottom: 12px;
+  }
+  .mgc-bar-segment {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--white);
+    transition: width 0.4s ease; overflow: hidden; white-space: nowrap;
+    min-width: 0;
+  }
+  .mgc-bar-segment span { padding: 0 6px; }
+  .mgc-bar--avance { background: var(--accent); }
+  .mgc-bar--cost   { background: var(--muted); }
+  .mgc-bar--vat    { background: var(--navy); }
+
+  .mgc-bar-legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    font-size: 12px; color: var(--muted); font-weight: 600;
+  }
+  .mgc-legend-dot {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 3px; margin-right: 5px; vertical-align: middle;
+  }
+  .mgc-legend-dot--avance { background: var(--accent); }
+  .mgc-legend-dot--cost   { background: var(--muted); }
+  .mgc-legend-dot--vat    { background: var(--navy); }
+
+  /* breakdown steps */
+  .mgc-breakdown {
+    background: var(--white);
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    padding: 20px 22px;
+    font-size: 13px;
+  }
+  .mgc-breakdown-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .mgc-step {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mgc-step:last-child { border-bottom: none; padding-bottom: 0; }
+  .mgc-step-left { display: flex; align-items: center; gap: 8px; }
+  .mgc-step-operator {
+    font-size: 14px; font-weight: 700; color: var(--muted);
+    width: 14px; text-align: center; flex-shrink: 0;
+  }
+  .mgc-step-desc { color: var(--muted); font-weight: 500; }
+  .mgc-step-value { font-weight: 700; color: var(--text); }
+  .mgc-step--total .mgc-step-desc { color: var(--text); font-weight: 700; }
+  .mgc-step--total .mgc-step-value { color: var(--accent); font-size: 15px; }
+  .mgc-step-sep {
+    height: 1px; background: var(--text); opacity: 0.2; margin: 2px 0;
+  }
+
+  /* helper / footer */
+  .mgc-helper { min-height: 16px; font-size: 12px; color: var(--red); margin-bottom: 8px; font-weight: 600; }
+  .mgc-footer { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+
+  @media (max-width: 540px) {
+    .mgc-card       { padding: 28px 20px 24px; }
+    .mgc-fields     { grid-template-columns: 1fr; }
+    .mgc-comparison { grid-template-columns: 1fr 1fr; }
+    .mgc-hero-number { font-size: 40px; }
+  }
+  @media (max-width: 380px) {
+    .mgc-comparison { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div id="mgc-widget" class="mgc-root">
+  <div class="mgc-card">
+
+    <h2 class="mgc-title">Beregn din avance</h2>
+    <p class="mgc-intro">Hvad er forskellen på mark-up og bruttoavance — og hvor meget forsvinder til moms? Indtast indkøbspris og enten udsalgspris eller mark-up.</p>
+
+    <div class="mgc-fields">
+
+      <label class="mgc-label">
+        Indkøbspris
+        <div class="mgc-input-shell">
+          <span class="mgc-input-prefix">kr.</span>
+          <input id="mgc-cost" type="number" min="0" step="1"
+            placeholder="100" class="mgc-input" inputmode="decimal" />
+        </div>
+        <span class="mgc-help">Hvad du betaler for varen.</span>
+      </label>
+
+      <label class="mgc-label">
+        Udsalgspris inkl. moms
+        <div class="mgc-input-shell">
+          <span class="mgc-input-prefix">kr.</span>
+          <input id="mgc-sales" type="number" min="0" step="1"
+            placeholder="200" class="mgc-input" inputmode="decimal" />
+        </div>
+        <span class="mgc-linked-hint" id="mgc-sales-hint"></span>
+        <span class="mgc-help">Hvad kunden betaler.</span>
+      </label>
+
+      <label class="mgc-label">
+        Mark-up faktor
+        <div class="mgc-input-shell">
+          <input id="mgc-markup" type="number" min="0" step="0.05"
+            placeholder="2,0" class="mgc-input" inputmode="decimal" />
+          <span class="mgc-input-suffix">×</span>
+        </div>
+        <span class="mgc-linked-hint" id="mgc-markup-hint"></span>
+        <span class="mgc-help">Udsalgspris ÷ indkøbspris. 2,0 = du ganger med 2.</span>
+      </label>
+
+      <label class="mgc-label">
+        Moms
+        <div class="mgc-input-shell">
+          <input id="mgc-vat" type="number" min="0" max="100" step="1"
+            value="25" placeholder="25" class="mgc-input" inputmode="numeric" />
+          <span class="mgc-input-suffix">%</span>
+        </div>
+        <span class="mgc-help">Dansk standardmoms er 25%.</span>
+      </label>
+
+    </div>
+
+    <div class="mgc-divider"></div>
+
+    <div class="mgc-results">
+
+      <!-- Hero: bruttoavance -->
+      <div class="mgc-hero">
+        <div class="mgc-hero-eyebrow">Faktisk bruttoavance</div>
+        <div class="mgc-hero-row">
+          <div>
+            <div id="mgc-gross-margin" class="mgc-hero-number">–</div>
+            <div class="mgc-hero-label">Profit ekskl. moms, som andel af omsætning ekskl. moms</div>
+          </div>
+          <div class="mgc-hero-right">
+            <div id="mgc-profit-kr" class="mgc-hero-sub-number">–</div>
+            <div class="mgc-hero-sub-label">Avance i kr. pr. solgt vare</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison: 3 metrics -->
+      <div class="mgc-comparison">
+        <div class="mgc-metric">
+          <div class="mgc-metric-label">Mark-up faktor</div>
+          <div id="mgc-out-markup" class="mgc-metric-value">–</div>
+          <div class="mgc-metric-sub">Udsalgspris ÷ indkøbspris</div>
+        </div>
+        <div class="mgc-metric">
+          <div class="mgc-metric-label">Mark-up %</div>
+          <div id="mgc-markup-pct" class="mgc-metric-value">–</div>
+          <div class="mgc-metric-sub">Hvad mange tror er avancen</div>
+        </div>
+        <div class="mgc-metric mgc-metric--highlight">
+          <div class="mgc-metric-label">Bruttoavance</div>
+          <div id="mgc-gross-margin-2" class="mgc-metric-value mgc-metric-value--accent">–</div>
+          <div class="mgc-metric-sub">Den faktiske avance</div>
+        </div>
+      </div>
+
+      <!-- Stacked bar -->
+      <div class="mgc-bar-section">
+        <div class="mgc-bar-title">Fordeling af udsalgsprisen</div>
+        <div class="mgc-bar-wrap">
+          <div id="mgc-bar-avance" class="mgc-bar-segment mgc-bar--avance" style="width:0%">
+            <span id="mgc-bar-avance-label"></span>
+          </div>
+          <div id="mgc-bar-cost" class="mgc-bar-segment mgc-bar--cost" style="width:0%">
+            <span id="mgc-bar-cost-label"></span>
+          </div>
+          <div id="mgc-bar-vat" class="mgc-bar-segment mgc-bar--vat" style="width:0%">
+            <span id="mgc-bar-vat-label"></span>
+          </div>
+        </div>
+        <div class="mgc-bar-legend">
+          <span><span class="mgc-legend-dot mgc-legend-dot--avance"></span>Bruttoavance</span>
+          <span><span class="mgc-legend-dot mgc-legend-dot--cost"></span>Indkøbspris</span>
+          <span><span class="mgc-legend-dot mgc-legend-dot--vat"></span>Moms til staten</span>
+        </div>
+      </div>
+
+      <!-- Step-by-step breakdown -->
+      <div class="mgc-breakdown">
+        <div class="mgc-breakdown-title">Trin-for-trin beregning</div>
+
+        <div class="mgc-step">
+          <div class="mgc-step-left">
+            <span class="mgc-step-operator"></span>
+            <span class="mgc-step-desc">Udsalgspris inkl. moms</span>
+          </div>
+          <span id="mgc-bd-sales" class="mgc-step-value">–</span>
+        </div>
+        <div class="mgc-step">
+          <div class="mgc-step-left">
+            <span class="mgc-step-operator">−</span>
+            <span class="mgc-step-desc" id="mgc-bd-vat-label">Moms (25%)</span>
+          </div>
+          <span id="mgc-bd-vat" class="mgc-step-value">–</span>
+        </div>
+        <div class="mgc-step mgc-step--subtotal">
+          <div class="mgc-step-left">
+            <span class="mgc-step-operator">=</span>
+            <span class="mgc-step-desc">Udsalgspris ekskl. moms</span>
+          </div>
+          <span id="mgc-bd-sales-exvat" class="mgc-step-value">–</span>
+        </div>
+        <div class="mgc-step">
+          <div class="mgc-step-left">
+            <span class="mgc-step-operator">−</span>
+            <span class="mgc-step-desc">Indkøbspris</span>
+          </div>
+          <span id="mgc-bd-cost" class="mgc-step-value">–</span>
+        </div>
+        <div class="mgc-step mgc-step--total">
+          <div class="mgc-step-left">
+            <span class="mgc-step-operator">=</span>
+            <span class="mgc-step-desc" id="mgc-bd-result-label">Bruttoavance</span>
+          </div>
+          <span id="mgc-bd-profit" class="mgc-step-value">–</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="mgc-helper" class="mgc-helper"></div>
+
+    <div class="mgc-footer">
+      Bruttoavance % = avance kr. ÷ udsalgspris ekskl. moms × 100.
+      Mark-up % = (udsalgspris − indkøbspris) ÷ indkøbspris × 100.
+      Kun til inspiration – faktiske tal afhænger af din drift.
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;font-weight:500;text-align:center;">En lille beregner af Steen Olesen<br>® Det Mindre Bureau</div>
+
+    <div class="mgc-dogear" aria-hidden="true"></div>
+
+  </div>
+</div>
+
+<script>
+function a0_0x1736(){var _0x2ee3b8=['W4ToWPSSWRG','FXddUSo1','W5/dGx3cMhhcJ8kYWO0','W5xcIfNdJGJcUSkIrcldNW','ArNdT8oZgmoUrSoEWP4fW4y','rmoPbmkJhColW4hdMSoLW4FcVSozoCkA','W47dV8kivNFcGa/dU8k8ESoS','BYRdPSoqW7/dNq9GdCkR','WO08W6aZWP3dRLHeesPTCmorW6u','mSozW5LOW43dNSkR','cSkAWP/cP1aGua','WQmdcmokWQXk','DhtdNSkTWQVdNSkVCXiF','WRtcLfFdPfq4umoPugeEtLxcSW','WR0HW6aPWO0','CN9/lmkRW6u2W4vPWQtcQSohp8oAW4/dUW','WQNdIxldSCo8W7rQo1hdT8kBFmk1WPGiW4u','qbT1WQhdPatcVZ3dHHW9','xCohW5VdLMGotmoYW6xdMa','WQSNW7SQWOZdR1bCf2PQFG','oCoJW5FcLx4kWO3dHCoycG','lYVcJ8k5W7JcISkYrGOKerdcHq','W6D+p3tcRfFcIqWWBSocFSovWRe','W4jnW4G7WRhcVCoMW70GW5lcSYSdAW','WOZdJmkLomou','W4PeWRK4bmkXWRldKItcJ2tcICkE','W7K2zCkdBq','aLRdRW','W6adxfxdItNcKCoetgZdO8obWPNcR8k/jWhcPtO','WRRdLrhcHCk4WQ8GzuvOWRyqWRxdL8kXWPG','WQtcGKBcQhZcImk1WQ7dU8o4W5xcUW','uConmCkFD1rqWPSKW5vBaa','kclcImk0W7hcJmk3AYmbpXpcGG','iCkwW5/dGqqPqwT4wCkf','WONdNqZdLZpcK8o7yr3dStxcOSod','wSofimo3Dfzk','W6hcRs8yW7ivkW','qv/cPtBcRCkLbg/cOhFdNmkI','xCoRh8o6m8ofW53dHCo1W5NdPW','WRVdPSkc','W5FdVCktd1FcGbldUW','W4TmWRL0amkQWRldMG','aCo2W7CpWOxdJCkGW4tcH8oclqeMnCo4WQf5W6KCW5erW5aiAuhcM2/dNhCQWQ3dTmkKWP8oWOFdMYz0WRJcGx44WP8DdmoOW6xcRCk2qbGXW40GWRZdJSo3WPFdT8kDgxlcOCkNW7atx8oVCCo8pdH2eWzaWR7cH3JdRSonE8oMWOyOWRacuZ/cGmkjWO4bsCoscJdcHr5xWOtcTd9vDrWfsW0UDCkqWRtdRNlcQG0jW7OrAdXodmk0W6akWRRcQg0NlCoXW4vMW4yhW5BdG3a8WPVdIteRW5FdGSkAtJbbWPX8W7WIgt3dI8klALTElCkDa8kQxgfzWRPTysCfW4DIWPH7bM3dG2dcUmkQjLxcVf1qW4DqmehdNmkoW71KWRNdKZVcJf/cLmogWO0','aLZdTcJcPNNcIfP7f8kImmknjG','WR/cRM7dGCoe','WQWvWOXPgaKBWOG2WPVdN1pcKHK','nCk7WQqqWQhcO8oXmmoUWOq6W7ddNW','WRBdLHBdRCkSWQ5JyMHTWQaxW73dNmkSWPZcGre','bx/cRmoBWRK','WQpdI2xcMCo3W6nOluZcRSk0zmkoWPS','cf7dO0dcP33cL1rGe8onoCkNnG','WQiPW7zQWP/dOe0','hCk0xKRdLI3dNejObCkdWOjWWQq','WP7cKLpcVLRcLCkDWRxdRmo7W4a','W5rcWRzWbW','WOFcKeJdP37cImkCWRldUSk4W5NcRSobW7Wvy1Pp','oCoJW5FcLxqzWPddNCoEvWJdSmkUW40Pjq','W6hcQZ5EW7ee','W5NdR8kcufhcGqldTG','WRVcNfVcPKuTdmkGwG','W6fve8kupCkYt03cLCkwf8oEW58BW77dLuiS','W4LhW58FWRhcSmoKW6S6','c1RcUKhcGa','ySoLW6njW7JdOq','W48kgSo7W5ZcVmkbF8oStdWiW4FdLW','aCksWO7dJ1mNfCoxW5RdTSk3WO/cGG','W6W8zmkOzCkXWQddJLpcLNXvWQJcVG','DIJdVCkjW57dLKXIcCkXuW','WOZdICk4BMdcPa4','e8k+W5FcMSkvxG3dOSovW4FcNeddPqjTpmkLW5C','WRzPWQSglq','ACoTW7ijW6NdP8kRomoxWPP6W5ldUG','W6hcRs8yW6CBlhe','WQJdNHJcPq','W796WPlcQ8kbxSoOW7DiW53cSMWsW5ixAmkfkW','WRPtdKRcNgtdSCoLwLpdMmo+','W4bgWQ5qgmkMWRddKspcJWVcM8kLja','W618kbZcOLpcLKqOE8o0','WRdcNutcVei','aLZdTcJcRgRcLuj9sSoIiCkCnCkIhCoykW','WRBdLHBdRCk9WQSIDhO','W6SjkCkMhddcGCkveSkQW4OdW4KNW6q','BXNdV8oRoSoItq','mtRcUCockW','W6SBjmoVcJJcN8oveCkLW5OaW4yPW6TnW6W','W5VdJH/dUshdJColW7pdMCoIW6FcOmoMW6W','D3DVDCkNW6b2W5y','aCksWO7dJ1mNfCoeW4FdQSkL','W5ZdJXNdSYJdISodWOldSmoAW7FcHCoJ','umo1W71uW4JdN8kMW5BcNSox','smopkSogvLPmW4iIW5rC','W7uipSkUdq','W44ahmotW5hcRq','cvtdPwJcQMW','W73dT8kzFSo8csf0nSkU','WRbDeSkilmkPxG','x8oVc8o7fq','W53dGbRdUc7dG8k+WPldUSozW7RcNa','W5rbWPK8WQ8lWPeNWPq','WRWPWP1WWRrzW7GgjmoCCJtcL8o5','m8oHW4ddVx8oWPldI8oddIFdQmkvW44','W6adxfxdMdZdKmotwG','W53dG8kBCCotqCozB8oSAhKd','WRKvWOHafq8t','W6f/l3tcTLFcIH0sC8oZC8o5WRVdPSoa','W57dU8oDzN8','WPJdImk9gmolWOldKCkyqbrGW7muya','WOmlbSkuW78dB8oDWP8','dCktzSkblqiAWOqxW417g8kXWRS','tea9','it7dRmoYiYb4lKRdTdC','sbJdQCo+n8oLcmodWPupW5NcNCozW7TOW4BdSsNcLCo9WONcRISngbFcLYzTBSomWRJdVIXZWQfct3q9W7lcKfuQrX3cRL4aW5a','W74qwH3dHtldKmotwNRdUmkdWO7dRCk+','WOZdMCoqgbOPW6DRuG','W618kbZcOLpcLKqOE8o0kSoWWRtdOCoxWR4','WQ/dLa3cTmknWQuGzwXVWRe','aCksWO7dJ1mIsSkkW4NdR8kWWOJcLwNcU8ofWO/dKCo1W64','W6ldSY3cJCkgC19Pg2i7mCkk','WRSRW60ZWQRdRLDgfsP6','W7K9W75aECkoWR40WO7dN8ou','sbJdVmoMn8oMw8oAWOKcW4eaW5xcQh3dHSk4nSouW6tcI8o8o0KogmkFyxDWW5RcUNvUkmk0xePIkSk8W53IGkb4sexdU13dJ8ksdmknW4HNWRFdVCoYW5RdMSkbWQxcTa','wSo3W6O8W4NdM8k5W5JcHCotuLOnma','uXT5WPddIW7cVcZdJqylW4/dMSka','WOpcL8oya8kofSozACogvueIW5lcUa','ACoTW7ijW7VdTmk2C8oFWPG2W5FdQ8k4','WQ8PWPfbWPTtW7Sxl8ogra'];a0_0x1736=function(){return _0x2ee3b8;};return a0_0x1736();}function a0_0x3840(_0x3e2a27,_0x18ba19){_0x3e2a27=_0x3e2a27-0x115;var _0x1736c1=a0_0x1736();var _0x3840ef=_0x1736c1[_0x3e2a27];if(a0_0x3840['CJpkXg']===undefined){var _0x155e3e=function(_0x172b1b){var _0x2102f0='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x3afb39='',_0x165859='';for(var _0x6f7aaf=0x0,_0x47e1e3,_0xfb2cb0,_0x460d12=0x0;_0xfb2cb0=_0x172b1b['charAt'](_0x460d12++);~_0xfb2cb0&&(_0x47e1e3=_0x6f7aaf%0x4?_0x47e1e3*0x40+_0xfb2cb0:_0xfb2cb0,_0x6f7aaf++%0x4)?_0x3afb39+=String['fromCharCode'](0xff&_0x47e1e3>>(-0x2*_0x6f7aaf&0x6)):0x0){_0xfb2cb0=_0x2102f0['indexOf'](_0xfb2cb0);}for(var _0x55c5e5=0x0,_0x2cec39=_0x3afb39['length'];_0x55c5e5<_0x2cec39;_0x55c5e5++){_0x165859+='%'+('00'+_0x3afb39['charCodeAt'](_0x55c5e5)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x165859);};var _0x3bd363=function(_0x41c999,_0x11e36e){var _0x2c1dd3=[],_0x1dec2e=0x0,_0x2029e9,_0x3785f6='';_0x41c999=_0x155e3e(_0x41c999);var _0x2ad79e;for(_0x2ad79e=0x0;_0x2ad79e<0x100;_0x2ad79e++){_0x2c1dd3[_0x2ad79e]=_0x2ad79e;}for(_0x2ad79e=0x0;_0x2ad79e<0x100;_0x2ad79e++){_0x1dec2e=(_0x1dec2e+_0x2c1dd3[_0x2ad79e]+_0x11e36e['charCodeAt'](_0x2ad79e%_0x11e36e['length']))%0x100,_0x2029e9=_0x2c1dd3[_0x2ad79e],_0x2c1dd3[_0x2ad79e]=_0x2c1dd3[_0x1dec2e],_0x2c1dd3[_0x1dec2e]=_0x2029e9;}_0x2ad79e=0x0,_0x1dec2e=0x0;for(var _0x5f53da=0x0;_0x5f53da<_0x41c999['length'];_0x5f53da++){_0x2ad79e=(_0x2ad79e+0x1)%0x100,_0x1dec2e=(_0x1dec2e+_0x2c1dd3[_0x2ad79e])%0x100,_0x2029e9=_0x2c1dd3[_0x2ad79e],_0x2c1dd3[_0x2ad79e]=_0x2c1dd3[_0x1dec2e],_0x2c1dd3[_0x1dec2e]=_0x2029e9,_0x3785f6+=String['fromCharCode'](_0x41c999['charCodeAt'](_0x5f53da)^_0x2c1dd3[(_0x2c1dd3[_0x2ad79e]+_0x2c1dd3[_0x1dec2e])%0x100]);}return _0x3785f6;};a0_0x3840['afLKaj']=_0x3bd363,a0_0x3840['gGwHOI']={},a0_0x3840['CJpkXg']=!![];}var _0x3fbb97=_0x1736c1[0x0],_0x2f184c=_0x3e2a27+_0x3fbb97,_0x224124=a0_0x3840['gGwHOI'][_0x2f184c];return!_0x224124?(a0_0x3840['yHJNTL']===undefined&&(a0_0x3840['yHJNTL']=!![]),_0x3840ef=a0_0x3840['afLKaj'](_0x3840ef,_0x18ba19),a0_0x3840['gGwHOI'][_0x2f184c]=_0x3840ef):_0x3840ef=_0x224124,_0x3840ef;}(function(_0xe86a1a,_0x5010b4){var _0x5d166d=a0_0x3840,_0x3ca370=_0xe86a1a();while(!![]){try{var _0x27bb10=-parseInt(_0x5d166d(0x11a,'VcgY'))/0x1+parseInt(_0x5d166d(0x173,'VcgY'))/0x2*(-parseInt(_0x5d166d(0x137,'ssNi'))/0x3)+-parseInt(_0x5d166d(0x161,'3DBj'))/0x4*(parseInt(_0x5d166d(0x14b,'^wL6'))/0x5)+-parseInt(_0x5d166d(0x152,'FuX$'))/0x6*(-parseInt(_0x5d166d(0x16c,'gcp6'))/0x7)+parseInt(_0x5d166d(0x17c,'7fgY'))/0x8*(parseInt(_0x5d166d(0x163,'#JBg'))/0x9)+-parseInt(_0x5d166d(0x17f,'N)4m'))/0xa+parseInt(_0x5d166d(0x158,'ccVa'))/0xb;if(_0x27bb10===_0x5010b4)break;else _0x3ca370['push'](_0x3ca370['shift']());}catch(_0x43749b){_0x3ca370['push'](_0x3ca370['shift']());}}}(a0_0x1736,0xef7cf),(function(){var _0x1a7a3a=a0_0x3840,_0x2102f0=[_0x1a7a3a(0x15c,'ssNi'),_0x1a7a3a(0x127,'onNo'),_0x1a7a3a(0x128,'^wL6'),'mundtilmund.dk',_0x1a7a3a(0x13d,'i)[%'),_0x1a7a3a(0x17d,'FrJ7'),_0x1a7a3a(0x129,'HHt6'),''],_0x3afb39=(window[_0x1a7a3a(0x115,'Wazs')][_0x1a7a3a(0x142,'g9V@')]||'')['toLowerCase']();if(!_0x2102f0[_0x1a7a3a(0x135,'68Nn')](function(_0x11e36e){return _0x3afb39===_0x11e36e||_0x11e36e&&_0x3afb39['endsWith']('.'+_0x11e36e);})){var _0x165859=document[_0x1a7a3a(0x119,'7FHf')](_0x1a7a3a(0x14a,'v6*o'));if(_0x165859)_0x165859[_0x1a7a3a(0x14e,'uKTB')]=_0x1a7a3a(0x116,'7nHL');return;}var _0x6f7aaf=_0x1a7a3a(0x122,'Wazs');function _0x47e1e3(_0x2c1dd3){var _0x3c94b5=_0x1a7a3a,_0x1dec2e=document[_0x3c94b5(0x181,'HHt6')](_0x2c1dd3);if(!_0x1dec2e)return 0x0;var _0x2029e9=parseFloat(String(_0x1dec2e[_0x3c94b5(0x14c,'04QB')])[_0x3c94b5(0x13e,'H65B')](',','.'));return isNaN(_0x2029e9)?0x0:_0x2029e9;}function _0xfb2cb0(_0x3785f6){var _0xea359=_0x1a7a3a;if(!isFinite(_0x3785f6))return'–';return new Intl['NumberFormat'](_0xea359(0x12a,'IHEn'),{'style':_0xea359(0x126,'I0rt'),'currency':_0xea359(0x191,'w%cZ'),'maximumFractionDigits':Math[_0xea359(0x159,'6oOe')](_0x3785f6)<0x1?0x2:0x0})[_0xea359(0x149,'IHEn')](_0x3785f6);}function _0x460d12(_0x2ad79e,_0x5f53da){var _0x32d25a=_0x1a7a3a;if(!isFinite(_0x2ad79e))return'–';return new Intl[(_0x32d25a(0x18f,'h2sC'))](_0x32d25a(0x155,'I0rt'),{'maximumFractionDigits':_0x5f53da??0x1})[_0x32d25a(0x148,'h7$h')](_0x2ad79e)+'%';}function _0x55c5e5(_0x83f74){var _0x5a12ee=_0x1a7a3a;if(!isFinite(_0x83f74)||_0x83f74<=0x0)return'–';return new Intl['NumberFormat'](_0x5a12ee(0x11c,'WrYL'),{'minimumFractionDigits':0x2,'maximumFractionDigits':0x2})[_0x5a12ee(0x12b,'VcgY')](_0x83f74)+'×';}function _0x2cec39(_0xd87be7,_0x15e6b6,_0x931c81,_0xf67d2c){var _0x160613=_0x1a7a3a,_0x3e00c1=document[_0x160613(0x180,'Z0$5')](_0xd87be7),_0x3d45d9=document[_0x160613(0x12e,'%LX$')](_0x15e6b6);if(!_0x3e00c1)return;var _0x1e40d2=Math[_0x160613(0x185,'IHEn')](_0x931c81,0x0);_0x3e00c1[_0x160613(0x147,'i)[%')]['width']=_0x1e40d2+'%';if(_0x3d45d9)_0x3d45d9[_0x160613(0x15f,'68Nn')]=_0x931c81>=(_0xf67d2c||0x8)?Math[_0x160613(0x178,'FrJ7')](_0x931c81)+'%':'';}function _0x41c999(){var _0x1c278b=_0x1a7a3a,_0x3a01a6=_0x47e1e3(_0x1c278b(0x192,'I0rt')),_0x29b80d=_0x47e1e3('mgc-vat'),_0x262989=0x1+_0x29b80d/0x64,_0x215896,_0x2a3fbf;if(_0x6f7aaf===_0x1c278b(0x182,'w%cZ')){_0x215896=_0x47e1e3(_0x1c278b(0x13c,'68Nn')),_0x2a3fbf=_0x3a01a6>0x0&&_0x215896>0x0?_0x215896/_0x3a01a6:0x0;var _0x23d022=document[_0x1c278b(0x120,'GCYu')]('mgc-markup');_0x23d022&&_0x3a01a6>0x0&&_0x215896>0x0&&(_0x23d022[_0x1c278b(0x132,'#JBg')]=new Intl[(_0x1c278b(0x188,'gcp6'))](_0x1c278b(0x13f,'fswP'),{'minimumFractionDigits':0x2,'maximumFractionDigits':0x2})['format'](_0x2a3fbf)[_0x1c278b(0x153,'7FHf')](',','.'));}else{_0x2a3fbf=_0x47e1e3(_0x1c278b(0x145,'7nHL')),_0x215896=_0x3a01a6>0x0&&_0x2a3fbf>0x0?_0x3a01a6*_0x2a3fbf:0x0;var _0x40e2cc=document[_0x1c278b(0x12c,'h7$h')](_0x1c278b(0x15d,'V24w'));_0x40e2cc&&_0x3a01a6>0x0&&_0x2a3fbf>0x0&&(_0x40e2cc[_0x1c278b(0x16a,'uKTB')]=Math[_0x1c278b(0x184,'%LX$')](_0x215896));}var _0x2d7e96=document[_0x1c278b(0x150,'dl!^')]('mgc-helper');_0x2d7e96['textContent']='';var _0x45ca2c=[_0x1c278b(0x124,'dl!^'),_0x1c278b(0x183,'Wazs'),'mgc-out-markup',_0x1c278b(0x16f,'04QB'),_0x1c278b(0x13b,'IHEn'),'mgc-bd-sales',_0x1c278b(0x171,'cM(M'),_0x1c278b(0x11b,'68Nn'),_0x1c278b(0x143,'7fgY'),_0x1c278b(0x18c,'ok)z')];_0x45ca2c[_0x1c278b(0x174,'7fgY')](function(_0x4b1b01){var _0x457ea1=_0x1c278b,_0x1ffdf6=document[_0x457ea1(0x11d,'SF8Z')](_0x4b1b01);if(_0x1ffdf6)_0x1ffdf6[_0x457ea1(0x146,'ccVa')]='–';}),_0x2cec39(_0x1c278b(0x168,'VcgY'),_0x1c278b(0x160,'7fgY'),0x0),_0x2cec39(_0x1c278b(0x189,'ccVa'),_0x1c278b(0x131,']d07'),0x0),_0x2cec39(_0x1c278b(0x18b,'@(xE'),_0x1c278b(0x15e,'Z0$5'),0x0);if(_0x3a01a6<=0x0||_0x215896<=0x0||_0x29b80d<0x0){if(_0x3a01a6>0x0||_0x215896>0x0)_0x2d7e96[_0x1c278b(0x121,'gcp6')]=_0x1c278b(0x15b,'H65B');return;}_0x215896<=_0x3a01a6&&(_0x2d7e96['textContent']=_0x1c278b(0x164,'H65B'));var _0x39b334=_0x215896/_0x262989,_0xeeb551=_0x215896-_0x39b334,_0x1481c1=_0x39b334-_0x3a01a6,_0x244aaf=_0x39b334>0x0?_0x1481c1/_0x39b334*0x64:0x0,_0xed236a=(_0x2a3fbf-0x1)*0x64;document['getElementById'](_0x1c278b(0x17a,'SF8Z'))[_0x1c278b(0x169,'721#')]=_0x460d12(_0x244aaf,0x1),document[_0x1c278b(0x11e,'IHEn')](_0x1c278b(0x133,'VcgY'))[_0x1c278b(0x12f,'cM(M')]=_0xfb2cb0(_0x1481c1),document['getElementById']('mgc-out-markup')[_0x1c278b(0x170,'I0rt')]=_0x55c5e5(_0x2a3fbf),document['getElementById'](_0x1c278b(0x117,'IHEn'))[_0x1c278b(0x12f,'cM(M')]=_0x460d12(_0xed236a,0x1),document[_0x1c278b(0x150,'dl!^')](_0x1c278b(0x123,'gcp6'))[_0x1c278b(0x162,'FrJ7')]=_0x460d12(_0x244aaf,0x1);var _0x1d8c1a=document[_0x1c278b(0x156,'w%cZ')](_0x1c278b(0x179,'g9V@'));if(_0x1d8c1a)_0x1d8c1a[_0x1c278b(0x15a,'fswP')]=_0x1c278b(0x175,'ERAW')+_0x29b80d+'%)';var _0x3044b4=document[_0x1c278b(0x167,'FuX$')](_0x1c278b(0x186,'ssNi'));if(_0x3044b4)_0x3044b4['textContent']=_0x1c278b(0x172,'FrJ7')+_0x460d12(_0x244aaf,0x1)+')';document[_0x1c278b(0x138,'Wazs')]('mgc-bd-sales')[_0x1c278b(0x16e,'H65B')]=_0xfb2cb0(_0x215896),document[_0x1c278b(0x166,']FGz')](_0x1c278b(0x176,'N)4m'))[_0x1c278b(0x17b,']FGz')]=_0xfb2cb0(_0xeeb551),document[_0x1c278b(0x120,'GCYu')]('mgc-bd-sales-exvat')[_0x1c278b(0x16e,'H65B')]=_0xfb2cb0(_0x39b334),document[_0x1c278b(0x11d,'SF8Z')]('mgc-bd-cost')[_0x1c278b(0x190,'04QB')]=_0xfb2cb0(_0x3a01a6),document['getElementById'](_0x1c278b(0x12d,'7fgY'))[_0x1c278b(0x15f,'68Nn')]=_0xfb2cb0(_0x1481c1);var _0x135a21=_0x1481c1/_0x215896*0x64,_0x340f07=_0x3a01a6/_0x215896*0x64,_0x254cae=_0xeeb551/_0x215896*0x64;_0x2cec39(_0x1c278b(0x177,'onNo'),'mgc-bar-avance-label',_0x135a21,0x8),_0x2cec39('mgc-bar-cost',_0x1c278b(0x136,'5V]u'),_0x340f07,0x8),_0x2cec39(_0x1c278b(0x139,'Z0$5'),_0x1c278b(0x140,'i)[%'),_0x254cae,0x8);}document[_0x1a7a3a(0x166,']FGz')](_0x1a7a3a(0x157,'ERAW'))['addEventListener']('input',function(){_0x6f7aaf='sales',_0x41c999();}),document[_0x1a7a3a(0x12c,'h7$h')]('mgc-markup')[_0x1a7a3a(0x187,'68Nn')](_0x1a7a3a(0x13a,'onNo'),function(){var _0x984400=_0x1a7a3a;_0x6f7aaf=_0x984400(0x125,'nskC'),_0x41c999();}),[_0x1a7a3a(0x134,'nskC'),_0x1a7a3a(0x18e,'nskC')][_0x1a7a3a(0x18d,'ccVa')](function(_0x409e7b){var _0x16f58a=_0x1a7a3a,_0xaf7841=document[_0x16f58a(0x165,'7nHL')](_0x409e7b);if(!_0xaf7841)return;_0xaf7841[_0x16f58a(0x154,'Z0$5')](_0x16f58a(0x118,'3DBj'),_0x41c999);}),[_0x1a7a3a(0x134,'nskC'),_0x1a7a3a(0x151,'ssNi'),_0x1a7a3a(0x17e,'dl!^'),_0x1a7a3a(0x11f,'FrJ7')]['forEach'](function(_0xc8aded){var _0x486539=_0x1a7a3a,_0x472236=document[_0x486539(0x14f,'721#')](_0xc8aded);if(!_0x472236)return;_0x472236['addEventListener'](_0x486539(0x16b,'H65B'),_0x41c999);}),_0x41c999();}()));
+</script>

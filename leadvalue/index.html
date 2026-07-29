@@ -1,0 +1,574 @@
+<!-- ============================================================
+     Lead-værdi-widget — embed-snippet
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     Brug uden tilladelse er ikke tilladt.
+     ============================================================ -->
+
+<style>
+  .lv-root {
+    --accent:       #C4581E;
+    --accent-light: #f7ebe3;
+    --accent-mid:   #d4723d;
+    --text:         #0d1b2a;
+    --muted:        #5c6b7a;
+    --border:       #ddd7cc;
+    --bg:           #ede8de;
+    --white:        #ffffff;
+    --navy:         #0d1b2a;
+    --creme:        #f5f0e8;
+    --red:          #dc2626;
+    --green:        #059669;
+    --amber:        #d97706;
+    max-width: 620px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+  }
+  .lv-card {
+    background: var(--creme);
+    border-radius: 24px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .lv-dogear {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+  .lv-title {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .lv-intro {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .lv-required-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  .lv-required-note em { color: var(--red); font-style: normal; font-weight: 700; }
+  .lv-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .lv-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .lv-label-text {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .lv-required-star { color: var(--red); font-weight: 700; }
+  .lv-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .lv-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,0.12);
+    background: var(--white);
+  }
+  .lv-input-shell--error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.10) !important;
+    background: #fff5f5 !important;
+  }
+  .lv-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 24px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .lv-input::placeholder { font-weight: 400; color: #c4c9d4; }
+  .lv-input-prefix,
+  .lv-input-suffix {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .lv-help {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .lv-input-warning {
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .lv-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 24px;
+  }
+  .lv-results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .lv-result-card--main {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    color: var(--white);
+  }
+  .lv-ltv-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 12px;
+  }
+  .lv-ltv-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .lv-ltv-profit {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .lv-ltv-profit-label {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .lv-ltv-right { text-align: right; }
+  .lv-ltv-revenue {
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.9;
+  }
+  .lv-ltv-revenue-label {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+  .lv-ltv-note {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+  .lv-empty-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    min-height: 18px;
+  }
+  .lv-empty-hint.lv-visible { opacity: 1; }
+  .lv-result-card--segments {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 22px 22px 18px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .lv-result-card--segments.lv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lv-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .lv-donuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .lv-donut-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .lv-donut-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .lv-donut-svg { width: 96px; height: 96px; display: block; }
+  .lv-donut-bg  { fill: none; stroke: var(--border); }
+  .lv-donut-arc { fill: none; stroke: var(--accent); stroke-linecap: butt; }
+  .lv-donut-arc--one { stroke: #e8b49a; }
+  .lv-donut-label {
+    font-size: 17px;
+    font-weight: 800;
+    fill: var(--text);
+  }
+  .lv-donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .lv-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .lv-dot--loyal { background: var(--accent); }
+  .lv-dot--one   { background: #e8b49a; }
+  .lv-seg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .lv-seg {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--border);
+  }
+  .lv-seg-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .lv-seg-share {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .lv-seg-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 3px 0;
+    font-weight: 500;
+  }
+  .lv-seg-row strong { color: var(--text); font-weight: 700; }
+  .lv-result-card--ratio {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 20px 22px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .lv-result-card--ratio.lv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lv-ratio-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .lv-ratio-number {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .lv-ratio-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-top: 5px;
+  }
+  .lv-ratio-badge--great  { background: #d1fae5; color: #065f46; }
+  .lv-ratio-badge--good   { background: #fef3c7; color: #92400e; }
+  .lv-ratio-badge--break  { background: #fee2e2; color: #991b1b; }
+  .lv-ratio-badge--danger { background: #fee2e2; color: #991b1b; }
+  .lv-ratio-right { text-align: right; }
+  .lv-ratio-sub { font-size: 18px; font-weight: 700; color: var(--text); }
+  .lv-ratio-sub-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .lv-ratio-footnote { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); font-weight: 500; }
+  .lv-ratio-footnote strong { color: var(--text); font-weight: 700; }
+  .lv-helper {
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .lv-footer { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 540px) {
+    .lv-card       { padding: 28px 20px 24px; }
+    .lv-fields     { grid-template-columns: 1fr; }
+    .lv-seg-grid   { grid-template-columns: 1fr; }
+    .lv-ltv-profit { font-size: 34px; }
+  }
+  @media (max-width: 380px) {
+    .lv-donuts     { grid-template-columns: 1fr; }
+    .lv-ltv-profit { font-size: 28px; }
+  }
+</style>
+
+<div id="lv-widget" class="lv-root">
+  <div class="lv-card">
+
+    <h2 class="lv-title">Værdien af dine leads</h2>
+    <p class="lv-intro">Beregn hvor mange kroner dine leads reelt er værd – ud fra konvertering og kundeøkonomi.</p>
+    <p class="lv-required-note"><em>*</em> Påkrævet felt</p>
+
+    <div class="lv-fields">
+
+      <label class="lv-label">
+        <span class="lv-label-text">Antal nye leads<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <input id="lv-leads" type="number" min="0" step="1" placeholder="1000" class="lv-input" inputmode="numeric" />
+          <span class="lv-input-suffix">leads</span>
+        </div>
+        <span class="lv-help">Antal nye leads du vil beregne værdien af.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Konverteringsrate<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <input id="lv-conversion" type="number" min="0" max="100" step="0.5" placeholder="10" class="lv-input" inputmode="decimal" />
+          <span class="lv-input-suffix">%</span>
+        </div>
+        <span id="lv-conversion-warn" class="lv-input-warning"></span>
+        <span class="lv-help">Andel af leads der bliver betalende kunder.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Gennemsnitlig ordreværdi<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <span class="lv-input-prefix">kr.</span>
+          <input id="lv-avg-purchase" type="number" min="0" step="1" placeholder="500" class="lv-input" inputmode="decimal" />
+        </div>
+        <span class="lv-help">Dit typiske ordregennemsnit.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Bruttoavance<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <input id="lv-gross-margin" type="number" min="0" max="100" step="0.5" placeholder="70" class="lv-input" inputmode="decimal" />
+          <span class="lv-input-suffix">%</span>
+        </div>
+        <span id="lv-gross-margin-warn" class="lv-input-warning"></span>
+        <span class="lv-help">Profit efter vareforbrug, som % af omsætningen.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Køb pr. år<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <input id="lv-purchases-per-year" type="number" min="0" max="100" step="0.1" value="4" placeholder="4" class="lv-input" inputmode="decimal" />
+          <span class="lv-input-suffix">køb/år</span>
+        </div>
+        <span class="lv-help">Antal køb pr. år for en typisk kunde.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Kundeforholdets længde<span class="lv-required-star">*</span></span>
+        <div class="lv-input-shell">
+          <input id="lv-years" type="number" min="0" max="100" step="0.5" value="5" placeholder="5" class="lv-input" inputmode="decimal" />
+          <span class="lv-input-suffix">år</span>
+        </div>
+        <span class="lv-help">E-handel: typisk 1–3 år. Tip: 1 ÷ månedlig churn × 1/12.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Andel loyale kunder</span>
+        <div class="lv-input-shell">
+          <input id="lv-loyal-pct" type="number" min="0" max="100" step="1" value="20" placeholder="20" class="lv-input" inputmode="numeric" />
+          <span class="lv-input-suffix">%</span>
+        </div>
+        <span id="lv-loyal-pct-warn" class="lv-input-warning"></span>
+        <span class="lv-help">Kunder der køber mere end én gang. Usikker? Brug 20–30%.</span>
+      </label>
+
+      <label class="lv-label">
+        <span class="lv-label-text">Pris pr. lead <span style="font-weight:400;color:var(--muted)">(valgfri)</span></span>
+        <div class="lv-input-shell">
+          <span class="lv-input-prefix">kr.</span>
+          <input id="lv-cost-per-lead" type="number" min="0" step="1" placeholder="50" class="lv-input" inputmode="decimal" />
+        </div>
+        <span class="lv-help">Hvad det koster dig at skaffe 1 lead – bruges til omsætning:pris‑forholdet.</span>
+      </label>
+
+    </div>
+
+    <div class="lv-divider"></div>
+
+    <div class="lv-results">
+
+      <div class="lv-result-card lv-result-card--main">
+        <div class="lv-ltv-eyebrow">Estimeret værdi af dine leads</div>
+        <div class="lv-ltv-row">
+          <div>
+            <div id="lv-total-profit" class="lv-ltv-profit">–</div>
+            <div class="lv-ltv-profit-label">Total profit-værdi</div>
+          </div>
+          <div class="lv-ltv-right">
+            <div id="lv-total-revenue" class="lv-ltv-revenue">–</div>
+            <div class="lv-ltv-revenue-label">Total omsætning</div>
+          </div>
+        </div>
+        <div id="lv-customers-note" class="lv-ltv-note"></div>
+      </div>
+
+      <div id="lv-empty-hint" class="lv-empty-hint"></div>
+
+      <div id="lv-yield-card" class="lv-result-card lv-result-card--ratio" style="display:none;">
+        <div class="lv-section-label">Værdi pr. lead</div>
+        <div class="lv-ratio-inner">
+          <div>
+            <div id="lv-value-per-lead" class="lv-ratio-number">–</div>
+          </div>
+          <div class="lv-ratio-right">
+            <div id="lv-customers-count" class="lv-ratio-sub">–</div>
+            <div class="lv-ratio-sub-label">Nye kunder skabt</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="lv-segments-card" class="lv-result-card lv-result-card--segments" style="display:none;">
+        <div class="lv-section-label">Fordeling — engang vs. loyale kunder</div>
+        <div class="lv-donuts">
+          <div class="lv-donut-block">
+            <div class="lv-donut-title">Antal kunder</div>
+            <svg viewBox="0 0 100 100" class="lv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-bg" />
+              <circle id="lv-pie-count-one" cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-arc lv-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="lv-pie-count-loyal" cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="lv-pie-count-label" x="50" y="56" text-anchor="middle" class="lv-donut-label">–</text>
+            </svg>
+            <div class="lv-donut-legend">
+              <span><span class="lv-dot lv-dot--loyal"></span>Loyale</span>
+              <span><span class="lv-dot lv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+          <div class="lv-donut-block">
+            <div class="lv-donut-title">Andel af værdi</div>
+            <svg viewBox="0 0 100 100" class="lv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-bg" />
+              <circle id="lv-pie-sales-one" cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-arc lv-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="lv-pie-sales-loyal" cx="50" cy="50" r="38" stroke-width="13" class="lv-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="lv-pie-sales-label" x="50" y="56" text-anchor="middle" class="lv-donut-label">–</text>
+            </svg>
+            <div class="lv-donut-legend">
+              <span><span class="lv-dot lv-dot--loyal"></span>Loyale</span>
+              <span><span class="lv-dot lv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+        </div>
+        <div class="lv-seg-grid">
+          <div class="lv-seg">
+            <div class="lv-seg-name">Engangskunder</div>
+            <div id="lv-one-time-share" class="lv-seg-share">–</div>
+            <div class="lv-seg-row"><span>Antal kunder</span><strong id="lv-one-time-count">–</strong></div>
+            <div class="lv-seg-row"><span>Andel af kunder</span><strong id="lv-one-time-pct-text">–</strong></div>
+            <div class="lv-seg-row"><span>Værdi pr. kunde</span><strong id="lv-one-time-ltv">–</strong></div>
+          </div>
+          <div class="lv-seg">
+            <div class="lv-seg-name">Loyale kunder</div>
+            <div id="lv-loyal-share" class="lv-seg-share">–</div>
+            <div class="lv-seg-row"><span>Antal kunder</span><strong id="lv-loyal-count">–</strong></div>
+            <div class="lv-seg-row"><span>Andel af kunder</span><strong id="lv-loyal-pct-text">–</strong></div>
+            <div class="lv-seg-row"><span>Værdi pr. kunde</span><strong id="lv-loyal-ltv">–</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="lv-roi-card" class="lv-result-card lv-result-card--ratio" style="display:none;">
+        <div class="lv-section-label">Omsætning : pris‑forhold</div>
+        <div class="lv-ratio-inner">
+          <div>
+            <div id="lv-roi-ratio" class="lv-ratio-number">–</div>
+            <span id="lv-roi-badge" class="lv-ratio-badge"></span>
+          </div>
+          <div class="lv-ratio-right">
+            <div id="lv-investment-display" class="lv-ratio-sub">–</div>
+            <div class="lv-ratio-sub-label">Samlet leadinvestering</div>
+          </div>
+        </div>
+        <div class="lv-ratio-footnote">Heraf overskud: <strong id="lv-roi-profit-ratio">–</strong></div>
+      </div>
+
+    </div>
+
+    <div id="lv-helper" class="lv-helper"></div>
+
+    <div class="lv-footer">
+      Baseret på: leads × konvertering × kundens livstidsværdi (AOV × bruttoavance × køb/år × kundeår).
+      Engangskunder = 1 køb. Kun til inspiration – faktiske tal afhænger af din drift.
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;font-weight:500;text-align:center;">En lille beregner af Steen Olesen<br>® Det Mindre Bureau</div>
+
+    <div class="lv-dogear" aria-hidden="true"></div>
+
+  </div>
+</div>
+
+<script>
+function a0_0x494c(){var _0x40b279=['vebxt8orwxWqWRu5qmkywYtdOSkhWOeBBmoNcW','WPxcMCkw','sxr4u8kZWOpdPHxdH2RdP8o2W7m4WR9y','W7OuwCkJgY7dSCk2W53cKCkvWPTiWOTojSoi','WQqzm8kjnYRcJYJcSLFdVmo0xsj3','lcmlWP/dUaFdUxJdQfpcGSkr','W6xcIGaMWPpcOt/cRJi','iv8lab/cKCoeWPNcLmooW5/cPxtcPXzEsSkzWQi','W5f3gCkUbtldVdZcH2PnEgVdMmozW6pcNw0','hmofrrawWObDAdJcMfFcKwW','WPHIWPJdU8kWnW','EmoeWQtcMW','bmoweaC6WOffEs/cHuO','W40NtgRdT8krW6tdHhXHW4fQbgr7WQa','iv8labhcJmkaWOBdI8odW5JcQgFdR0KsxmkcWQHaDW','W78+nSktcCoRWQq7t8ojxSkxlrORW44TBW','WQtcHbtcJb7cKmoDWQ/dMSosnq','p8olCSozWPddKhVcM8opW4ZcUCoZW6FdIa','W4hcKCooWR4OCGBdQLmcWRG','FmouWQ/cH8kXWQddKHfBCmo3','EvNcImo7WO/dUuz0W7RcNf0','WOZcOZGSW6lcP8ovkCoWgmknW743W5xdPCoyvG','WPBcThK1W6G','ncKNWRJdT0vgWOCSW61yhZhcSdldGmkpzq4p','WPHXW5VdTCkQl3aDbmoozXXspXpcPCoxW7OHWPrX','mmk5z2lcRSo+W5ZdSSoUyZ7cLSo3W6uEW7u','rM40q8kVWRZdU0VdGW','WRZcL0hcLZpcMSkEWQ/dLSorjmkrW5TcWOxcMCki','fxuLWONcMmoH','sfCiwSokx1OuWReNqmkfaG','vebxxmolrwKDWQy5tmkega','imkrh8kxWRq','W6H7havQDMxdHKNdI8k5xfZcIW','fmkLW6BdOGRcHuq8hX0mmCk5','W5pcMSooWP4WjHJdPLatWR/dRG','WRFdOSobgwtdOMOu','WRSzdSoylCknWP3dU1RdJG','pL1dfX7cL8kfWOZcLCoeW5FdOMpdPqK','jCkuvSkwWONdJwxcQ8kvW4lcOSo1W7ldRGGK','WPHXW5VdV8kRmxmmw8oozHzqFKNdQCoaW6y','WOBcOCo4xLdcTmowk8kKdmkKlrVcRH8Tjq','WQ5XBtjUWRHFW4i','W5iLe2NdS8knWQJdJdbIW4P/','gH7cJa','WPRcJCo5WP4RW7tcK2zRWQJdSdimW50','fZjMb8oKWR7dUK/dU1ZdMG','W4LKtmkQlZJcVZVcG2HC','WPGHvCk4tce3pCkcB01L','WRmKFSkcbmo9WQLW','qmo8WQhcKLldLbq','nSk4D2lcTmo+W5/dO8omFG/cM8oBW68','WP7cSSkTrNZcOSozm8oSeSkZ','iv8lbH/cJmkiWOxdI8orW4VcO2BdOXa','bHNdS37cVq','W7yUjuuotCk7d8kmWQlcObWGWRRcGxddSmkqW5tdLW','W4RdRCoJWRlcKHxcNbRdHSkeeCkIWPpcHJHcW6u','WPHXW5VdUCkPl3eqbmovzHDk','WRRcJGxcLG','W5dcVJOro8oXW6hcJq','W7yEq8kqeJNdQmk2W4hcJmk5WOvYWP0','WRFdU8kpaxxdQNCj','WRdcH3xcHsGvWOvKDxJdL8oPgG','WR8lp8kAW4pcQGDhyvddICkyWQLdbmkqWPbHs2XK','W5BcLmkZW5i','jwRdJJ4grCkSW6tdOmkeW5y','WRqyzSk2W4hcUq9rE0NdRSkpWPqk','WPFdSGiSlW','lcmlWP/dTHRcVwxcPexcISkAWOFcLCo6W5RdUJlcUmoWkea','pCkRlKVcT8oIW5pdQSkpEI7cLG','W4W2u2RdQSkr','WQBcIbGWW4dcHIpcSYlcJrLJW5JdGSkKzCkVW5S','WRulA8oFBgtdNWNcV3xdQCohrq','WQfYmJzIWQvvW5KfW4C','B8ouWQpcTSkEWQRdKqbqASobpIPB','WQPtWQ/cJmouWOW6W5RcPSowct4xks4Yx8kaWOLzW7e','WOrwl2ZcR8kEx8k4Fa','i8kvrSkwWPpdJwBcUSk3W5/cK8o4W57dPa','W4ZcICkxWRaQn0FdU1SlWQ7cPHlcTmkA','WRNcVCkUnCksWQRdNKK','WPHXW5VdRmkToIGkrSoiyq0tp1hdSCotW6q','pmkOBupcRmoYW57dQ8oxzcNdJmo2W6a','W57dVmoLWPJcLrxdNbVdICkdo8k0WRZcHa','W7zDC8kvWO3cQSkerNfuW4NcMa','zSo7WQNcOmogsmkUrh7cTdhdRmkwWPm','WQlcHahcLYVcMG','WRpcJq3cIY7cSCosWRBdMG','WOpcUCkLr0S','f8owhdyvWOTgActcN3ZcH0SN','WQ/cVxNdS8k/pCkwWOZdQZyNimoCeW','W73dQshcSSo5rmojW4BdIG','W6vlESoGWQVdMSoAWRldQCohmCkM','iJPjWOldPbRdUM7dOG','W6ldKLNdJ2ZdJ8kfWRBdT8oXnSoWW54','iSkYBKi','WObIWO7dQmkhmgSDtmotEW','WPZcM8otWQLKir7dTL4dW7BcQrZcOCkpW6VcGCoAjSkhASocWPywW5pcO8ofqmkQW58QW6/dU2W7WRiDrCkuW41nkCoJW48wW7JcGmo9W7hcICkHW7FcICk9W4VcR8kPWR8sW5tcRmktWPXBbxJcUa9Xr8kOyfXzuc3dHSoPWPFcTCoPW67dTtD5jHzzrJ0WemkYja1aW57cMIWFW7LqE8k1wSkxqbVcNgFdRLngWQWeWRZdTbhdRHlcSmo1C8kqbdm3pq/cRCkAWO4LnK7cLmkNCwRdO8o0WOJdLSoEemotWRy7W77cS8o1nZqpwYq8WRDLWQTCd8olW69Jt8kGcYhcNxRdMCkqmmkaoLtcTh1VWRVcUCkeW4PEWRPTW6ylmfbNy8kMzvysoapdN0tcS8oramoaW4u','W4LUEmkXgZlcOWZcH3vn','WRukoSkJW67cHCknWQNdGmoKjCkpWPS','ahu8WQpcGSoHW5/dUSkzW6GUvmoxWQu','pCkRlKJcTSo+WP/dSSolzYJdJ8oHW6mAW7xcMW','WQJdQqtcJSoUrmo5','W67dOCoHWQZdS34vr8k6aCo2WOPpDCoWW5OA','WRNcOZnavmk5','W5lcMSoxWRaYnW','WQhcS8kVjmksWR/dTKddHXpcRrhdGq','WONdPWm','W5rVrmkRga','WQnRCsu','W6nOrtzVyghdGuVdMG','qMCHDCkWWPxdV13dMxVdL8kIW5y5','W67dOCoHWR3dQwrms8k2fSoG','WRFdN1bSW5JdLgtcMstcVG8TW4C','W5iLe2NdUCkvWQ3dKW','W6TpiSo4WRddJmoAWQJcPCokpCk2WPpcLa','lKzibHhcKCkhWPO','jCk4E1pcM8o0W5ZdSSohzdK','qCkluufmW5SDnb/cU1dcJ0KY','W7qTB8kMdmoRW6q9tSoiCSkAsri','W5fKwSk5gd8','WQpcLr7cLZBcMSkEWR/dNSopkCoDW4PFWPhcJG','WOrwl23cPmkcwSkPi2FdQtuCtCooF8ofWQzwys8','jLXifHxcNSkgWPVcJSooW5xcQhpdPSkcuvNcLmkO','WOBcOCo4w1hcVCocm8kKd8kVpfRcTLD4ngOCBCk7','WOJdSfyWi8oyWRtcPI5ThxZdHSo1a8kPuN4','W7yUju4kwmkGeW','WRFdOSobdg7dUNKlb8oGBmo4','W5G8tgJdVCka','W6ZdT8o1WRJcIWpdMGVdGW','WQPHAWvNWRnrW54hW5zfewDH','usz4W57dL8k0W7tdRCkZW4yIFW','uSo2WQVcO3ddMbiacHOl','W73cUa/dUSoEqmk9pSo5','WPbUWOxdRmkOpNW','WQPtWQ/cISouWPLIW5RdOSoibhyljNCYtSkxWOnc','kmkgh8kJWORdMMJcT8k4W5JcTmoYWRRdSaGKWRhdHhqLoq','W5b0wSk6gd7cVslcK2HmjsxdM8ov','W5JdVCo1WPJcJXxdNWRdQ8kEcSk5WPdcJI5v','k8olCSoDWOJdGwtcL8odW43cJ8oV','WQVcSCoFWQNdVv7dG8kiAq','hmofrquqWP1cBYBcJG','W7rCE8ovWQVdGCojWQ3dQSoCjSkM','t07cLCoUWQFcU012W7RcNa','ncKNWRJdT0vgWOCSW61yhZhcSdi','xLKiuSofxW','W6TpiSoGWRddGCoAWQJcPCoBn8k1WPJcJKGf','W6nCE8o5WRBdM8oFWRBdRColj8kXWPJcGuHoBCou','W6RcSrBdVCoUy8k6oCoOESkH','WRarC8kaW57cKaThyq','g3RdHt4GwmkNW6tcPCkEW4VcOZS','W4O2rNhdN8kBWQFdLhH8W50','W4iUWOxcPhRdNSoc','W6RdOdJcTCojz8ooW4hdMWG9','WRJcMcVcLISAWOO','WRJcJSk5WPaHW7/cTgu0WRBdUsC','zmohW7RcKmkhWRZdIaPtE8oXne5Csmk1WRre','qwn4Dmkx','drVcHmkSEa','WRLHzZriWRLsW48mW4XZ','WQDbW6y','WQzvB2BcR8kaACkYFhNdOcq','WQLWxCo4','W6eormk9','nSkvqSk/WP7dI24','ouXEbJpcL8khWP3cG8opW40','W7lcGXKHWQpcGJJcQspcHH8','W7T7edrfFgBdL0ldKCkp','CgyZsCkWWPtcSG','W5hdRcr5WRxdP8kgaCk/pSkkW6rW','WRBcPCo/W7BcSZvuE8kUi8oJWQmu','W5PKqmkBadlcVcRcIhjQCG/dKa','W67dUmkVWQ7dQMuow8kJ','W67dOCoHWR3dQwrmsSk2amoJWPW','WRnQr8o+','W6uEt8kHptpdQ8kNW4RcLSkp','Bmo3WRm','WRTPw8oI','B1dcHCo9','W77cSCo6WPxdQL7dSW','WQmCymkwW4pcQcDyCfddICkyWQK','WQJdOL7cSCkupmksp8ojtSkBW60','ncKNWRpdOeTrWOC','kmkgh8kJWPBdJsBcRmk4W4FcTmoYWRRdRWmZ','W5f3gCkUbtldVcZcIxngF2VdM8owW6q','uvGuwSowy0S1WPG','W7fmk8ko','W70ngSkIfZJdOSk2W5S','WOZcOZGHW7VcUCkznCkOgSknW6j7W5hdOq','WO3cSSkHD1pcQmoAiSoNcmkfih/cVG','WPnIWOldMCkOoMGmr8ojtqb3nW','W5tcMSocWQShpqtdU1CiWR8','W4tdObqYASoCW63dTtXKwgVcGSoTtmkIvMhcQJ1zv2q','WR5GwSovW4HbWRXfvSoDWQ1MW7PP','zmohW7RcN8kDWRBdNqKtBSoGmW','W6vqnSklpdlcGZtcOrZdQSo2','W5ldPsz3WRxcKmoCmSkro8kH','W5W9W5JcSxldMmolW4/dJelcH8kgWRi','exeKWPpcIW','w1OBtmoxz3ylWQa','W55TvCkThXVcUdZcKG','pN3dKJGGxctdOSoHWOm','gmk8W6TVgqPEWPyHW7WFvCo1fW','WQRcKdtcKYi','W6hcGXuqWOZcIdVcUcJcNcK6W6tdGG','W44Mtw0','WOrwl3BcQ8kgrSkYi3BdOdqxrmod','WOpdOW8fjSoyW7tcScf1oNBcOSo9','W78+nSkqbCoPW6q9tSoiq8ooyXC4W4G','WQeyF8kCW5VcUq','y8oYWRlcHSob','W6TpiSoZWQ3dMSoiWRFcPCoem8kXWPRcIvm','W4ZcICkxWQKTiqpdRv4d','f2u7WO4','W4aQWOFcRxxdICoIW4FcHeZcG8kAWQi','qCo2WQFcKL/dKHeraqa9mmkPvG','WOFcSgefW6hcU8ozimkZhmkSW7ntW4y','WQXGEWv9WRnsW48LW4T0heTRWRuR','W4VcHW8YWOZcIctdP2y','WO83aCoRvwxdQqFcLM9BCX8','W4FcMSooWPOOnWFdQLWsWONdSJFcPa','WR3cPmoWimkkWQZcNLZdLWZcQXFdLmopbW','W5eVWPe','ySoYWRZcLSozyCkQuMq','WQtcQ8ktWQJdR2BdG8kumaRdQCkuxmoGFmoNWPOjW5bzWQG','W5iLe3pdTCkhWQddGNf3','DCo7WQxcKCoPqSkTvxxcRGC','W6ynW7BcJmowWPaUW4RdV8kFqq','pCkRlLhcUCo3W4FdO8kpEIJcKmk/W6CEW6BcMG','ih8SWPi','x1moESoitNiDWRO+z8kspZa','WOhdQb8ZhCouW63cVq','W7nCD8oGWPZdMSovWRddRCohjG','WOZcOZGJW6lcRCoaAmkTdCkCWQD2W4FdPCoo','kmkgh8k0WO3dH3JcRmo0W4BcSmoZW7ddQqm','WODxW44KWRJcIrrF'];a0_0x494c=function(){return _0x40b279;};return a0_0x494c();}function a0_0x4cf4(_0x447589,_0x1cd82a){_0x447589=_0x447589-0x93;var _0x494c1c=a0_0x494c();var _0x4cf4ef=_0x494c1c[_0x447589];if(a0_0x4cf4['bhDdRv']===undefined){var _0x297f5d=function(_0xb332f8){var _0x56945f='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x210080='',_0x3bf393='';for(var _0x4f8504=0x0,_0x571a11,_0x479dd4,_0x27a1c7=0x0;_0x479dd4=_0xb332f8['charAt'](_0x27a1c7++);~_0x479dd4&&(_0x571a11=_0x4f8504%0x4?_0x571a11*0x40+_0x479dd4:_0x479dd4,_0x4f8504++%0x4)?_0x210080+=String['fromCharCode'](0xff&_0x571a11>>(-0x2*_0x4f8504&0x6)):0x0){_0x479dd4=_0x56945f['indexOf'](_0x479dd4);}for(var _0x574a04=0x0,_0x5de6bd=_0x210080['length'];_0x574a04<_0x5de6bd;_0x574a04++){_0x3bf393+='%'+('00'+_0x210080['charCodeAt'](_0x574a04)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x3bf393);};var _0x2ecb28=function(_0x36646f,_0x50b932){var _0x393c1e=[],_0x5ddd69=0x0,_0x28499d,_0x2c0829='';_0x36646f=_0x297f5d(_0x36646f);var _0xbc595f;for(_0xbc595f=0x0;_0xbc595f<0x100;_0xbc595f++){_0x393c1e[_0xbc595f]=_0xbc595f;}for(_0xbc595f=0x0;_0xbc595f<0x100;_0xbc595f++){_0x5ddd69=(_0x5ddd69+_0x393c1e[_0xbc595f]+_0x50b932['charCodeAt'](_0xbc595f%_0x50b932['length']))%0x100,_0x28499d=_0x393c1e[_0xbc595f],_0x393c1e[_0xbc595f]=_0x393c1e[_0x5ddd69],_0x393c1e[_0x5ddd69]=_0x28499d;}_0xbc595f=0x0,_0x5ddd69=0x0;for(var _0x19bcb0=0x0;_0x19bcb0<_0x36646f['length'];_0x19bcb0++){_0xbc595f=(_0xbc595f+0x1)%0x100,_0x5ddd69=(_0x5ddd69+_0x393c1e[_0xbc595f])%0x100,_0x28499d=_0x393c1e[_0xbc595f],_0x393c1e[_0xbc595f]=_0x393c1e[_0x5ddd69],_0x393c1e[_0x5ddd69]=_0x28499d,_0x2c0829+=String['fromCharCode'](_0x36646f['charCodeAt'](_0x19bcb0)^_0x393c1e[(_0x393c1e[_0xbc595f]+_0x393c1e[_0x5ddd69])%0x100]);}return _0x2c0829;};a0_0x4cf4['LGanaf']=_0x2ecb28,a0_0x4cf4['CxiKII']={},a0_0x4cf4['bhDdRv']=!![];}var _0x42aff8=_0x494c1c[0x0],_0x9e802f=_0x447589+_0x42aff8,_0x784b81=a0_0x4cf4['CxiKII'][_0x9e802f];return!_0x784b81?(a0_0x4cf4['iivcsm']===undefined&&(a0_0x4cf4['iivcsm']=!![]),_0x4cf4ef=a0_0x4cf4['LGanaf'](_0x4cf4ef,_0x1cd82a),a0_0x4cf4['CxiKII'][_0x9e802f]=_0x4cf4ef):_0x4cf4ef=_0x784b81,_0x4cf4ef;}(function(_0x9097f,_0x10673a){var _0x49c973=a0_0x4cf4,_0x1e69cc=_0x9097f();while(!![]){try{var _0x4b1418=parseInt(_0x49c973(0xb8,'l^9d'))/0x1*(parseInt(_0x49c973(0x174,'aONQ'))/0x2)+parseInt(_0x49c973(0xe7,'W4yF'))/0x3+parseInt(_0x49c973(0x132,'OmQW'))/0x4+-parseInt(_0x49c973(0x13e,'O[Bb'))/0x5*(parseInt(_0x49c973(0x13c,'MMFg'))/0x6)+parseInt(_0x49c973(0xd2,'ucSf'))/0x7+parseInt(_0x49c973(0xac,'IQ)y'))/0x8+-parseInt(_0x49c973(0xe3,'&eAI'))/0x9;if(_0x4b1418===_0x10673a)break;else _0x1e69cc['push'](_0x1e69cc['shift']());}catch(_0x492629){_0x1e69cc['push'](_0x1e69cc['shift']());}}}(a0_0x494c,0x6fa9e),(function(){'use strict';var _0x444921=a0_0x4cf4;var _0x56945f=[_0x444921(0xb0,'@NyP'),_0x444921(0xe6,'GONx'),_0x444921(0x11c,'U%cX'),_0x444921(0xdb,'GkQY'),_0x444921(0x112,'xqyd'),_0x444921(0x14c,'ucSf'),_0x444921(0x135,'x$kW'),''],_0x210080=(window[_0x444921(0xc7,'G#ZU')][_0x444921(0xd9,'xX60')]||'')[_0x444921(0xeb,'xqyd')]();if(!_0x56945f[_0x444921(0xe8,'GkQY')](function(_0x2c0829){var _0x12cad4=_0x444921;return _0x210080===_0x2c0829||_0x2c0829&&_0x210080[_0x12cad4(0x170,'oKz2')]('.'+_0x2c0829);})){var _0x3bf393=document[_0x444921(0xc6,'5oG9')](_0x444921(0x144,'5oG9'));if(_0x3bf393)_0x3bf393[_0x444921(0x142,'XTod')]=_0x444921(0xea,'Zse)');return;}function _0x4f8504(_0xbc595f){var _0x4a6185=_0x444921,_0x19bcb0=document[_0x4a6185(0xd7,'wA99')](_0xbc595f);if(!_0x19bcb0)return 0x0;var _0x1acb77=parseFloat(String(_0x19bcb0[_0x4a6185(0x154,'*%^O')])[_0x4a6185(0x121,'v^1d')](',','.'));return isNaN(_0x1acb77)?0x0:_0x1acb77;}function _0x571a11(_0x3c2da1,_0x14368c,_0x30d3de){var _0x21b29a=_0x444921;return Math[_0x21b29a(0x139,'JBGA')](_0x30d3de,Math[_0x21b29a(0xf4,'oKz2')](_0x14368c,_0x3c2da1));}function _0x479dd4(_0xab9baf){var _0x2b72c2=_0x444921;if(!isFinite(_0xab9baf)||_0xab9baf<=0x0)return'–';return new Intl[(_0x2b72c2(0x124,'a4Oy'))](_0x2b72c2(0xaa,'wA99'),{'style':_0x2b72c2(0xb4,'C2%G'),'currency':_0x2b72c2(0x176,'xX60'),'maximumFractionDigits':_0xab9baf<0x1?0x2:0x0})[_0x2b72c2(0x11a,'XTod')](_0xab9baf);}function _0x27a1c7(_0x433644,_0x28ddb3){var _0x3b9e4c=_0x444921;if(!isFinite(_0x433644))return'–';return new Intl[(_0x3b9e4c(0x12a,'44ga'))](_0x3b9e4c(0x126,'l^9d'),{'maximumFractionDigits':_0x28ddb3??0x1})[_0x3b9e4c(0x109,'3(Cu')](_0x433644);}var _0x574a04=0x26,_0x5de6bd=0x2*Math['PI']*_0x574a04;function _0x36646f(_0x29daa2,_0x5f348a,_0x5843ab,_0x441604){var _0x4c61c9=_0x444921,_0x395cb9=document[_0x4c61c9(0x10b,'C2%G')](_0x5f348a),_0x4b6e36=document[_0x4c61c9(0x155,'WifZ')](_0x5843ab),_0x21231f=document[_0x4c61c9(0x9c,'0fS!')](_0x441604);if(!_0x395cb9||!_0x21231f)return;var _0x2c455e=_0x571a11(_0x29daa2,0.001,0.999),_0x14f6c9=_0x2c455e*_0x5de6bd,_0x100128=_0x5de6bd;_0x395cb9[_0x4c61c9(0xad,'Zse)')](_0x4c61c9(0x102,'W4yF'),_0x14f6c9+'\x20'+_0x100128);if(_0x4b6e36){var _0x568d8a=(0x1-_0x2c455e)*_0x5de6bd;_0x4b6e36[_0x4c61c9(0x117,'U%cX')](_0x4c61c9(0x98,'3(Cu'),_0x568d8a+'\x20'+_0x100128),_0x4b6e36[_0x4c61c9(0x114,'0fS!')](_0x4c61c9(0xc2,'&5ya'),-_0x14f6c9);}_0x21231f[_0x4c61c9(0x10d,'IQ)y')]=_0x27a1c7(_0x2c455e*0x64,0x0)+'%';}function _0x50b932(_0x528fed){var _0x1c8656=_0x444921;_0x528fed[_0x1c8656(0xc0,'VChF')][_0x1c8656(0x123,'*%^O')]=_0x1c8656(0x15b,'JBGA'),requestAnimationFrame(function(){requestAnimationFrame(function(){var _0x539a1f=a0_0x4cf4;_0x528fed[_0x539a1f(0x115,'MMFg')][_0x539a1f(0x167,'v^1d')](_0x539a1f(0x15d,'Zse)'));});});}function _0x393c1e(_0x2b3a09){var _0x4dd550=_0x444921;_0x2b3a09[_0x4dd550(0x17b,'WifZ')][_0x4dd550(0xa7,'sd))')](_0x4dd550(0x16a,'3(Cu')),setTimeout(function(){var _0x1d9bec=_0x4dd550;if(!_0x2b3a09[_0x1d9bec(0x151,'xqyd')][_0x1d9bec(0xfd,'@NyP')](_0x1d9bec(0xf7,'lG[*')))_0x2b3a09[_0x1d9bec(0xcd,'oKz2')][_0x1d9bec(0x10f,'mEZ%')]=_0x1d9bec(0xf6,'C2%G');},0x104);}function _0x5ddd69(){var _0x22daea=_0x444921,_0x3c5aa0=document[_0x22daea(0xab,'lG[*')](_0x22daea(0xd6,'44ga')),_0x35f0b5=document[_0x22daea(0xf8,'l^9d')](_0x22daea(0xbf,'@NyP')),_0x518ce4=document[_0x22daea(0x134,'xqyd')](_0x22daea(0x11b,'U%cX')),_0x3dfdf1=document[_0x22daea(0xe2,'8sPe')](_0x22daea(0xf0,'x$kW')),_0x2712f2=document[_0x22daea(0x153,'8dt1')](_0x22daea(0x14e,'v^1d')),_0x20b966=document[_0x22daea(0x160,'IQ)y')](_0x22daea(0x16d,'GkQY')),_0x1e0617=document[_0x22daea(0x14a,'7y2n')](_0x22daea(0x125,'XIui')),_0x31e956=document[_0x22daea(0x153,'8dt1')](_0x22daea(0x159,'FImj')),_0x8d6238=document[_0x22daea(0x146,'oqPh')](_0x22daea(0xf9,'x$kW')),_0x40a95e=document[_0x22daea(0xbd,'GkQY')](_0x22daea(0x17a,'GONx')),_0x3c2d48=document[_0x22daea(0x165,'Zse)')](_0x22daea(0x136,'x$kW')),_0x1ed229=document[_0x22daea(0x134,'xqyd')](_0x22daea(0x17c,'@NyP')),_0xdcc857=document[_0x22daea(0xed,'sd))')](_0x22daea(0xc9,'%]Et')),_0x52af1b=document[_0x22daea(0xe2,'8sPe')](_0x22daea(0xc3,'mEZ%')),_0x2d5ffe=document[_0x22daea(0x161,'OmQW')](_0x22daea(0xee,'GkQY')),_0x30b869=document[_0x22daea(0x158,'oKz2')](_0x22daea(0xb7,'a4Oy')),_0x3beb7f=document[_0x22daea(0x147,'mEZ%')](_0x22daea(0xa6,'W4yF')),_0x44064d=document[_0x22daea(0x100,'FImj')](_0x22daea(0xfc,'U%cX')),_0x3f2b23=document[_0x22daea(0xdc,'&5ya')](_0x22daea(0x110,'HvXr')),_0x938401=document[_0x22daea(0xd4,'XIui')](_0x22daea(0xb3,'oqPh')),_0x1d10e8=document[_0x22daea(0xde,'JBGA')](_0x22daea(0xd8,'Zse)')),_0x2b6e2d=document[_0x22daea(0x147,'mEZ%')](_0x22daea(0x108,'G#ZU'));if(!_0x35f0b5)return;var _0x29aed7=_0x4f8504(_0x22daea(0x13f,'%R7a')),_0x20a493=_0x4f8504(_0x22daea(0xc8,'*%^O')),_0x1f6545=_0x4f8504(_0x22daea(0x166,'xX60')),_0x34be39=_0x4f8504(_0x22daea(0x119,'%R7a')),_0xa72632=_0x4f8504(_0x22daea(0x175,'XTod')),_0xe7b9fb=_0x4f8504(_0x22daea(0x107,'$rO6')),_0x1f9c7d=_0x4f8504(_0x22daea(0x14b,'XIui')),_0xb624d7=_0x4f8504(_0x22daea(0x172,'OmQW'));_0x3c5aa0[_0x22daea(0xb9,'xqyd')]='',_0x393c1e(_0x8d6238),_0x52af1b[_0x22daea(0x150,'XTod')][_0x22daea(0xd0,'3(Cu')](_0x22daea(0xd3,'C2%G'));if(_0x29aed7<=0x0||_0x20a493<=0x0||_0x1f6545<=0x0||_0x34be39<=0x0||_0xa72632<=0x0||_0xe7b9fb<=0x0){_0x35f0b5[_0x22daea(0x130,'lG[*')]='–',_0x518ce4[_0x22daea(0x12e,'@NyP')]='–',_0x3dfdf1[_0x22daea(0xbe,'oqPh')]='',_0x393c1e(_0x2712f2),_0x393c1e(_0x31e956);var _0x250063=[];if(_0x29aed7<=0x0)_0x250063[_0x22daea(0x143,'ucSf')](_0x22daea(0x9d,'Zse)'));if(_0x20a493<=0x0)_0x250063[_0x22daea(0x96,'XIui')](_0x22daea(0x178,'5oG9'));if(_0x1f6545<=0x0)_0x250063[_0x22daea(0x15e,'sd))')](_0x22daea(0x152,'BPFL'));if(_0x34be39<=0x0)_0x250063[_0x22daea(0x12b,'7y2n')](_0x22daea(0xe5,'U%cX'));if(_0xa72632<=0x0)_0x250063[_0x22daea(0x12c,'5oG9')](_0x22daea(0xaf,'W4yF'));if(_0xe7b9fb<=0x0)_0x250063[_0x22daea(0x156,'3(Cu')](_0x22daea(0x104,'@NyP'));_0x250063[_0x22daea(0x101,'xqyd')]&&(_0x250063[_0x22daea(0x95,'mEZ%')]<=0x2&&(_0x29aed7<=0x0||_0x20a493<=0x0)?(_0x52af1b[_0x22daea(0x171,'U%cX')]=_0x22daea(0x131,'l^9d')+_0x250063[_0x22daea(0x137,'7y2n')](_0x22daea(0xca,'a4Oy'))+_0x22daea(0x149,'oKz2'),_0x52af1b[_0x22daea(0x10e,'O[Bb')][_0x22daea(0xb6,'QCnr')](_0x22daea(0x116,'8sPe'))):_0x3c5aa0[_0x22daea(0x97,'8sPe')]=_0x22daea(0x163,'WifZ')+_0x250063[_0x22daea(0xc4,'W4yF')](',\x20')+'.');return;}var _0x307b1d=_0x571a11(_0x1f9c7d,0x0,0x64)/0x64,_0x512ffa=0x1-_0x307b1d,_0xa16a1c=_0x571a11(_0x20a493,0x0,0x64)/0x64,_0x365911=_0xa72632*_0xe7b9fb,_0x5229d3=_0x1f6545*(_0x34be39/0x64),_0x2eceab=_0x5229d3*0x1,_0x39ec03=_0x5229d3*_0x365911,_0x222975=_0x512ffa*_0x2eceab+_0x307b1d*_0x39ec03,_0x5980a6=_0x512ffa*_0x1f6545+_0x307b1d*_0x365911*_0x1f6545,_0x4f3aed=_0x29aed7*_0xa16a1c,_0x1769ab=_0x4f3aed*_0x222975,_0x3f4b0c=_0x4f3aed*_0x5980a6,_0x3b774c=_0x29aed7>0x0?_0x1769ab/_0x29aed7:0x0;_0x35f0b5[_0x22daea(0xb9,'xqyd')]=_0x479dd4(_0x1769ab),_0x518ce4[_0x22daea(0x9b,'W4yF')]=_0x479dd4(_0x3f4b0c),_0x3dfdf1[_0x22daea(0x97,'8sPe')]='≈\x20'+_0x27a1c7(_0x4f3aed,0x0)+_0x22daea(0xd1,'WifZ')+_0x27a1c7(_0x29aed7,0x0)+_0x22daea(0xbb,'FImj')+_0x27a1c7(_0x20a493,0x1)+_0x22daea(0x179,'ucSf'),_0x20b966[_0x22daea(0x9e,'XIui')]=_0x479dd4(_0x3b774c),_0x1e0617[_0x22daea(0x11d,'O[Bb')]=_0x27a1c7(_0x4f3aed,0x0),_0x50b932(_0x2712f2);var _0x602148=_0x512ffa*_0x2eceab,_0x32d938=_0x307b1d*_0x39ec03,_0x43cdc3=_0x602148+_0x32d938,_0x3b280e=_0x43cdc3>0x0?_0x602148/_0x43cdc3:0x0,_0x14b4a1=_0x43cdc3>0x0?_0x32d938/_0x43cdc3:0x0;_0x2d5ffe[_0x22daea(0xfe,'GkQY')]=_0x27a1c7(_0x3b280e*0x64,0x1)+_0x22daea(0xba,'xqyd'),_0x30b869[_0x22daea(0xcb,'BPFL')]=_0x27a1c7(_0x14b4a1*0x64,0x1)+_0x22daea(0xdd,'%]Et'),_0x3beb7f[_0x22daea(0x148,'Zse)')]=_0x27a1c7(_0x4f3aed*_0x512ffa,0x0),_0x44064d[_0x22daea(0xfe,'GkQY')]=_0x27a1c7(_0x4f3aed*_0x307b1d,0x0),_0x3f2b23[_0x22daea(0x11d,'O[Bb')]=_0x27a1c7(_0x512ffa*0x64,0x0)+'%',_0x938401[_0x22daea(0x122,'&eAI')]=_0x27a1c7(_0x307b1d*0x64,0x0)+'%',_0x1d10e8[_0x22daea(0x16b,'JBGA')]=_0x479dd4(_0x2eceab),_0x2b6e2d[_0x22daea(0x128,'C2%G')]=_0x479dd4(_0x39ec03),_0x50b932(_0x31e956),_0x36646f(_0x307b1d,_0x22daea(0xda,'mEZ%'),_0x22daea(0x141,'xqyd'),_0x22daea(0x9a,'FImj')),_0x36646f(_0x14b4a1,_0x22daea(0x106,'oKz2'),_0x22daea(0x140,'wA99'),_0x22daea(0x93,'xqyd'));if(_0xb624d7>0x0){var _0x36e1a9=_0x29aed7*_0xb624d7,_0xf0d11e=_0x36e1a9>0x0?_0x3f4b0c/_0x36e1a9:0x0,_0xb46d62=_0x36e1a9>0x0?_0x1769ab/_0x36e1a9:0x0;_0x50b932(_0x8d6238),_0x40a95e[_0x22daea(0x130,'lG[*')]=_0x27a1c7(_0xf0d11e,0x1)+':1',_0xdcc857[_0x22daea(0xe9,'mEZ%')]=_0x479dd4(_0x36e1a9),_0x1ed229[_0x22daea(0x138,'5oG9')]=_0x27a1c7(_0xb46d62,0x1)+':1';var _0x1cbe2e,_0x5c1dff;if(_0xf0d11e>=0x4)_0x1cbe2e=_0x22daea(0xf1,'oqPh'),_0x5c1dff=_0x22daea(0x169,'MMFg');else{if(_0xf0d11e>=0x2)_0x1cbe2e=_0x22daea(0x16e,'sd))'),_0x5c1dff=_0x22daea(0xc1,'$rO6');else _0xf0d11e>=0x1?(_0x1cbe2e=_0x22daea(0x118,'&lky'),_0x5c1dff=_0x22daea(0x99,'@NyP')):(_0x1cbe2e=_0x22daea(0x10a,'&5ya'),_0x5c1dff=_0x22daea(0xce,'GONx'));}_0x3c2d48[_0x22daea(0x9f,'&lky')]=_0x1cbe2e,_0x3c2d48[_0x22daea(0xe0,'W4yF')]=_0x22daea(0x157,'44ga')+_0x5c1dff;}}function _0x28499d(_0x4220a5,_0x470a8e,_0x299da5,_0x44a7ff){var _0x1a240a=_0x444921,_0x41ab2f=document[_0x1a240a(0xe2,'8sPe')](_0x4220a5),_0x20fa2b=document[_0x1a240a(0x16f,'XTod')](_0x470a8e);if(!_0x41ab2f||!_0x20fa2b)return;_0x41ab2f[_0x1a240a(0x162,'C2%G')](_0x1a240a(0x13b,'&lky'),function(){var _0x59ecc9=_0x1a240a,_0x47ef22=String(_0x41ab2f[_0x59ecc9(0xa1,'OmQW')])[_0x59ecc9(0x12d,'wA99')](',','.');if(_0x47ef22===''||isNaN(parseFloat(_0x47ef22))){_0x20fa2b[_0x59ecc9(0x12f,'WifZ')]='',_0x41ab2f[_0x59ecc9(0x13d,'%]Et')][_0x59ecc9(0xe4,'&eAI')][_0x59ecc9(0x15a,'%]Et')](_0x59ecc9(0xa3,'mEZ%'));return;}var _0x49378d=parseFloat(_0x47ef22);_0x49378d<_0x299da5||_0x49378d>_0x44a7ff?(_0x41ab2f[_0x59ecc9(0x14f,'sd))')]=_0x571a11(_0x49378d,_0x299da5,_0x44a7ff),_0x20fa2b[_0x59ecc9(0x138,'5oG9')]=_0x59ecc9(0x11f,'BPFL')+_0x41ab2f[_0x59ecc9(0x127,'QCnr')]+_0x59ecc9(0x16c,'HvXr')+_0x299da5+'–'+_0x44a7ff+')',_0x41ab2f[_0x59ecc9(0x15f,'v^1d')][_0x59ecc9(0xa5,'l^9d')][_0x59ecc9(0x129,'HvXr')](_0x59ecc9(0x103,'44ga')),_0x5ddd69()):(_0x20fa2b[_0x59ecc9(0x130,'lG[*')]='',_0x41ab2f[_0x59ecc9(0xf3,'xX60')][_0x59ecc9(0x11e,'%]Et')][_0x59ecc9(0xdf,'W4yF')](_0x59ecc9(0xd5,'HvXr')));}),_0x41ab2f[_0x1a240a(0xb1,'wA99')](_0x1a240a(0xe1,'oqPh'),function(){var _0x1534d8=_0x1a240a;_0x20fa2b[_0x1534d8(0x120,'3(Cu')]='',_0x41ab2f[_0x1534d8(0xa8,'XTod')][_0x1534d8(0x168,'JBGA')][_0x1534d8(0xf2,'Zse)')](_0x1534d8(0x105,'oqPh'));});}_0x28499d(_0x444921(0xa9,'XTod'),_0x444921(0xb2,'mEZ%'),0x0,0x64),_0x28499d(_0x444921(0x173,'wA99'),_0x444921(0xa2,'%R7a'),0x0,0x64),_0x28499d(_0x444921(0xb5,'3(Cu'),_0x444921(0xa0,'OmQW'),0x0,0x64),[_0x444921(0xfb,'3(Cu'),_0x444921(0x94,'8sPe'),_0x444921(0x145,'OmQW'),_0x444921(0x15c,'U%cX'),_0x444921(0x111,'wA99'),_0x444921(0xae,'G#ZU'),_0x444921(0xcf,'GkQY'),_0x444921(0x177,'l^9d')][_0x444921(0xbc,'IQ)y')](function(_0x299446){var _0x4702ed=_0x444921,_0x336f61=document[_0x4702ed(0xcc,'%]Et')](_0x299446);if(!_0x336f61)return;_0x336f61[_0x4702ed(0x113,'&5ya')](_0x4702ed(0xf5,'xqyd'),_0x5ddd69),_0x336f61[_0x4702ed(0xa4,'GkQY')](_0x4702ed(0x13a,'7y2n'),_0x5ddd69);}),_0x5ddd69();}()));
+</script>

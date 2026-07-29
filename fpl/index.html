@@ -1,0 +1,2674 @@
+<!-- ============================================================
+     Løftestangen — embed-snippet (fuld version)
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     Brug uden tilladelse er ikke tilladt.
+     ============================================================ -->
+<style>
+  #fp-widget {
+    --accent: #C4581E;
+    --navy: #0d1b2a;
+    --creme: #f5f0e8;
+    --bg: #ede8de;
+    --border: #ddd7cc;
+    --muted: #5c6b7a;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #059669;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--navy);
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  #fp-widget *, #fp-widget *::before, #fp-widget *::after { box-sizing: border-box; }
+
+  .fp-card {
+    position: relative;
+    background: linear-gradient(to right, var(--creme) 0%, var(--creme) calc(100% - 400px), var(--navy) calc(100% - 400px));
+    border-radius: 24px;
+    padding: 0;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    overflow: clip;
+  }
+
+  .fp-dogear {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+
+  /* Two-column layout */
+  .fp-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 0;
+    align-items: start;
+  }
+
+  .fp-left {
+    min-width: 0;
+    padding: 48px 48px 48px 48px;
+  }
+
+  .fp-sidebar {
+    position: sticky;
+    top: 0;
+    padding: 44px 36px 48px;
+    color: var(--white);
+  }
+
+  /* Section labels */
+  .fp-widget-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    line-height: 1;
+  }
+
+  .fp-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    margin-top: 40px;
+  }
+  .fp-section-label:first-child { margin-top: 0; }
+
+  .fp-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    margin-top: 40px;
+  }
+  .fp-section-header .fp-section-label { margin: 0; }
+
+  /* Baseline collapse toggle */
+  .fp-baseline-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .fp-baseline-toggle:hover { background: var(--bg); color: var(--navy); }
+  .fp-baseline-collapsible {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    max-height: 1000px;
+    opacity: 1;
+  }
+  .fp-baseline-collapsible.fp-collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+  .fp-baseline-summary {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 20px;
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    line-height: 1.6;
+  }
+  .fp-baseline-summary.fp-visible { display: flex; }
+  .fp-baseline-summary strong { color: var(--navy); font-weight: 700; }
+
+  /* Baseline grid */
+  .fp-baseline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .fp-field { display: flex; flex-direction: column; gap: 5px; }
+
+  .fp-field label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+
+  .fp-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .fp-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,0.12);
+    background: var(--white);
+  }
+
+  .fp-input-shell .fp-unit {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .fp-input-shell input[type="number"],
+  .fp-input-shell input[type="text"] {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 0;
+    min-width: 0;
+  }
+  .fp-input-shell input[type="number"]::-webkit-inner-spin-button,
+  .fp-input-shell input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .fp-input-shell input[type="number"] { -moz-appearance: textfield; }
+
+  .fp-help {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Lever cards */
+  .fp-lever-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .fp-lever-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fp-lever-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .fp-lever-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    flex: 1;
+  }
+
+  .fp-lever-today {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .fp-lever-reset {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .fp-lever-reset:hover { background: var(--bg); color: var(--navy); }
+
+  .fp-lever-body {
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Slider row */
+  .fp-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fp-slider-wrap { flex: 1; }
+
+  input[type="range"].fp-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--bg);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"].fp-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(196,88,30,0.25);
+    transition: box-shadow 0.15s;
+  }
+  input[type="range"].fp-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 2px 8px rgba(196,88,30,0.45);
+  }
+  input[type="range"].fp-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 4px rgba(196,88,30,0.25);
+  }
+
+  .fp-num-shell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    flex-shrink: 0;
+  }
+  .fp-num-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(196,88,30,0.10);
+  }
+  .fp-num-shell input[type="number"],
+  .fp-num-shell input[type="text"] {
+    width: 70px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: right;
+    color: var(--navy);
+    border: none;
+    outline: none;
+    background: transparent;
+    -moz-appearance: textfield;
+  }
+  .fp-num-shell input[type="number"]::-webkit-inner-spin-button,
+  .fp-num-shell input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .fp-num-unit {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Wizard blocks */
+  .fp-wiz-q {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .fp-wiz-q:first-child { border-top: none; padding-top: 0; }
+
+  .fp-wiz-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+
+  /* Reset all button */
+  .fp-reset-all-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .fp-reset-all-btn:hover { background: var(--bg); color: var(--navy); }
+
+  /* Results panel */
+  .fp-results-panel {
+    background: transparent;
+  }
+
+  .fp-results-hero {
+    padding: 0 0 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+  }
+
+  .fp-results-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+
+  #fp-r-pct {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    color: #6ee7b7;
+    margin-bottom: 4px;
+    transition: color 0.2s, font-size 0.2s;
+  }
+  #fp-r-pct.fp-neg  { color: #fca5a5; }
+  #fp-r-pct.fp-kr-mode { font-size: 44px; }
+
+  .fp-results-sub {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .fp-kpi-rows {
+    padding: 20px 0 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fp-kpi-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .fp-kpi-row:last-child { border-bottom: none; }
+
+  .fp-kpi-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .fp-kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+
+  .fp-kpi-values {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .fp-kpi-today {
+    font-size: 11px;
+    opacity: 0.45;
+  }
+
+  .fp-kpi-arrow {
+    font-size: 11px;
+    opacity: 0.4;
+  }
+
+  .fp-kpi-after {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    transition: color 0.2s;
+  }
+  .fp-kpi-after--up   { color: #6ee7b7 !important; }
+  .fp-kpi-after--down { color: #fca5a5 !important; }
+
+  .fp-kpi-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .fp-kpi-badge--up   { background: rgba(110,231,183,0.2); color: #6ee7b7; }
+  .fp-kpi-badge--down { background: rgba(252,165,165,0.2); color: #fca5a5; }
+
+  /* Moms secondary hint under KPI values */
+  .fp-kpi-moms {
+    font-size: 10px;
+    opacity: 0.45;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .fp-kpi-moms-label {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    font-size: 9px;
+    opacity: 0.8;
+  }
+  .fp-kpi-moms-val {
+    font-weight: 600;
+  }
+  .fp-lever-card .fp-kpi-badge--up   { background: rgba(5,150,105,0.12); color: #059669; }
+  .fp-lever-card .fp-kpi-badge--down { background: rgba(220,38,38,0.10); color: #dc2626; }
+
+  /* Helper / footer */
+  #fp-helper {
+    min-height: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    margin-bottom: 12px;
+  }
+
+  .fp-footer-note {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 24px;
+  }
+
+  .fp-attribution {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 32px;
+    line-height: 1.7;
+  }
+
+  /* Responsive */
+  @media (max-width: 860px) {
+    .fp-layout {
+      grid-template-columns: 1fr;
+    }
+    .fp-card {
+      background: var(--creme);
+    }
+    .fp-sidebar {
+      position: static;
+      background: var(--navy);
+      border-radius: 0 0 24px 24px;
+      color: var(--white);
+    }
+    .fp-left {
+      padding: 32px 28px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .fp-baseline-grid {
+      grid-template-columns: 1fr;
+    }
+    .fp-left {
+      padding: 24px 20px;
+    }
+    .fp-sidebar {
+      padding: 32px 24px 40px;
+    }
+  }
+
+  /* ── Segment (donut) card ─────────────────────────────────────────────── */
+  .fp-seg-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 22px 20px;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .fp-seg-card.fp-seg-visible { opacity: 1; transform: translateY(0); }
+
+  .fp-seg-donuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .fp-seg-donut-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .fp-seg-donut-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .fp-seg-donut-svg { width: 100px; height: 100px; display: block; }
+  .fp-seg-donut-bg  { fill: none; stroke: var(--border); }
+  .fp-seg-donut-arc { fill: none; stroke: var(--accent); stroke-linecap: butt; }
+  .fp-seg-donut-arc--one { stroke: #e8b49a; }
+  .fp-seg-donut-label {
+    font-size: 17px;
+    font-weight: 800;
+    fill: var(--text);
+  }
+  .fp-seg-legend {
+    display: flex;
+    justify-content: center;
+    gap: 10px 16px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .fp-seg-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 99px;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+  .fp-seg-dot--loyal { background: var(--accent); }
+  .fp-seg-dot--one   { background: #e8b49a; }
+
+  .fp-seg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .fp-seg-item {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--border);
+  }
+  .fp-seg-item-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .fp-seg-item-share {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .fp-seg-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 3px 0;
+    font-weight: 500;
+  }
+  .fp-seg-row strong { color: var(--text); font-weight: 700; }
+
+  /* Sidebar overrides — dark background */
+  .fp-sidebar .fp-seg-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  .fp-sidebar .fp-seg-card .fp-section-label { color: rgba(255,255,255,0.45); }
+  .fp-sidebar .fp-seg-donut-title { color: rgba(255,255,255,0.5); }
+  .fp-sidebar .fp-seg-donut-bg    { stroke: rgba(255,255,255,0.12); }
+  .fp-sidebar .fp-seg-donut-label { fill: #fff; }
+  .fp-sidebar .fp-seg-legend      { color: rgba(255,255,255,0.55); }
+  .fp-sidebar .fp-seg-item {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .fp-sidebar .fp-seg-item-name   { color: #fff; }
+  .fp-sidebar .fp-seg-item-share  { color: var(--accent); }
+  .fp-sidebar .fp-seg-row         { color: rgba(255,255,255,0.5); }
+  .fp-sidebar .fp-seg-row strong  { color: #fff; }
+
+  /* Burn rate callout */
+  .fp-burn-block {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .fp-burn-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .fp-burn-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .fp-burn-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .fp-sidebar .fp-burn-block { border-top-color: rgba(255,255,255,0.1); }
+  .fp-sidebar .fp-burn-label { color: rgba(255,255,255,0.45); }
+  .fp-sidebar .fp-burn-sub   { color: rgba(255,255,255,0.35); }
+
+  /* Moms toggle row */
+  .fp-moms-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: -4px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .fp-moms-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    flex: 1;
+    min-width: 180px;
+  }
+  .fp-moms-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .fp-moms-rate-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .fp-moms-rate-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .fp-moms-rate-shell {
+    display: flex;
+    align-items: center;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 80px;
+  }
+  .fp-moms-rate-shell input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    padding: 6px 4px 6px 10px;
+    width: 100%;
+    font-family: inherit;
+  }
+  .fp-moms-rate-shell .fp-unit {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding-right: 8px;
+    flex-shrink: 0;
+  }
+  .fp-moms-hint {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 4px 8px;
+    background: rgba(196,88,30,0.08);
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .fp-moms-price-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: none;
+  }
+
+  @media (max-width: 380px) {
+    .fp-seg-donuts { grid-template-columns: 1fr; }
+  }
+</style>
+<div id="fp-widget">
+  <div class="fp-card">
+
+    <div class="fp-layout">
+
+      <!-- ═══════════════════════ LEFT COLUMN ═══════════════════════ -->
+      <div class="fp-left">
+
+        <!-- WIDGET TITLE -->
+        <div class="fp-widget-title">Løftestangen</div>
+
+        <!-- BASELINE INPUTS -->
+        <div class="fp-section-header">
+          <div class="fp-section-label">DINE TAL I DAG</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="fp-reset-all-btn" id="fp-reset-baseline">Nulstil</button>
+            <button class="fp-baseline-toggle" id="fp-baseline-toggle" title="Skjul/vis">▲</button>
+          </div>
+        </div>
+        <div class="fp-baseline-summary" id="fp-baseline-summary"></div>
+        <div class="fp-baseline-collapsible" id="fp-baseline-collapsible">
+        <div class="fp-baseline-grid">
+
+          <!-- Række 1: Omsætning + Nettoresultat side om side -->
+          <div class="fp-field">
+            <label for="b-revenue">Omsætning</label>
+            <div class="fp-input-shell">
+              <span class="fp-unit">kr.</span>
+              <input type="text" id="b-revenue" inputmode="numeric" placeholder="5.000.000" value="5000000" required>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-netprofit">Nettoresultat</label>
+            <div class="fp-input-shell">
+              <span class="fp-unit">kr.</span>
+              <input type="text" id="b-netprofit" inputmode="numeric" placeholder="250.000" value="250000" required>
+            </div>
+          </div>
+
+          <!-- Række 2: Moms toggle + momssats — spans full grid width -->
+          <div class="fp-moms-row">
+            <label class="fp-moms-label" for="fp-moms-toggle">
+              <input type="checkbox" id="fp-moms-toggle">
+              Omsætning er inkl. moms
+            </label>
+            <div class="fp-moms-rate-wrap">
+              <span class="fp-moms-rate-label">Momssats</span>
+              <div class="fp-moms-rate-shell">
+                <input type="number" id="fp-moms-rate" inputmode="decimal" value="25" min="1" max="99" step="0.1" placeholder="25">
+                <span class="fp-unit">%</span>
+              </div>
+            </div>
+          </div>
+          <div id="fp-moms-hint" style="display:none;" class="fp-moms-hint"></div>
+
+          <div class="fp-field">
+            <label for="b-conv">Konverteringsrate</label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-conv" inputmode="decimal" placeholder="25" value="25" min="0" max="100" required>
+              <span class="fp-unit">%</span>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-margin">Bruttoavance</label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-margin" inputmode="decimal" placeholder="50" value="50" min="0" max="100" required>
+              <span class="fp-unit">%</span>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-tx">Transaktioner pr. år</label>
+            <div class="fp-input-shell">
+              <input type="text" id="b-tx" inputmode="numeric" placeholder="5.000" value="5000" required>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-units">Antal solgte enheder <span style="font-weight:400;opacity:0.7;">(valgfri)</span></label>
+            <div class="fp-input-shell">
+              <input type="text" id="b-units" inputmode="numeric" placeholder="7.500" value="7500">
+            </div>
+            <div class="fp-help" id="units-warning" style="display:none;color:var(--red);margin-top:6px;">⚠ Antal solgte enheder er lavere end antal transaktioner — det giver under 1 enhed pr. køb, hvilket ikke er muligt.</div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-days">Åbningsdage pr. år</label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-days" inputmode="numeric" placeholder="300" value="300" min="1" max="365">
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-loy">Andel loyale kunder <span style="font-weight:400;opacity:0.7;">(valgfri)</span></label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-loy" inputmode="decimal" placeholder="33" value="33" min="0" max="100">
+              <span class="fp-unit">%</span>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-loy-q2">Antal køb/år — loyale <span style="font-weight:400;opacity:0.7;">(valgfri)</span></label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-loy-q2" inputmode="decimal" placeholder="4" value="4" min="1" max="52" step="0.1">
+              <span class="fp-unit">køb</span>
+            </div>
+          </div>
+
+          <div class="fp-field">
+            <label for="b-loy-q3">Varighed kundeforhold <span style="font-weight:400;opacity:0.7;">(valgfri)</span></label>
+            <div class="fp-input-shell">
+              <input type="number" id="b-loy-q3" inputmode="decimal" placeholder="5" value="5" min="0.5" max="25" step="0.5">
+              <span class="fp-unit">år</span>
+            </div>
+          </div>
+
+        </div><!-- /fp-baseline-grid -->
+        </div><!-- /fp-baseline-collapsible -->
+
+        <!-- LEVER SECTION HEADER -->
+        <div class="fp-section-header">
+          <div class="fp-section-label">SYV VÆKSTLEVERS</div>
+          <button class="fp-reset-all-btn" id="fp-reset-all">Nulstil alle</button>
+        </div>
+
+        <!-- LEVER 1: Konverteringsrate -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">1</div>
+            <div class="fp-lever-title">Konverteringsrate</div>
+            <div class="fp-lever-today" id="d-conv">I dag: –</div>
+            <span class="fp-kpi-badge" id="d-conv-badge"></span>
+            <button class="fp-lever-reset" data-lever="conv">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-conv" min="0" max="50" step="0.1">
+              </div>
+              <div class="fp-num-shell">
+                <input type="number" id="in-conv" inputmode="decimal" step="0.1">
+                <span class="fp-num-unit">%</span>
+              </div>
+            </div>
+            <div class="fp-help">Konverteringsrate — en stigning giver ekstra salg fra eksisterende besøgende uden ekstra markedsføring.</div>
+          </div>
+        </div>
+
+        <!-- LEVER 2: Enheder pr. transaktion -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">2</div>
+            <div class="fp-lever-title">Enheder pr. transaktion</div>
+            <div class="fp-lever-today" id="d-upt">I dag: –</div>
+            <span class="fp-kpi-badge" id="d-upt-badge"></span>
+            <button class="fp-lever-reset" data-lever="upt">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-upt" min="0" max="15" step="0.01">
+              </div>
+              <div class="fp-num-shell">
+                <input type="number" id="in-upt" inputmode="decimal" step="0.01">
+                <span class="fp-num-unit">stk</span>
+              </div>
+            </div>
+            <div class="fp-help">Mersalg og bundling kan løfte kurvestørrelsen — selv 0,1 ekstra enhed pr. køb gør en forskel.</div>
+            <div class="fp-help" id="upt-warning" style="display:none;color:var(--red);margin-top:6px;">⚠ En transaktion indeholder altid mindst 1 enhed. En værdi under 1 er ikke realistisk.</div>
+          </div>
+        </div>
+
+        <!-- LEVER 3: Gennemsnitlig enhedspris -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">3</div>
+            <div class="fp-lever-title">Gennemsnitlig enhedspris</div>
+            <div class="fp-lever-today" id="d-price">I dag: –</div>
+            <span class="fp-kpi-badge" id="d-price-badge"></span>
+            <button class="fp-lever-reset" data-lever="price">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-price" min="0" max="5000" step="1">
+              </div>
+              <div class="fp-num-shell">
+                <span class="fp-num-unit">kr.</span>
+                <input type="number" id="in-price" inputmode="decimal" step="1">
+              </div>
+            </div>
+            <div class="fp-help">Upsell til premium-varianter eller bedre sortiment løfter prisen pr. enhed.</div>
+            <div class="fp-moms-price-hint" id="fp-moms-price-hint" style="display:none;"></div>
+            <div id="d-price-moms" style="display:none;font-size:11px;color:var(--muted);margin-top:4px;"></div>
+          </div>
+        </div>
+
+        <!-- LEVER 4: Loyalitetsprofil (wizard) -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">4</div>
+            <div class="fp-lever-title">Loyalitetsprofil</div>
+            <div class="fp-lever-today" id="d-loy">I dag: –</div>
+            <span class="fp-kpi-badge" id="d-loy-badge"></span>
+            <button class="fp-lever-reset" data-lever="loy">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <!-- Q1: Andel loyale kunder -->
+            <div class="fp-wiz-q">
+              <div class="fp-wiz-label">Andel loyale kunder (målsætning)<span class="fp-kpi-badge" id="d-loy-q1-badge"></span></div>
+              <div class="fp-slider-row">
+                <div class="fp-slider-wrap">
+                  <input type="range" class="fp-slider" id="sl-loy-q1" min="0" max="100" step="0.1">
+                </div>
+                <div class="fp-num-shell">
+                  <input type="number" id="in-loy-q1" inputmode="decimal" step="0.1">
+                  <span class="fp-num-unit">%</span>
+                </div>
+              </div>
+            </div>
+            <!-- Q2: Køb pr. år -->
+            <div class="fp-wiz-q">
+              <div class="fp-wiz-label">Køb pr. år (loyale kunder)<span class="fp-kpi-badge" id="d-loy-q2-badge"></span></div>
+              <div class="fp-slider-row">
+                <div class="fp-slider-wrap">
+                  <input type="range" class="fp-slider" id="sl-loy-q2" min="1" max="52" step="0.1">
+                </div>
+                <div class="fp-num-shell">
+                  <input type="number" id="in-loy-q2" inputmode="decimal" step="0.1">
+                  <span class="fp-num-unit">× /år</span>
+                </div>
+              </div>
+            </div>
+            <!-- Q3: Kundeforholdets længde -->
+            <div class="fp-wiz-q">
+              <div class="fp-wiz-label">Kundeforholdets længde<span class="fp-kpi-badge" id="d-loy-q3-badge"></span></div>
+              <div class="fp-slider-row">
+                <div class="fp-slider-wrap">
+                  <input type="range" class="fp-slider" id="sl-loy-q3" min="1" max="25" step="0.5">
+                </div>
+                <div class="fp-num-shell">
+                  <input type="number" id="in-loy-q3" inputmode="decimal" step="0.5">
+                  <span class="fp-num-unit">år</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEVER 5: Find nye kunder -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">5</div>
+            <div class="fp-lever-title">Find nye kunder</div>
+            <div class="fp-lever-today" id="d-new">0 ekstra kunder</div>
+            <button class="fp-lever-reset" data-lever="new">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-new" min="0" max="2000" step="10">
+              </div>
+              <div class="fp-num-shell">
+                <input type="number" id="in-new" inputmode="numeric" step="10" value="0">
+                <span class="fp-num-unit">kunder/år</span>
+              </div>
+            </div>
+            <div class="fp-help">Ekstra nye kunder pr. år — kræver besøgende at konvertere via din konverteringsrate.</div>
+            <div class="fp-wiz-q">
+              <div class="fp-wiz-label">Kundeanskaffelsesomkostning (CAC)</div>
+              <div class="fp-slider-row">
+                <div class="fp-help" style="flex:1;">Kr. pr. ny kunde — fratrækkes det samlede resultat.</div>
+                <div class="fp-num-shell">
+                  <span class="fp-num-unit">kr.</span>
+                  <input type="number" id="in-cac" inputmode="decimal" step="1" placeholder="0">
+                </div>
+              </div>
+              <div class="fp-help" id="fp-cac-breakeven" style="display:none;">
+                Break-even år 1: maks. <strong id="fp-cac-breakeven-val">–</strong> pr. kunde
+                <span style="opacity:0.6;">= AOV × avance × årsindeks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEVER 6: Bruttoavance -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">6</div>
+            <div class="fp-lever-title">Bruttoavance</div>
+            <div class="fp-lever-today" id="d-margin">I dag: –</div>
+            <span class="fp-kpi-badge" id="d-margin-badge"></span>
+            <button class="fp-lever-reset" data-lever="margin">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-margin" min="0" max="90" step="0.1">
+              </div>
+              <div class="fp-num-shell">
+                <input type="number" id="in-margin" inputmode="decimal" step="0.1">
+                <span class="fp-num-unit">%</span>
+              </div>
+            </div>
+            <div class="fp-help">En højere bruttoavance giver mere profit pr. solgt krone — selv 1–2 procentpoint kan flytte bundlinjen markant.</div>
+          </div>
+        </div>
+
+        <!-- LEVER 7: Besparelse faste omkostninger -->
+        <div class="fp-lever-card">
+          <div class="fp-lever-header">
+            <div class="fp-lever-num">7</div>
+            <div class="fp-lever-title">Faste omkostninger</div>
+            <div class="fp-lever-today" id="d-fixed">0 kr.</div>
+            <button class="fp-lever-reset" data-lever="fixed">Nulstil</button>
+          </div>
+          <div class="fp-lever-body">
+            <div class="fp-slider-row">
+              <div class="fp-slider-wrap">
+                <input type="range" class="fp-slider" id="sl-fixed" min="-1250000" max="1250000" step="5000" value="0">
+              </div>
+              <div class="fp-num-shell">
+                <span class="fp-num-unit">kr.</span>
+                <input type="text" id="in-fixed" inputmode="numeric" placeholder="0">
+              </div>
+            </div>
+            <div class="fp-help">Besparelser på faste omkostninger lægges direkte til nettoresultatet. Tast et negativt beløb for at modellere en omkostningsstigning.</div>
+          </div>
+        </div>
+
+        <!-- Helper + footer -->
+        <div id="fp-helper"></div>
+        <div class="fp-footer-note">
+          Omsætning = besøgende &times; konverteringsrate &times; enheder &times; enhedspris. Resultat beregnes med konstante faste omkostninger. Kun til inspiration.
+        </div>
+        <div class="fp-attribution">
+          En lille beregner af Steen Olesen<br>&reg; Det Mindre Bureau
+        </div>
+
+      </div><!-- /fp-left -->
+
+      <!-- ═══════════════════════ RIGHT COLUMN ═══════════════════════ -->
+      <div class="fp-sidebar">
+        <div class="fp-results-panel">
+
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button id="fp-print-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);cursor:pointer;letter-spacing:0.03em;">⬇ Gem som PDF</button>
+          </div>
+
+          <div class="fp-results-hero">
+            <div class="fp-results-eyebrow">VÆKST I NETTORESULTAT</div>
+            <div id="fp-r-pct">+0,0%</div>
+            <div class="fp-results-sub">Δ <span id="fp-r-delta-np">kr. 0</span> ekstra resultat</div>
+          </div>
+
+          <div class="fp-kpi-rows">
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label">Nettoresultat</div>
+                <span class="fp-kpi-badge" id="r-np-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-np-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-np-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label">Omsætning</div>
+                <span class="fp-kpi-badge" id="r-rev-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-rev-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-rev-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label" id="r-aov-label">Ordreværdi (AOV)</div>
+                <span class="fp-kpi-badge" id="r-aov-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-aov-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-aov-after">–</span>
+              </div>
+              <div class="fp-kpi-moms" id="r-aov-moms" style="display:none;">
+                <span class="fp-kpi-moms-label">inkl. moms:</span>
+                <span class="fp-kpi-moms-val" id="r-aov-moms-today">–</span>
+                <span>→</span>
+                <span class="fp-kpi-moms-val" id="r-aov-moms-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label" id="r-cltv1-label">CLTV år 1</div>
+                <span class="fp-kpi-badge" id="r-cltv1-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-cltv1-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-cltv1-after">–</span>
+              </div>
+              <div class="fp-kpi-moms" id="r-cltv1-moms" style="display:none;">
+                <span class="fp-kpi-moms-label">inkl. moms:</span>
+                <span class="fp-kpi-moms-val" id="r-cltv1-moms-today">–</span>
+                <span>→</span>
+                <span class="fp-kpi-moms-val" id="r-cltv1-moms-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label" id="r-cltvL-label">CLTV livstid</div>
+                <span class="fp-kpi-badge" id="r-cltvL-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-cltvL-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-cltvL-after">–</span>
+              </div>
+              <div class="fp-kpi-moms" id="r-cltvL-moms" style="display:none;">
+                <span class="fp-kpi-moms-label">inkl. moms:</span>
+                <span class="fp-kpi-moms-val" id="r-cltvL-moms-today">–</span>
+                <span>→</span>
+                <span class="fp-kpi-moms-val" id="r-cltvL-moms-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label">Transaktioner</div>
+                <span class="fp-kpi-badge" id="r-tx-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-tx-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-tx-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label">Besøgende</div>
+                <span class="fp-kpi-badge" id="r-vis-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-vis-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-vis-after">–</span>
+              </div>
+            </div>
+
+          </div><!-- /fp-kpi-rows -->
+
+          <!-- SEGMENT DONUT CARD (sidebar) -->
+          <div id="fp-seg-card" class="fp-seg-card" style="display:none;">
+            <div class="fp-section-label" style="margin-top:24px;margin-bottom:16px;">Fordeling — engang vs. loyale kunder</div>
+            <div class="fp-seg-donuts">
+              <div class="fp-seg-donut-block">
+                <div class="fp-seg-donut-title">Antal kunder</div>
+                <svg viewBox="0 0 100 100" class="fp-seg-donut-svg" aria-hidden="true">
+                  <circle cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-bg" />
+                  <circle id="fp-pie-count-one"   cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-arc fp-seg-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+                  <circle id="fp-pie-count-loyal" cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+                  <text id="fp-pie-count-label" x="50" y="56" text-anchor="middle" class="fp-seg-donut-label">–</text>
+                </svg>
+                <div class="fp-seg-legend">
+                  <span><span class="fp-seg-dot fp-seg-dot--loyal"></span>Loyale</span>
+                  <span><span class="fp-seg-dot fp-seg-dot--one"></span>Engang</span>
+                </div>
+              </div>
+              <div class="fp-seg-donut-block">
+                <div class="fp-seg-donut-title">Andel af værdi</div>
+                <svg viewBox="0 0 100 100" class="fp-seg-donut-svg" aria-hidden="true">
+                  <circle cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-bg" />
+                  <circle id="fp-pie-val-one"   cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-arc fp-seg-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+                  <circle id="fp-pie-val-loyal" cx="50" cy="50" r="38" stroke-width="13" class="fp-seg-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+                  <text id="fp-pie-val-label" x="50" y="56" text-anchor="middle" class="fp-seg-donut-label">–</text>
+                </svg>
+                <div class="fp-seg-legend">
+                  <span><span class="fp-seg-dot fp-seg-dot--loyal"></span>Loyale</span>
+                  <span><span class="fp-seg-dot fp-seg-dot--one"></span>Engang</span>
+                </div>
+              </div>
+            </div>
+            <div class="fp-seg-grid">
+              <div class="fp-seg-item">
+                <div class="fp-seg-item-name">Engangskunder</div>
+                <div id="fp-seg-one-share" class="fp-seg-item-share">–</div>
+                <div class="fp-seg-row"><span>Antal kunder</span><strong id="fp-seg-one-count">–</strong></div>
+                <div class="fp-seg-row"><span>Andel af kunder</span><strong id="fp-seg-one-pct">–</strong></div>
+                <div class="fp-seg-row"><span>Køb pr. kunde</span><strong>1</strong></div>
+                <div class="fp-seg-row"><span>LTV/kunde</span><strong id="fp-seg-one-ltv">–</strong></div>
+              </div>
+              <div class="fp-seg-item">
+                <div class="fp-seg-item-name">Loyale kunder</div>
+                <div id="fp-seg-loy-share" class="fp-seg-item-share">–</div>
+                <div class="fp-seg-row"><span>Antal kunder</span><strong id="fp-seg-loy-count">–</strong></div>
+                <div class="fp-seg-row"><span>Andel af kunder</span><strong id="fp-seg-loy-pct">–</strong></div>
+                <div class="fp-seg-row"><span>Køb pr. kunde</span><strong id="fp-seg-loy-purchases">–</strong></div>
+                <div class="fp-seg-row"><span>LTV/kunde</span><strong id="fp-seg-loy-ltv">–</strong></div>
+              </div>
+            </div>
+            <div class="fp-burn-block" id="fp-burn-block" style="display:none;">
+              <div>
+                <div class="fp-burn-label">Burn rate</div>
+                <div class="fp-burn-sub" id="fp-burn-sub">–</div>
+              </div>
+              <div class="fp-burn-value" id="fp-burn-value">–</div>
+            </div>
+          </div>
+
+        </div><!-- /fp-results-panel -->
+      </div><!-- /fp-sidebar -->
+
+    </div><!-- /fp-layout -->
+
+    <div class="fp-dogear"></div>
+  </div><!-- /fp-card -->
+</div><!-- /fp-widget -->
+
+<script>
+(function () {
+  "use strict";
+
+  // ─── DOMAIN LOCK ────────────────────────────────────────────────────────────
+  var _allowed = ["steenolesen.com","booost.dk","detmindrebureau.dk","mundtilmund.dk","mundtilmund.com","dinmening.dk","localhost",""];
+  var _host = (window.location.hostname || "").toLowerCase();
+  if (!_allowed.some(function(d){ return _host===d||(d&&_host.endsWith("."+d)); })) {
+    var _r = document.getElementById("fp-widget");
+    if (_r) _r.innerHTML = '<div style="background:#f5f0e8;border-radius:16px;padding:24px 20px;border:1px solid #ddd7cc;color:#0d1b2a;font-size:14px;font-family:system-ui,sans-serif;">Denne beregner er udviklet af Steen Olesen.</div>';
+    return;
+  }
+
+  // ─── STATE ───────────────────────────────────────────────────────────────────
+  var leversInited = false;
+  var leverAdjusted = { conv: false, upt: false, price: false, loy: false, margin: false };
+  var EPSILON = 1e-4;
+
+  // ─── FORMATTERS ─────────────────────────────────────────────────────────────
+  function fmtCurrency(v) {
+    if (!isFinite(v)) return "–";
+    return new Intl.NumberFormat("da-DK", {
+      style: "currency",
+      currency: "DKK",
+      maximumFractionDigits: Math.abs(v) < 1 ? 2 : 0
+    }).format(v);
+  }
+
+  function fmtNum(v, d) {
+    if (!isFinite(v)) return "–";
+    return new Intl.NumberFormat("da-DK", {
+      maximumFractionDigits: d !== undefined ? d : 1
+    }).format(v);
+  }
+
+  function fmtPct(v, d) {
+    return fmtNum(v, d !== undefined ? d : 1) + "%";
+  }
+
+  function num(id) {
+    var el = document.getElementById(id);
+    if (!el) return NaN;
+    var s = String(el.value).trim();
+    var raw = el.type === "text" ? s.replace(/\./g, "").replace(",", ".") : s.replace(",", ".");
+    var v = parseFloat(raw);
+    return isNaN(v) ? NaN : v;
+  }
+
+  function setupMoneyInput(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var fmt = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+    function format() {
+      var raw = parseInt(String(el.value).replace(/\./g, "").replace(",", ""), 10);
+      if (!isNaN(raw)) el.value = fmt.format(raw);
+    }
+    function unformat() {
+      var raw = parseInt(String(el.value).replace(/\./g, "").replace(",", ""), 10);
+      if (!isNaN(raw)) { el.value = String(raw); el.select(); }
+    }
+    el.addEventListener("focus", unformat);
+    el.addEventListener("blur",  format);
+    format();
+  }
+
+  function setupSignedMoneyInput(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var fmt = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+    function format() {
+      var s = String(el.value).trim();
+      var neg = s.startsWith("-");
+      var n = parseInt(s.replace(/\./g, "").replace(",", "").replace(/-/g, ""), 10);
+      if (!isNaN(n) && n !== 0) el.value = (neg ? "-" : "") + fmt.format(n);
+      else el.value = "";
+    }
+    function unformat() {
+      var s = String(el.value).trim();
+      var neg = s.startsWith("-");
+      var n = parseInt(s.replace(/\./g, "").replace(",", "").replace(/-/g, ""), 10);
+      if (!isNaN(n) && n !== 0) { el.value = (neg ? "-" : "") + n; el.select(); }
+      else el.value = "";
+    }
+    el.addEventListener("focus", unformat);
+    el.addEventListener("blur",  function() { format(); recalc(); });
+  }
+
+  function approxEq(a, b) {
+    if (!isFinite(a) || !isFinite(b)) return false;
+    return Math.abs(a - b) <= EPSILON * Math.max(1, Math.abs(a), Math.abs(b));
+  }
+
+  function setVal(id, txt) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  }
+
+  // ─── LOYALTY MATH ───────────────────────────────────────────────────────────
+  function calcMultipliers(q1, q2, q3) {
+    if (!isFinite(q1) || !isFinite(q2) || !isFinite(q3)) return null;
+    var lp = Math.max(1, q2 * q3);
+    var af = Math.min(q2, lp);
+    var ann = (1 - q1) * 1 + q1 * af;
+    var lft = (1 - q1) * 1 + q1 * lp;
+    return {
+      annual:        ann,
+      lifetime:      lft,
+      annualDisplay: Math.round(ann * 10) / 10,
+      lifetimeDisplay: Math.round(lft * 10) / 10
+    };
+  }
+
+  function computeCltv(aov, marginRatio, mults) {
+    if (!aov || !marginRatio || !mults) return null;
+    return {
+      y1profit: aov * mults.annual   * marginRatio,
+      ltProfit: aov * mults.lifetime * marginRatio
+    };
+  }
+
+  // ─── CORE IMPACT ENGINE ─────────────────────────────────────────────────────
+  function computePlannerImpact(b, t) {
+    var turnover    = b.turnover;
+    var netProfit   = b.netProfit;
+    var grossMargin = b.grossMargin;   // ratio 0-1
+    var transactions = b.transactions;
+    var convRate    = b.convRate;      // percent
+
+    // Step A
+    var baseAov      = turnover / transactions;
+    var baseVisitors = convRate > 0 ? transactions / (convRate / 100) : 0;
+
+    // Step C — conversion lift
+    var targetConv = (t.convRate !== null && t.convRate !== undefined) ? t.convRate : convRate;
+    var convLift = 0;
+    if (!approxEq(targetConv, convRate) && baseVisitors > 0) {
+      convLift = baseVisitors * ((targetConv - convRate) / 100);
+    }
+
+    // Step D — loyalty lift
+    var effectiveBaseMult = (b.baseLoyMult && b.baseLoyMult > 0) ? b.baseLoyMult : 1.0;
+    var loyLift = 0;
+    if (t.loyMult !== null && t.loyMult !== undefined && isFinite(t.loyMult)) {
+      loyLift = transactions * (t.loyMult / effectiveBaseMult - 1);
+    }
+
+    // Step E — new customer lift
+    var newInc = (t.newCustomers && t.newCustomers > 0) ? t.newCustomers : 0;
+    var newLift = 0;
+    if (newInc > 0) {
+      if (t.loyMult !== null && t.loyMult !== undefined && isFinite(t.loyMult)) {
+        newLift = newInc * t.loyMult;
+      } else {
+        newLift = newInc;
+      }
+    }
+
+    // Step G — target transactions
+    var targetTx = transactions + convLift + loyLift + newLift;
+
+    // Step H — target visitors
+    var targetVisitors = baseVisitors;
+    if (targetConv > 0 && newInc > 0) {
+      targetVisitors = baseVisitors + newInc / (targetConv / 100);
+    }
+
+    // Step I — target AOV
+    var tUpt   = (t.upt      !== null && t.upt      !== undefined && isFinite(t.upt))      ? t.upt      : b.baseUpt;
+    var tPrice = (t.unitPrice !== null && t.unitPrice !== undefined && isFinite(t.unitPrice)) ? t.unitPrice : b.baseUnitPrice;
+    var targetAov;
+    if (approxEq(tUpt, b.baseUpt) && approxEq(tPrice, b.baseUnitPrice)) {
+      targetAov = baseAov;
+    } else {
+      targetAov = tUpt * tPrice;
+    }
+
+    // Step J
+    var targetTurnover = targetTx * targetAov;
+    var tGrossMargin = (t.grossMargin !== null && t.grossMargin !== undefined && isFinite(t.grossMargin))
+                       ? t.grossMargin : grossMargin;
+    var fixedCosts = turnover * grossMargin - netProfit;
+    var cacCost    = (t.cac && t.cac > 0 && newInc > 0) ? t.cac * newInc : 0;
+    var targetNP = targetTurnover * tGrossMargin - fixedCosts - cacCost;
+    var incrNP   = targetNP - netProfit;
+    var incrRev  = targetTurnover - turnover;
+
+    // Normalise near-zero noise
+    if (Math.abs(incrRev) < EPSILON * Math.max(1, turnover))             incrRev = 0;
+    if (Math.abs(incrNP)  < EPSILON * Math.max(1, Math.abs(netProfit)))  incrNP  = 0;
+
+    // Step K
+    var profitGrowthPct;
+    if (netProfit > 0) {
+      profitGrowthPct = (incrNP / netProfit) * 100;
+    } else if (incrNP > 0) {
+      profitGrowthPct = 100;
+    } else {
+      profitGrowthPct = null;
+    }
+
+    return {
+      targetNP:        targetNP,
+      targetTurnover:  targetTurnover,
+      incrRev:         incrRev,
+      incrNP:          incrNP,
+      targetTx:        targetTx,
+      baseVisitors:    baseVisitors,
+      targetVisitors:  targetVisitors,
+      profitGrowthPct: profitGrowthPct,
+      targetAov:       targetAov,
+      baseAov:         baseAov,
+      incrTx:          targetTx - transactions,
+      tGrossMargin:    tGrossMargin
+    };
+  }
+
+  // ─── SLIDER FILL ────────────────────────────────────────────────────────────
+  function fillSlider(id) {
+    var sl = document.getElementById(id);
+    if (!sl) return;
+    var mn  = parseFloat(sl.min)   || 0;
+    var mx  = parseFloat(sl.max)   || 100;
+    var val = parseFloat(sl.value) || 0;
+    var pct = mx > mn ? ((val - mn) / (mx - mn)) * 100 : 0;
+    pct = Math.max(0, Math.min(100, pct));
+    sl.style.background = "linear-gradient(to right,#C4581E " + pct + "%,#ede8de " + pct + "%)";
+  }
+
+  function fillCenteredSlider(id) {
+    var sl = document.getElementById(id);
+    if (!sl) return;
+    var mn  = parseFloat(sl.min) || 0;
+    var mx  = parseFloat(sl.max) || 0;
+    var val = parseFloat(sl.value) || 0;
+    var range = mx - mn;
+    if (range === 0) return;
+    var midPct = Math.max(0, Math.min(100, ((0 - mn) / range) * 100));
+    var valPct = Math.max(0, Math.min(100, ((val - mn) / range) * 100));
+    var lo = Math.min(midPct, valPct);
+    var hi = Math.max(midPct, valPct);
+    sl.style.background = "linear-gradient(to right,#ede8de " + lo + "%,#C4581E " + lo + "%,#C4581E " + hi + "%,#ede8de " + hi + "%)";
+  }
+
+  // ─── SLIDER ↔ INPUT SYNC ────────────────────────────────────────────────────
+  function linkSlider(slId, inId, cb) {
+    var sl  = document.getElementById(slId);
+    var inp = document.getElementById(inId);
+    if (!sl || !inp) return;
+
+    sl.addEventListener("input", function () {
+      inp.value = parseFloat(sl.value);
+      fillSlider(slId);
+      cb();
+    });
+    inp.addEventListener("input", function () {
+      var v = parseFloat(String(inp.value).replace(",", "."));
+      if (isFinite(v)) { sl.value = v; fillSlider(slId); }
+      cb();
+    });
+    inp.addEventListener("blur", cb);
+  }
+
+  // ─── HELPER: set slider + input together ────────────────────────────────────
+  function setField(slId, inId, value) {
+    var sl  = document.getElementById(slId);
+    var inp = document.getElementById(inId);
+    if (sl)  sl.value  = value;
+    if (inp) inp.value = value;
+    if (slId) fillSlider(slId);
+  }
+
+  // ─── INIT LEVERS (once, when first valid baseline) ──────────────────────────
+  function initLevers(bConv, bUpt, bPrice, bMargin) {
+    var slConv = document.getElementById("sl-conv");
+    if (slConv) slConv.max = Math.max(50, Math.ceil(bConv * 2));
+    setField("sl-conv",    "in-conv",    bConv);
+
+    setField("sl-upt",     "in-upt",     bUpt);
+
+    var slPr = document.getElementById("sl-price");
+    if (slPr) slPr.max = Math.max(5000, Math.ceil(bPrice * 3));
+    setField("sl-price",   "in-price",   Math.round(bPrice * 100) / 100);
+
+    var bLoyPct = num("b-loy");
+    var loyDefault = isFinite(bLoyPct) && bLoyPct >= 0 ? bLoyPct : 35;
+    var bLoyQ2 = num("b-loy-q2"); var loyQ2Default = isFinite(bLoyQ2) && bLoyQ2 >= 1 ? bLoyQ2 : 4;
+    var bLoyQ3 = num("b-loy-q3"); var loyQ3Default = isFinite(bLoyQ3) && bLoyQ3 >= 0.5 ? bLoyQ3 : 5;
+    setField("sl-loy-q1",  "in-loy-q1",  loyDefault);
+    setField("sl-loy-q2",  "in-loy-q2",  loyQ2Default);
+    setField("sl-loy-q3",  "in-loy-q3",  loyQ3Default);
+
+    setField("sl-margin",  "in-margin",  bMargin);
+
+    setField("sl-new",     "in-new",     0);
+
+    leversInited = true;
+  }
+
+  // ─── SYNC LEVER TO BASELINE (when baseline changes and lever not yet adjusted) ─
+  function syncLeverToBaseline(lever) {
+    if (!leversInited) return;
+    var revenue     = num("b-revenue");
+    var txv         = num("b-tx");
+    var bUnitsRaw   = num("b-units");
+    var bUpt        = (isFinite(bUnitsRaw) && bUnitsRaw > 0 && isFinite(txv) && txv > 0) ? bUnitsRaw / txv : 1;
+    var baseAov     = (isFinite(revenue) && isFinite(txv) && txv > 0) ? revenue / txv : 0;
+    var bPrice      = bUpt > 0 ? baseAov / bUpt : baseAov;
+
+    if (lever === "conv" && !leverAdjusted.conv) {
+      var c = num("b-conv");
+      if (isFinite(c)) { setField("sl-conv", "in-conv", c); fillSlider("sl-conv"); }
+    }
+    if (lever === "upt" && !leverAdjusted.upt) {
+      setField("sl-upt", "in-upt", bUpt); fillSlider("sl-upt");
+    }
+    if (lever === "price" && !leverAdjusted.price) {
+      if (bPrice > 0) { setField("sl-price", "in-price", Math.round(bPrice * 100) / 100); fillSlider("sl-price"); }
+    }
+    if (lever === "loy" && !leverAdjusted.loy) {
+      var bLoy = num("b-loy");
+      var loyVal = isFinite(bLoy) && bLoy >= 0 ? bLoy : 35;
+      setField("sl-loy-q1", "in-loy-q1", loyVal); fillSlider("sl-loy-q1");
+      var bQ2s = num("b-loy-q2"); if (isFinite(bQ2s) && bQ2s >= 1) { setField("sl-loy-q2", "in-loy-q2", bQ2s); fillSlider("sl-loy-q2"); }
+      var bQ3s = num("b-loy-q3"); if (isFinite(bQ3s) && bQ3s >= 0.5) { setField("sl-loy-q3", "in-loy-q3", bQ3s); fillSlider("sl-loy-q3"); }
+    }
+    if (lever === "margin" && !leverAdjusted.margin) {
+      var m = num("b-margin");
+      if (isFinite(m)) { setField("sl-margin", "in-margin", m); fillSlider("sl-margin"); }
+    }
+  }
+
+  // ─── RESET HELPERS ──────────────────────────────────────────────────────────
+  function getBaseline() {
+    var turnover     = num("b-revenue");
+    var transactions = num("b-tx");
+    var bUnitsRaw    = num("b-units");
+    var bUpt         = (isFinite(bUnitsRaw) && bUnitsRaw > 0 && isFinite(transactions) && transactions > 0) ? bUnitsRaw / transactions : 1;
+    var baseAov      = (isFinite(turnover) && isFinite(transactions) && transactions > 0)
+                       ? turnover / transactions : 0;
+    var bPrice       = bUpt > 0 ? baseAov / bUpt : baseAov;
+    var bConv        = num("b-conv");
+    return { bConv: bConv, bUpt: bUpt, bPrice: bPrice };
+  }
+
+  function resetLever(lever) {
+    var bv = getBaseline();
+    if (lever === "conv") {
+      var c = isFinite(bv.bConv) ? bv.bConv : 15;
+      setField("sl-conv", "in-conv", c);
+      leverAdjusted.conv = false;
+
+    } else if (lever === "upt") {
+      var u = isFinite(bv.bUpt) ? bv.bUpt : 1;
+      setField("sl-upt", "in-upt", u);
+      leverAdjusted.upt = false;
+
+    } else if (lever === "price") {
+      var p = isFinite(bv.bPrice) && bv.bPrice > 0 ? Math.round(bv.bPrice * 100) / 100 : 100;
+      setField("sl-price", "in-price", p);
+      leverAdjusted.price = false;
+
+    } else if (lever === "loy") {
+      var bLoyPct = num("b-loy");
+      var loyResetVal = isFinite(bLoyPct) && bLoyPct >= 0 ? bLoyPct : 35;
+      var bQ2r = num("b-loy-q2"); var q2Reset = isFinite(bQ2r) && bQ2r >= 1 ? bQ2r : 4;
+      var bQ3r = num("b-loy-q3"); var q3Reset = isFinite(bQ3r) && bQ3r >= 0.5 ? bQ3r : 5;
+      setField("sl-loy-q1", "in-loy-q1", loyResetVal);
+      setField("sl-loy-q2", "in-loy-q2", q2Reset);
+      setField("sl-loy-q3", "in-loy-q3", q3Reset);
+      leverAdjusted.loy = false;
+
+    } else if (lever === "new") {
+      setField("sl-new", "in-new", 0);
+      var cacEl = document.getElementById("in-cac");
+      if (cacEl) cacEl.value = "";
+
+    } else if (lever === "margin") {
+      var mg = num("b-margin");
+      var mgVal = isFinite(mg) ? mg : 38;
+      setField("sl-margin", "in-margin", mgVal);
+      leverAdjusted.margin = false;
+
+    } else if (lever === "fixed") {
+      var fixedEl = document.getElementById("in-fixed");
+      if (fixedEl) fixedEl.value = "";
+    }
+  }
+
+  function resetAll() {
+    ["conv","upt","price","loy","new","margin"].forEach(resetLever);
+    leverAdjusted.conv = false;
+    leverAdjusted.upt = false;
+    leverAdjusted.price = false;
+    leverAdjusted.loy = false;
+    leverAdjusted.margin = false;
+  }
+
+  // ─── KPI ROW UPDATER ────────────────────────────────────────────────────────
+  function updateKpiRow(prefix, todayVal, afterVal, todayFmt, afterFmt, showBadge) {
+    var todayEl = document.getElementById(prefix + "-today");
+    var afterEl = document.getElementById(prefix + "-after");
+    var badgeEl = document.getElementById(prefix + "-badge");
+
+    if (todayEl) todayEl.textContent = todayFmt;
+
+    if (afterEl) {
+      afterEl.textContent = afterFmt;
+      afterEl.classList.remove("fp-kpi-after--up", "fp-kpi-after--down");
+      if (isFinite(afterVal) && isFinite(todayVal)) {
+        if (afterVal > todayVal + EPSILON)       afterEl.classList.add("fp-kpi-after--up");
+        else if (afterVal < todayVal - EPSILON)  afterEl.classList.add("fp-kpi-after--down");
+      }
+    }
+
+    if (badgeEl) {
+      badgeEl.classList.remove("fp-kpi-badge--up", "fp-kpi-badge--down");
+      badgeEl.textContent = "";
+      if (showBadge && isFinite(afterVal) && isFinite(todayVal) && Math.abs(todayVal) > EPSILON) {
+        var changePct = ((afterVal - todayVal) / Math.abs(todayVal)) * 100;
+        if (Math.abs(changePct) >= 0.05) {
+          var sign = changePct >= 0 ? "+" : "";
+          badgeEl.textContent = sign + fmtNum(changePct, 1) + "%";
+          badgeEl.classList.add(changePct > 0 ? "fp-kpi-badge--up" : "fp-kpi-badge--down");
+        }
+      }
+    }
+  }
+
+  // ─── MAIN RECALC ────────────────────────────────────────────────────────────
+  function recalc() {
+    var helperEl = document.getElementById("fp-helper");
+    if (helperEl) helperEl.textContent = "";
+
+    // Moms toggle
+    var momsToggleEl = document.getElementById("fp-moms-toggle");
+    var momsChecked  = momsToggleEl ? momsToggleEl.checked : false;
+    var momsRateRaw  = parseFloat((document.getElementById("fp-moms-rate") || {}).value);
+    var momsRate     = (isFinite(momsRateRaw) && momsRateRaw > 0 && momsRateRaw < 100) ? momsRateRaw : 25;
+    var momsDiv      = momsChecked ? (1 + momsRate / 100) : 1;
+
+    // Read baseline
+    var turnover       = num("b-revenue") / momsDiv;
+    var netProfit      = num("b-netprofit");
+    var grossMarginPct = num("b-margin");
+    var transactions   = num("b-tx");
+    var bConvPct       = num("b-conv");
+    var bLoyPct        = num("b-loy");
+
+    // Validate required fields
+    var missing = [];
+    if (!isFinite(turnover)      || turnover <= 0)     missing.push("Omsætning");
+    if (!isFinite(netProfit))                           missing.push("Nettoresultat");
+    if (!isFinite(grossMarginPct))                      missing.push("Bruttoavance");
+    if (!isFinite(transactions)  || transactions < 1)  missing.push("Transaktioner");
+    if (!isFinite(bConvPct)      || bConvPct <= 0)     missing.push("Konverteringsrate");
+
+    if (missing.length > 0) {
+      if (helperEl) helperEl.textContent = "Udfyld venligst: " + missing.join(", ");
+      return;
+    }
+
+    var grossMargin = grossMarginPct / 100;
+
+    // Derived baseline values
+    var bUnitsRaw = num("b-units");
+    var bUpt      = (isFinite(bUnitsRaw) && bUnitsRaw > 0 && isFinite(transactions) && transactions > 0) ? bUnitsRaw / transactions : 1;
+    var baseAov = turnover / transactions;
+    var bPrice  = bUpt > 0 ? baseAov / bUpt : baseAov;
+
+    // Show moms hint (ex-moms revenue) below the moms row
+    var momsHintEl = document.getElementById("fp-moms-hint");
+    if (momsHintEl) {
+      if (momsChecked && isFinite(turnover) && turnover > 0) {
+        momsHintEl.textContent = "= " + fmtCurrency(Math.round(turnover)) + " ekskl. moms";
+        momsHintEl.style.display = "inline-block";
+      } else {
+        momsHintEl.style.display = "none";
+      }
+    }
+
+    // Init levers once when baseline first becomes valid
+    if (!leversInited) {
+      initLevers(bConvPct, bUpt, bPrice, grossMarginPct);
+    }
+
+    // Update slider max for price if baseline changes significantly
+    // Also sync slider to new bPrice if lever hasn't been manually adjusted
+    if (leversInited) {
+      var slPr = document.getElementById("sl-price");
+      var inPr = document.getElementById("in-price");
+      if (slPr && parseFloat(slPr.max) < bPrice * 1.5) {
+        slPr.max = Math.ceil(bPrice * 3);
+      }
+      if (!leverAdjusted.price) {
+        var syncedBPrice = Math.round(bPrice * 100) / 100;
+        if (slPr) slPr.value = syncedBPrice;
+        if (inPr) inPr.value = syncedBPrice;
+      }
+    }
+
+    // Today labels
+    setVal("d-conv",  "I dag: " + fmtPct(bConvPct, 1));
+    setVal("d-upt",   "I dag: " + fmtNum(bUpt, 2) + " stk");
+    setVal("d-price", "I dag: " + fmtCurrency(bPrice));
+    setVal("d-new",   "0 ekstra kunder");
+
+    // Loyalty wizard values
+    var tLq1Raw = num("in-loy-q1");
+    var tLq2Raw = num("in-loy-q2");
+    var tLq3Raw = num("in-loy-q3");
+    var tLq1 = isFinite(tLq1Raw) ? tLq1Raw / 100 : 0.35;
+    var tLq2 = isFinite(tLq2Raw) ? tLq2Raw : 4;
+    var tLq3 = isFinite(tLq3Raw) ? tLq3Raw : 5;
+
+    // Base loyalty multipliers (from b-loy input, fallback 35%)
+    var bLoyShare  = isFinite(bLoyPct) ? bLoyPct / 100 : 0.35;
+    var bBaseQ2    = num("b-loy-q2"); var bQ2eff = isFinite(bBaseQ2) && bBaseQ2 >= 1 ? bBaseQ2 : 4;
+    var bBaseQ3    = num("b-loy-q3"); var bQ3eff = isFinite(bBaseQ3) && bBaseQ3 >= 0.5 ? bBaseQ3 : 5;
+    var baseMults  = calcMultipliers(bLoyShare, bQ2eff, bQ3eff);
+    var baseLoyMult = baseMults ? baseMults.annual : 1.0;
+
+    // Target loyalty multipliers (from wizard)
+    var targMults   = calcMultipliers(tLq1, tLq2, tLq3);
+    var targLoyMult = targMults ? targMults.annual : null;
+
+    // Update loyalty display
+    setVal("d-loy", "I dag: " + (baseMults ? fmtNum(baseLoyMult, 2) : "–") + "×");
+    setVal("d-margin", "I dag: " + fmtPct(grossMarginPct, 1));
+
+    // Read lever targets (null = not changed / use baseline)
+    var tConvRaw  = num("in-conv");
+    var tUptRaw   = num("in-upt");
+    // Only use price lever value if user has manually adjusted it —
+    // otherwise baseline sync may lag behind bPrice (e.g. when moms rate changes)
+    // Pris-leveren arbejder altid i ex-moms termer — "I dag"-labelen viser ex-moms,
+    // så brugeren taster naturligt ex-moms. Inkl.-moms-hint vises separat.
+    var tPriceRaw = leverAdjusted.price ? num("in-price") : NaN;
+    var tNewRaw   = num("in-new");
+
+    // Show/hide price moms hint
+    var momsPriceHint = document.getElementById("fp-moms-price-hint");
+    if (momsPriceHint) momsPriceHint.style.display = momsChecked ? "block" : "none";
+
+    var uptWarn = document.getElementById("upt-warning");
+    if (uptWarn) uptWarn.style.display = (isFinite(tUptRaw) && tUptRaw < 1) ? "block" : "none";
+
+    var unitsWarn = document.getElementById("units-warning");
+    if (unitsWarn) {
+      var wUnits = num("b-units");
+      var wTx    = num("b-tx");
+      unitsWarn.style.display = (isFinite(wUnits) && wUnits > 0 && isFinite(wTx) && wTx > 0 && wUnits < wTx) ? "block" : "none";
+    }
+
+    var tConv  = isFinite(tConvRaw)  ? tConvRaw  : null;
+    var tUpt   = isFinite(tUptRaw)   ? tUptRaw   : null;
+    var tPrice = isFinite(tPriceRaw) ? tPriceRaw : null;
+    var tNew   = isFinite(tNewRaw)   ? Math.max(0, tNewRaw) : 0;
+    var tMarginRaw = num("in-margin");
+    var tMargin    = isFinite(tMarginRaw) ? tMarginRaw / 100 : null;
+    var tCacRaw    = num("in-cac");
+    var tCac       = isFinite(tCacRaw) && tCacRaw > 0 ? tCacRaw : 0;
+
+    // Build impact
+    var bObj = {
+      turnover:      turnover,
+      netProfit:     netProfit,
+      grossMargin:   grossMargin,
+      transactions:  transactions,
+      convRate:      bConvPct,
+      baseUpt:       bUpt,
+      baseUnitPrice: bPrice,
+      baseLoyMult:   baseLoyMult
+    };
+    var tObj = {
+      convRate:     tConv,
+      upt:          tUpt,
+      unitPrice:    tPrice,
+      newCustomers: tNew,
+      loyMult:      targLoyMult,
+      grossMargin:  tMargin,
+      cac:          tCac
+    };
+
+    var result = computePlannerImpact(bObj, tObj);
+
+    // Fixed cost saving (purely additive to net profit)
+    var fixedSavingRaw = num("in-fixed");
+    var fixedSaving = isFinite(fixedSavingRaw) ? fixedSavingRaw : 0;
+    if (fixedSaving !== 0) {
+      result.targetNP += fixedSaving;
+      result.incrNP   += fixedSaving;
+      if (netProfit > 0) {
+        result.profitGrowthPct = (result.incrNP / netProfit) * 100;
+      } else {
+        result.profitGrowthPct = result.incrNP > 0 ? 100 : null;
+      }
+    }
+    setVal("d-fixed", fixedSaving !== 0 ? (fixedSaving > 0 ? "+" : "") + fmtCurrency(fixedSaving) : "0 kr.");
+
+    // Keep slider range at ±25% of turnover
+    var slFixed = document.getElementById("sl-fixed");
+    if (slFixed && isFinite(turnover) && turnover > 0) {
+      var fixedLim = Math.round(turnover * 0.25 / 5000) * 5000;
+      slFixed.min = -fixedLim;
+      slFixed.max =  fixedLim;
+      var slVal = Math.max(-fixedLim, Math.min(fixedLim, fixedSaving));
+      slFixed.value = slVal;
+    }
+    fillCenteredSlider("sl-fixed");
+
+    // CLTV
+    var baseCltv = computeCltv(baseAov,          grossMargin, baseMults);
+    var targCltv = computeCltv(result.targetAov, result.tGrossMargin, targMults);
+
+    // Break-even CAC år 1
+    var beBlock = document.getElementById("fp-cac-breakeven");
+    var beVal   = document.getElementById("fp-cac-breakeven-val");
+    if (beBlock && beVal) {
+      var beY1 = targCltv ? targCltv.y1profit : (baseCltv ? baseCltv.y1profit : null);
+      if (beY1 && isFinite(beY1) && beY1 > 0) {
+        beVal.textContent = fmtCurrency(Math.round(beY1));
+        beBlock.style.display = "block";
+      } else {
+        beBlock.style.display = "none";
+      }
+    }
+
+    // ── Update results panel ─────────────────────────────────────────────────
+
+    var pctEl      = document.getElementById("fp-r-pct");
+    var eyebrowEl  = document.querySelector(".fp-results-eyebrow");
+    var subEl      = document.querySelector(".fp-results-sub");
+    var deltaNpEl  = document.getElementById("fp-r-delta-np");
+
+    var krMode = !isFinite(netProfit) || netProfit <= 0;
+    var deltaSign = result.incrNP >= 0 ? "+" : "";
+    var deltaFmt  = deltaSign + fmtCurrency(result.incrNP);
+
+    if (krMode) {
+      // Fremhæv kr.-delta som stornummer
+      if (pctEl) {
+        pctEl.textContent = deltaFmt;
+        pctEl.classList.add("fp-kr-mode");
+        pctEl.classList.toggle("fp-neg", result.incrNP < 0);
+      }
+      if (eyebrowEl) eyebrowEl.textContent = "EKSTRA NETTORESULTAT";
+      if (subEl)     subEl.innerHTML = "% ikke vist — udgangspunkt er 0 eller negativt";
+      if (deltaNpEl) deltaNpEl.textContent = "";
+    } else {
+      // Normal %-mode
+      if (pctEl) {
+        pctEl.classList.remove("fp-kr-mode");
+        if (result.profitGrowthPct !== null && isFinite(result.profitGrowthPct)) {
+          var sign = result.profitGrowthPct >= 0 ? "+" : "";
+          pctEl.textContent = sign + fmtPct(result.profitGrowthPct, 1);
+          pctEl.classList.toggle("fp-neg", result.profitGrowthPct < 0);
+        } else {
+          pctEl.textContent = "–";
+          pctEl.classList.remove("fp-neg");
+        }
+      }
+      if (eyebrowEl) eyebrowEl.textContent = "VÆKST I NETTORESULTAT";
+      if (subEl)     subEl.innerHTML = "Δ <span id=\"fp-r-delta-np\">" + deltaFmt + "</span> ekstra resultat";
+      if (deltaNpEl) deltaNpEl.textContent = deltaFmt;
+    }
+
+    updateKpiRow("r-np",
+      netProfit,        result.targetNP,
+      fmtCurrency(netProfit),        fmtCurrency(result.targetNP),
+      true
+    );
+    updateKpiRow("r-rev",
+      turnover,         result.targetTurnover,
+      fmtCurrency(turnover),         fmtCurrency(result.targetTurnover),
+      true
+    );
+    updateKpiRow("r-aov",
+      result.baseAov,   result.targetAov,
+      fmtCurrency(result.baseAov),   fmtCurrency(result.targetAov),
+      true
+    );
+    updateKpiRow("r-cltv1",
+      baseCltv ? baseCltv.y1profit : NaN,
+      targCltv ? targCltv.y1profit : NaN,
+      baseCltv ? fmtCurrency(baseCltv.y1profit) : "–",
+      targCltv ? fmtCurrency(targCltv.y1profit) : "–",
+      true
+    );
+    updateKpiRow("r-cltvL",
+      baseCltv ? baseCltv.ltProfit : NaN,
+      targCltv ? targCltv.ltProfit : NaN,
+      baseCltv ? fmtCurrency(baseCltv.ltProfit) : "–",
+      targCltv ? fmtCurrency(targCltv.ltProfit) : "–",
+      true
+    );
+    updateKpiRow("r-tx",
+      transactions,     result.targetTx,
+      fmtNum(transactions, 0),       fmtNum(result.targetTx, 0),
+      true
+    );
+    updateKpiRow("r-vis",
+      result.baseVisitors,  result.targetVisitors,
+      fmtNum(result.baseVisitors, 0), fmtNum(result.targetVisitors, 0),
+      true
+    );
+
+    // Moms secondary hints (inkl. moms værdier — altid synlige)
+    (function() {
+      // Brug altid momssats-feltet til at beregne inkl.-værdier
+      var displayDiv = 1 + momsRate / 100;
+
+      function setMomsHint(rowId, todayExMoms, afterExMoms) {
+        var row   = document.getElementById(rowId);
+        var today = document.getElementById(rowId + "-today");
+        var after = document.getElementById(rowId + "-after");
+        if (!row) return;
+        if (isFinite(todayExMoms)) {
+          if (today) today.textContent = fmtCurrency(Math.round(todayExMoms * displayDiv));
+          if (after) after.textContent = isFinite(afterExMoms) ? fmtCurrency(Math.round(afterExMoms * displayDiv)) : "–";
+          row.style.display = "flex";
+        } else {
+          row.style.display = "none";
+        }
+      }
+      setMomsHint("r-aov-moms",   result.baseAov,                     result.targetAov);
+      setMomsHint("r-cltv1-moms", baseCltv ? baseCltv.y1profit : NaN, targCltv ? targCltv.y1profit : NaN);
+      setMomsHint("r-cltvL-moms", baseCltv ? baseCltv.ltProfit : NaN, targCltv ? targCltv.ltProfit : NaN);
+
+      // Lever 3 enhedspris inkl.-hint
+      var dPriceMoms = document.getElementById("d-price-moms");
+      if (dPriceMoms && isFinite(bPrice)) {
+        var inclPrice = Math.round(bPrice * displayDiv);
+        var inclStr   = "Inkl. moms: " + fmtCurrency(inclPrice);
+        if (leverAdjusted.price && isFinite(tPrice)) {
+          inclStr += "  →  " + fmtCurrency(Math.round(tPrice * displayDiv));
+        }
+        dPriceMoms.textContent = inclStr;
+        dPriceMoms.style.display = "block";
+      }
+    })();
+
+    // Lever 2 + 3 delta badges
+    (function() {
+      function leverBadge(badgeId, baseVal, targetVal) {
+        var el = document.getElementById(badgeId);
+        if (!el) return;
+        el.classList.remove("fp-kpi-badge--up", "fp-kpi-badge--down");
+        el.textContent = "";
+        if (isFinite(baseVal) && isFinite(targetVal) && Math.abs(baseVal) > EPSILON) {
+          var pct = ((targetVal - baseVal) / Math.abs(baseVal)) * 100;
+          if (Math.abs(pct) >= 0.05) {
+            el.textContent = (pct >= 0 ? "+" : "") + fmtNum(pct, 1) + "%";
+            el.classList.add(pct > 0 ? "fp-kpi-badge--up" : "fp-kpi-badge--down");
+          }
+        }
+      }
+      var effUpt    = (tUpt    !== null && isFinite(tUpt))    ? tUpt    : bUpt;
+      var effPrice  = (tPrice  !== null && isFinite(tPrice))  ? tPrice  : bPrice;
+      var effConv   = (tConvRaw !== null && isFinite(tConvRaw)) ? tConvRaw : bConvPct;
+      var effMargin = (tMarginRaw !== null && isFinite(tMarginRaw)) ? tMarginRaw : grossMarginPct;
+      var effLoy    = (targLoyMult !== null && isFinite(targLoyMult)) ? targLoyMult : baseLoyMult;
+      leverBadge("d-upt-badge",    bUpt,        effUpt);
+      leverBadge("d-price-badge",  bPrice,      effPrice);
+      leverBadge("d-conv-badge",   bConvPct,    effConv);
+      leverBadge("d-margin-badge", grossMarginPct, effMargin);
+      leverBadge("d-loy-badge",    baseLoyMult, effLoy);
+      // Individuelle Q-badges: sammenlign med baseline-felterne
+      var bQ1base = isFinite(bLoyPct) ? bLoyPct : 35;
+      leverBadge("d-loy-q1-badge", bQ1base, tLq1 * 100);
+      leverBadge("d-loy-q2-badge", bQ2eff,  tLq2);
+      leverBadge("d-loy-q3-badge", bQ3eff,  tLq3);
+    })();
+
+    // Fill all slider tracks
+    ["sl-conv","sl-upt","sl-price","sl-loy-q1","sl-loy-q2","sl-loy-q3","sl-new","sl-margin"].forEach(fillSlider);
+
+    // ── Segment donut card ───────────────────────────────────────────────────
+    var segCard = document.getElementById("fp-seg-card");
+    if (segCard && baseAov > 0) {
+      var loyShare  = tLq1;                          // live lever Q1
+      var oneShare  = 1 - loyShare;
+      var loyPurchases = Math.round(tLq2 * tLq3);   // live Q2 × Q3
+
+      var dispAov = (isFinite(result.targetAov) && result.targetAov > 0) ? result.targetAov : baseAov;
+      var oneLtv  = dispAov;
+      var loyLtv  = dispAov * loyPurchases;
+
+      var oneVal  = oneShare * oneLtv;
+      var loyVal  = loyShare * loyLtv;
+      var totVal  = oneVal + loyVal;
+      var loyValShare = totVal > 0 ? loyVal / totVal : 0;
+      var oneValShare = 1 - loyValShare;
+
+      var CIRC = 2 * Math.PI * 38; // ≈ 238.76
+
+      function drawDonut(loyalId, oneId, labelId, loyPct) {
+        var loyArc = document.getElementById(loyalId);
+        var oneArc = document.getElementById(oneId);
+        var lbl    = document.getElementById(labelId);
+        if (!loyArc || !oneArc || !lbl) return;
+        var lp = Math.max(0.001, Math.min(0.999, loyPct));
+        var loyDash = lp * CIRC;
+        var oneDash = (1 - lp) * CIRC;
+        loyArc.setAttribute("stroke-dasharray", loyDash + " " + CIRC);
+        oneArc.setAttribute("stroke-dasharray", oneDash + " " + CIRC);
+        oneArc.setAttribute("stroke-dashoffset", -loyDash);
+        lbl.textContent = Math.round(lp * 100) + "%";
+      }
+
+      drawDonut("fp-pie-count-loyal", "fp-pie-count-one", "fp-pie-count-label", loyShare);
+      drawDonut("fp-pie-val-loyal",   "fp-pie-val-one",   "fp-pie-val-label",   loyValShare);
+
+      var fmtK = function(v) { return fmtCurrency(Math.round(v)); };
+      var fmtPct0 = function(v) { return fmtNum(v * 100, 0) + "%"; };
+
+      // Antal unikke kunder: total = tx / (1 + loyShare*(Q2-1))
+      // Brug targetTx så nye kunder (lever 5) afspejles i optællingen
+      var txForCust = (isFinite(result.targetTx) && result.targetTx > 0) ? result.targetTx : transactions;
+      var totalCust = (txForCust > 0 && tLq2 > 0)
+        ? txForCust / (1 + loyShare * (tLq2 - 1))
+        : 0;
+      var loyalCustN   = Math.round(totalCust * loyShare);
+      var oneTimeCustN = Math.round(totalCust * (1 - loyShare));
+
+      setVal("fp-seg-one-share",    fmtNum(oneValShare * 100, 1) + "% af værdien");
+      setVal("fp-seg-loy-share",    fmtNum(loyValShare * 100, 1) + "% af værdien");
+      setVal("fp-seg-one-count",    totalCust > 0 ? fmtNum(oneTimeCustN, 0) : "–");
+      setVal("fp-seg-loy-count",    totalCust > 0 ? fmtNum(loyalCustN, 0) : "–");
+      setVal("fp-seg-one-pct",      fmtPct0(oneShare));
+      setVal("fp-seg-loy-pct",      fmtPct0(loyShare));
+      setVal("fp-seg-loy-purchases",String(loyPurchases));
+      setVal("fp-seg-one-ltv",      fmtK(oneLtv));
+      setVal("fp-seg-loy-ltv",      fmtK(loyLtv));
+
+      // Burn rate: engangskunder (100% churn) + loyale × (1/varighed)
+      var burnBlock = document.getElementById("fp-burn-block");
+      var burnVal   = document.getElementById("fp-burn-value");
+      var burnSub   = document.getElementById("fp-burn-sub");
+      if (burnBlock && totalCust > 0 && tLq3 > 0) {
+        var loyChurnN  = loyalCustN / tLq3;
+        var burnRate   = Math.round(oneTimeCustN + loyChurnN);
+        var burnPct    = Math.round((burnRate / totalCust) * 100);
+        burnVal.textContent = fmtNum(burnRate, 0) + " kunder/år";
+        burnSub.textContent = fmtNum(oneTimeCustN, 0) + " engang + " +
+          fmtNum(Math.round(loyChurnN), 0) + " loyale der forlader (" +
+          fmtNum(Math.round(1 / tLq3 * 100), 0) + "%/år) = " + burnPct + "% af basen";
+        burnBlock.style.display = "flex";
+      } else if (burnBlock) {
+        burnBlock.style.display = "none";
+      }
+
+      // Vis kun kortet når der faktisk er en meningsfuld fordeling
+      var hasBothSegments = loyShare > 0.005 && loyShare < 0.995;
+      if (hasBothSegments) {
+        if (segCard.style.display === "none") {
+          segCard.style.display = "block";
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              segCard.classList.add("fp-seg-visible");
+            });
+          });
+        }
+      } else {
+        segCard.style.display = "none";
+        segCard.classList.remove("fp-seg-visible");
+      }
+    }
+  }
+
+  // ─── PRINT REPORT ───────────────────────────────────────────────────────────
+  function printReport() {
+    function txt(id) { var e = document.getElementById(id); return e ? e.textContent.trim() : "–"; }
+    function val(id) { var e = document.getElementById(id); return e ? e.value.trim() : ""; }
+
+    var date = new Date().toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" });
+
+    function donutSvg(loyId, oneId, lblId) {
+      var loy = document.getElementById(loyId);
+      var one = document.getElementById(oneId);
+      var lbl = document.getElementById(lblId);
+      if (!loy) return "";
+      return '<svg viewBox="0 0 100 100" width="88" height="88">' +
+        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#e5dfd5"/>' +
+        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#e8b49a"' +
+          ' stroke-dasharray="' + (one ? one.getAttribute("stroke-dasharray") : "0 239") + '"' +
+          ' stroke-dashoffset="' + (one ? (one.getAttribute("stroke-dashoffset") || 0) : 0) + '"' +
+          ' transform="rotate(-90 50 50)"/>' +
+        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#C4581E"' +
+          ' stroke-dasharray="' + loy.getAttribute("stroke-dasharray") + '"' +
+          ' transform="rotate(-90 50 50)"/>' +
+        '<text x="50" y="56" text-anchor="middle" font-size="16" font-weight="800" fill="#0d1b2a">' +
+          (lbl ? lbl.textContent : "–") + '</text>' +
+        '</svg>';
+    }
+
+    var segVisible = document.getElementById("fp-seg-card") &&
+                     document.getElementById("fp-seg-card").style.display !== "none";
+
+    var kpiRows = [
+      ["Nettoresultat",    txt("r-np-today"),    txt("r-np-after"),    txt("r-np-badge")],
+      ["Omsætning",        txt("r-rev-today"),   txt("r-rev-after"),   txt("r-rev-badge")],
+      ["Ordreværdi (AOV)", txt("r-aov-today"),   txt("r-aov-after"),   ""],
+      ["CLTV år 1",        txt("r-cltv1-today"), txt("r-cltv1-after"), ""],
+      ["CLTV livstid",     txt("r-cltvL-today"), txt("r-cltvL-after"), ""],
+      ["Transaktioner",    txt("r-tx-today"),    txt("r-tx-after"),    txt("r-tx-badge")],
+      ["Besøgende",        txt("r-vis-today"),   txt("r-vis-after"),   ""]
+    ];
+
+    var printMomsEl   = document.getElementById("fp-moms-toggle");
+    var printMoms     = printMomsEl && printMomsEl.checked;
+    var printMomsRate = parseFloat((document.getElementById("fp-moms-rate") || {}).value) || 25;
+    var baselineRows = [
+      ["Omsætning",              val("b-revenue") + " kr." + (printMoms ? " (inkl. " + printMomsRate + "% moms)" : "")],
+      ["Nettoresultat",          val("b-netprofit") + " kr."],
+      ["Konverteringsrate",      val("b-conv") + "%"],
+      ["Bruttoavance",           val("b-margin") + "%"],
+      ["Transaktioner pr. år",   val("b-tx")],
+      ["Antal solgte enheder",   val("b-units")],
+      ["Åbningsdage pr. år",     val("b-days")],
+      ["Andel loyale kunder",    val("b-loy") + "%"]
+    ];
+
+    var leverRows = [
+      ["Konverteringsrate",        val("in-conv") + "%",    txt("d-conv")],
+      ["Enheder pr. transaktion",  val("in-upt") + " stk",  txt("d-upt")],
+      ["Gennemsnitlig enhedspris", val("in-price") + " kr.", txt("d-price")],
+      ["Loyale kunder (andel)",    val("in-loy-q1") + "%",  ""],
+      ["Find nye kunder",          val("in-new") + "/år",   ""],
+      ["Bruttoavance",             val("in-margin") + "%",  txt("d-margin")],
+      ["Besparelse faste omk.",    val("in-fixed") ? val("in-fixed") + " kr." : "0 kr.", ""]
+    ];
+
+    var kpiHtml = kpiRows.map(function(r) {
+      var badge = r[3] ? '<span style="font-size:11px;background:#f0f8f4;color:#065f46;padding:2px 7px;border-radius:99px;margin-left:6px;">' + r[3] + '</span>' : "";
+      return '<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;font-size:13px;">' + r[0] + '</td>' +
+        '<td style="padding:8px 0;border-bottom:1px solid #eee;font-size:13px;text-align:right;">' + r[1] + '</td>' +
+        '<td style="padding:8px 0;border-bottom:1px solid #eee;font-size:13px;text-align:right;">→ <strong>' + r[2] + '</strong>' + badge + '</td></tr>';
+    }).join("");
+
+    var baseHtml = baselineRows.map(function(r) {
+      return '<tr><td style="padding:6px 0;color:#666;font-size:12px;border-bottom:1px solid #f0ebe2;">' + r[0] +
+        '</td><td style="padding:6px 0;font-size:12px;text-align:right;font-weight:600;border-bottom:1px solid #f0ebe2;">' + r[1] + '</td></tr>';
+    }).join("");
+
+    var leverHtml = leverRows.map(function(r) {
+      var today = r[2] ? '<span style="color:#999;font-size:11px;"> (' + r[2] + ')</span>' : "";
+      return '<tr><td style="padding:6px 0;color:#666;font-size:12px;border-bottom:1px solid #f0ebe2;">' + r[0] +
+        '</td><td style="padding:6px 0;font-size:12px;text-align:right;font-weight:600;border-bottom:1px solid #f0ebe2;">' + r[1] + today + '</td></tr>';
+    }).join("");
+
+    var segHtml = "";
+    if (segVisible) {
+      segHtml = '<div style="margin-top:32px;">' +
+        '<div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:14px;">Fordeling — engang vs. loyale kunder</div>' +
+        '<div style="display:flex;gap:24px;justify-content:center;margin-bottom:16px;">' +
+          '<div style="text-align:center;">' +
+            '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px;">Antal kunder</div>' +
+            donutSvg("fp-pie-count-loyal","fp-pie-count-one","fp-pie-count-label") +
+          '</div>' +
+          '<div style="text-align:center;">' +
+            '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px;">Andel af værdi</div>' +
+            donutSvg("fp-pie-val-loyal","fp-pie-val-one","fp-pie-val-label") +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+          '<div style="background:#f8f5f0;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:12px;font-weight:700;margin-bottom:2px;">Engangskunder</div>' +
+            '<div style="font-size:11px;color:#C4581E;font-weight:700;margin-bottom:8px;">' + txt("fp-seg-one-share") + '</div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Andel af kunder</span><strong>' + txt("fp-seg-one-pct") + '</strong></div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Køb pr. kunde</span><strong>1</strong></div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>LTV/kunde</span><strong>' + txt("fp-seg-one-ltv") + '</strong></div>' +
+          '</div>' +
+          '<div style="background:#f8f5f0;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:12px;font-weight:700;margin-bottom:2px;">Loyale kunder</div>' +
+            '<div style="font-size:11px;color:#C4581E;font-weight:700;margin-bottom:8px;">' + txt("fp-seg-loy-share") + '</div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Andel af kunder</span><strong>' + txt("fp-seg-loy-pct") + '</strong></div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Køb pr. kunde</span><strong>' + txt("fp-seg-loy-purchases") + '</strong></div>' +
+            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>LTV/kunde</span><strong>' + txt("fp-seg-loy-ltv") + '</strong></div>' +
+          '</div>' +
+        '</div></div>';
+    }
+
+    var isNeg = txt("fp-r-pct").startsWith("-");
+    var pctColor = isNeg ? "#fca5a5" : "#6ee7b7";
+
+    var css = [
+      '*{box-sizing:border-box;margin:0;padding:0;}',
+      'html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
+      'body{font-family:system-ui,-apple-system,sans-serif;color:#0d1b2a;background:#f5f0e8;min-height:100vh;}',
+
+      /* page header */
+      '.ph{background:#0d1b2a;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;}',
+      '.ph-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.01em;}',
+      '.ph-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;}',
+      '.ph-date{font-size:11px;color:rgba(255,255,255,.5);text-align:right;}',
+
+      /* hero band */
+      '.hero{background:#0d1b2a;padding:28px 40px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;border-bottom:3px solid #C4581E;}',
+      '.hero-left{}',
+      '.hero-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}',
+      '.hero-pct{font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1;color:' + pctColor + ';}',
+      '.hero-right{text-align:right;padding-bottom:6px;}',
+      '.hero-delta-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px;}',
+      '.hero-delta-val{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;}',
+
+      /* body */
+      '.body{padding:32px 40px 40px;}',
+
+      /* two-col */
+      '.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}',
+
+      /* cards */
+      '.card{background:#fff;border-radius:14px;padding:20px 22px;border:1px solid #e5dfd5;}',
+      '.card-dark{background:#0d1b2a;border-radius:14px;padding:20px 22px;}',
+      '.card-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b0a898;margin-bottom:14px;}',
+      '.card-dark .card-label{color:rgba(255,255,255,.35);}',
+
+      /* baseline / lever table */
+      '.dt{width:100%;border-collapse:collapse;}',
+      '.dt td{padding:6px 0;font-size:12px;border-bottom:1px solid #f0ebe2;}',
+      '.dt td:last-child{text-align:right;font-weight:700;color:#0d1b2a;}',
+      '.dt td:first-child{color:#888;}',
+
+      /* KPI table (dark card) */
+      '.kt{width:100%;border-collapse:collapse;}',
+      '.kt td{padding:7px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.08);}',
+      '.kt .k-label{color:rgba(255,255,255,.5);}',
+      '.kt .k-today{text-align:right;color:rgba(255,255,255,.5);white-space:nowrap;}',
+      '.kt .k-after{text-align:right;font-weight:800;color:#fff;white-space:nowrap;padding-left:8px;}',
+      '.kt .k-badge{text-align:right;padding-left:6px;}',
+      '.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(110,231,183,.18);color:#6ee7b7;}',
+      '.badge.neg{background:rgba(252,165,165,.18);color:#fca5a5;}',
+
+      /* segment */
+      '.seg-wrap{background:#fff;border-radius:14px;padding:20px 22px;border:1px solid #e5dfd5;}',
+      '.seg-donuts{display:flex;gap:32px;justify-content:center;margin:16px 0;}',
+      '.seg-donut-block{text-align:center;}',
+      '.seg-donut-title{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b0a898;margin-bottom:10px;}',
+      '.seg-items{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}',
+      '.seg-item{background:#f8f5f0;border-radius:10px;padding:12px 14px;}',
+      '.seg-item-name{font-size:12px;font-weight:700;margin-bottom:2px;}',
+      '.seg-item-share{font-size:11px;font-weight:700;color:#C4581E;margin-bottom:8px;}',
+      '.seg-row{display:flex;justify-content:space-between;font-size:11px;color:#888;padding:2px 0;}',
+      '.seg-row strong{color:#0d1b2a;font-weight:700;}',
+
+      /* footer */
+      '.footer{margin-top:28px;padding-top:14px;border-top:1px solid #e5dfd5;font-size:10px;color:#b0a898;line-height:1.6;}',
+
+      '@media print{',
+        'body{background:#f5f0e8;}',
+        '@page{margin:0;size:A4;}',
+        '.body{padding:24px 32px 32px;}',
+        '.ph,.hero{padding-left:32px;padding-right:32px;}',
+      '}'
+    ].join('');
+
+    var kpiHtml = kpiRows.map(function(r) {
+      var badgeHtml = r[3] ? '<td class="k-badge"><span class="badge' + (r[3].startsWith("-") ? " neg" : "") + '">' + r[3] + '</span></td>' : '<td></td>';
+      return '<tr><td class="k-label">' + r[0] + '</td><td class="k-today">' + r[1] + '</td><td class="k-after">→ ' + r[2] + '</td>' + badgeHtml + '</tr>';
+    }).join("");
+
+    var baseHtml = baselineRows.map(function(r) {
+      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    }).join("");
+
+    var leverHtml = leverRows.map(function(r) {
+      var today = r[2] ? ' <span style="color:rgba(255,255,255,.35);font-size:10px;font-weight:400;">(' + r[2] + ')</span>' : "";
+      return '<tr><td class="k-label">' + r[0] + '</td><td class="k-after" style="text-align:right;">' + r[1] + today + '</td></tr>';
+    }).join("");
+
+    var segHtml = "";
+    if (segVisible) {
+      segHtml = '<div class="seg-wrap">' +
+        '<div class="card-label">Fordeling — engang vs. loyale kunder</div>' +
+        '<div class="seg-donuts">' +
+          '<div class="seg-donut-block"><div class="seg-donut-title">Antal kunder</div>' +
+            donutSvg("fp-pie-count-loyal","fp-pie-count-one","fp-pie-count-label") + '</div>' +
+          '<div class="seg-donut-block"><div class="seg-donut-title">Andel af værdi</div>' +
+            donutSvg("fp-pie-val-loyal","fp-pie-val-one","fp-pie-val-label") + '</div>' +
+        '</div>' +
+        '<div class="seg-items">' +
+          '<div class="seg-item"><div class="seg-item-name">Engangskunder</div>' +
+            '<div class="seg-item-share">' + txt("fp-seg-one-share") + '</div>' +
+            '<div class="seg-row"><span>Antal kunder</span><strong>' + txt("fp-seg-one-count") + '</strong></div>' +
+            '<div class="seg-row"><span>Andel af kunder</span><strong>' + txt("fp-seg-one-pct") + '</strong></div>' +
+            '<div class="seg-row"><span>Køb pr. kunde</span><strong>1</strong></div>' +
+            '<div class="seg-row"><span>LTV/kunde</span><strong>' + txt("fp-seg-one-ltv") + '</strong></div>' +
+          '</div>' +
+          '<div class="seg-item"><div class="seg-item-name">Loyale kunder</div>' +
+            '<div class="seg-item-share">' + txt("fp-seg-loy-share") + '</div>' +
+            '<div class="seg-row"><span>Antal kunder</span><strong>' + txt("fp-seg-loy-count") + '</strong></div>' +
+            '<div class="seg-row"><span>Andel af kunder</span><strong>' + txt("fp-seg-loy-pct") + '</strong></div>' +
+            '<div class="seg-row"><span>Køb pr. kunde</span><strong>' + txt("fp-seg-loy-purchases") + '</strong></div>' +
+            '<div class="seg-row"><span>LTV/kunde</span><strong>' + txt("fp-seg-loy-ltv") + '</strong></div>' +
+          '</div>' +
+        '</div></div>';
+    }
+
+    var html = '<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8">' +
+      '<title>Løftestangen — Vækstrapport</title>' +
+      '<style>' + css + '</style></head><body>' +
+
+      '<div class="ph">' +
+        '<div><div class="ph-title">Løftestangen</div>' +
+        '<div class="ph-sub">Det Mindre Bureau</div></div>' +
+        '<div class="ph-date">Beregnet ' + date + '</div>' +
+      '</div>' +
+
+      '<div class="hero">' +
+        '<div class="hero-left">' +
+          '<div class="hero-eyebrow">Vækst i nettoresultat</div>' +
+          '<div class="hero-pct">' + txt("fp-r-pct") + '</div>' +
+        '</div>' +
+        '<div class="hero-right">' +
+          '<div class="hero-delta-label">Ekstra nettoresultat</div>' +
+          '<div class="hero-delta-val">' + txt("fp-r-delta-np") + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="body">' +
+        '<div class="cols">' +
+          '<div>' +
+            '<div class="card">' +
+              '<div class="card-label">Dine tal i dag</div>' +
+              '<table class="dt">' + baseHtml + '</table>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:16px;">' +
+            '<div class="card-dark">' +
+              '<div class="card-label">Estimeret effekt</div>' +
+              '<table class="kt">' + kpiHtml + '</table>' +
+            '</div>' +
+            '<div class="card-dark">' +
+              '<div class="card-label">Lever-indstillinger</div>' +
+              '<table class="kt">' + leverHtml + '</table>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        (segVisible ? '<div style="margin-bottom:24px;">' + segHtml + '</div>' : '') +
+        '<div class="footer">Omsætning = besøgende × konverteringsrate × enheder × enhedspris. ' +
+          'Resultat beregnes med konstante faste omkostninger. Kun til inspiration.</div>' +
+      '</div>' +
+
+      '</body></html>';
+
+    var w = window.open("", "_blank", "width=820,height=1000");
+    if (!w) { alert("Tillad pop-ups for at åbne rapporten."); return; }
+    w.document.write(html);
+    w.document.close();
+    setTimeout(function() { w.focus(); w.print(); }, 400);
+  }
+
+  // ─── EVENT WIRING ───────────────────────────────────────────────────────────
+
+  // Baseline inputs
+  var baselineSyncMap = {
+    "b-conv":    ["conv"],
+    "b-units":   ["upt", "price"],
+    "b-loy":     ["loy"],
+    "b-loy-q2":  ["loy"],
+    "b-loy-q3":  ["loy"],
+    "b-margin":  ["margin"],
+    "b-revenue": ["price"],
+    "b-tx":      ["price"]
+  };
+  ["b-revenue","b-netprofit","b-margin","b-tx","b-conv","b-days","b-units","b-loy","b-loy-q2","b-loy-q3"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    function handleBaseline() {
+      recalc();
+      var toSync = baselineSyncMap[id] || [];
+      toSync.forEach(syncLeverToBaseline);
+    }
+    el.addEventListener("input", handleBaseline);
+    el.addEventListener("blur",  handleBaseline);
+  });
+
+  // Lever sliders ↔ inputs
+  linkSlider("sl-conv",   "in-conv",   function(){ leverAdjusted.conv  = true; recalc(); });
+  linkSlider("sl-upt",    "in-upt",    function(){ leverAdjusted.upt   = true; recalc(); });
+  linkSlider("sl-price",  "in-price",  function(){ leverAdjusted.price = true; recalc(); });
+  linkSlider("sl-loy-q1", "in-loy-q1", function(){ leverAdjusted.loy  = true; recalc(); });
+  linkSlider("sl-loy-q2", "in-loy-q2", function(){ leverAdjusted.loy  = true; recalc(); });
+  linkSlider("sl-loy-q3", "in-loy-q3", function(){ leverAdjusted.loy  = true; recalc(); });
+  linkSlider("sl-new",    "in-new",    recalc);
+  var cacEl = document.getElementById("in-cac");
+  if (cacEl) { cacEl.addEventListener("input", recalc); cacEl.addEventListener("blur", recalc); }
+  linkSlider("sl-margin", "in-margin", function(){ leverAdjusted.margin = true; recalc(); });
+
+  // Moms toggle + rate
+  var momsToggleEvt = document.getElementById("fp-moms-toggle");
+  if (momsToggleEvt) momsToggleEvt.addEventListener("change", recalc);
+  var momsRateEvt = document.getElementById("fp-moms-rate");
+  if (momsRateEvt) { momsRateEvt.addEventListener("input", recalc); momsRateEvt.addEventListener("change", recalc); }
+
+
+  // Reset all
+  var rAllBtn = document.getElementById("fp-reset-all");
+  if (rAllBtn) {
+    rAllBtn.addEventListener("click", function () {
+      resetAll();
+      recalc();
+    });
+  }
+
+  var rBaseBtn = document.getElementById("fp-reset-baseline");
+  if (rBaseBtn) {
+    rBaseBtn.addEventListener("click", function () {
+      var fmt = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+      function setRaw(id, v) {
+        var el = document.getElementById(id);
+        if (el) el.value = v;
+      }
+      function setMoney(id, v) {
+        var el = document.getElementById(id);
+        if (el) el.value = fmt.format(v);
+      }
+      setMoney("b-revenue",   5000000);
+      setMoney("b-netprofit", 250000);
+      setRaw("b-conv",   "25");
+      setRaw("b-margin", "50");
+      setMoney("b-tx",    5000);
+      setMoney("b-units", 7500);
+      setRaw("b-days",    "300");
+      setRaw("b-loy",     "33");
+      setRaw("b-loy-q2",  "4");
+      setRaw("b-loy-q3",  "5");
+      var momsEl = document.getElementById("fp-moms-toggle");
+      if (momsEl) momsEl.checked = false;
+      setRaw("fp-moms-rate", "25");
+      recalc();
+    });
+  }
+
+  // Baseline collapse toggle
+  (function() {
+    var toggleBtn   = document.getElementById("fp-baseline-toggle");
+    var collapsible = document.getElementById("fp-baseline-collapsible");
+    var summary     = document.getElementById("fp-baseline-summary");
+    var isOpen      = true;
+
+    function updateSummary() {
+      if (!summary) return;
+      var fmt = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+      function fv(id) { var e = document.getElementById(id); return e ? e.value : ""; }
+      function fmtKr(id) {
+        var n = parseInt(String(fv(id)).replace(/\./g,""), 10);
+        return isNaN(n) ? "–" : fmt.format(n) + " kr.";
+      }
+      function fmtInt(id) {
+        var n = parseInt(String(fv(id)).replace(/\./g,""), 10);
+        return isNaN(n) ? "–" : fmt.format(n);
+      }
+      var summaryMomsEl = document.getElementById("fp-moms-toggle");
+      var summaryMoms   = summaryMomsEl && summaryMomsEl.checked;
+      var revRaw = parseInt(String(fv("b-revenue")).replace(/\./g,""), 10);
+      var revLabel = summaryMoms ? "Omsat. (ex moms)" : "Omsætning";
+      var revVal = summaryMoms && !isNaN(revRaw)
+        ? fmt.format(Math.round(revRaw / 1.25)) + " kr."
+        : fmtKr("b-revenue");
+      var parts = [
+        [revLabel, revVal],
+        ["Nettoresultat",    fmtKr("b-netprofit")],
+        ["Konv.rate",     (fv("b-conv")   || "–") + "%"],
+        ["Avance",        (fv("b-margin") || "–") + "%"],
+        ["Trans.",        fmtInt("b-tx")],
+        ["Enheder",       fmtInt("b-units")],
+        ["Dage",          (fv("b-days")   || "–")],
+        ["Loyale",        (fv("b-loy")    || "–") + "%"],
+        ["Køb/år",        (fv("b-loy-q2") || "–")],
+        ["Forhold",       (fv("b-loy-q3") || "–") + " år"],
+      ];
+      summary.innerHTML = parts.map(function(p) {
+        return "<span>" + p[0] + " <strong>" + p[1] + "</strong></span>";
+      }).join("");
+    }
+
+    function setOpen(open) {
+      isOpen = open;
+      if (open) {
+        collapsible.classList.remove("fp-collapsed");
+        summary.classList.remove("fp-visible");
+        toggleBtn.textContent = "▲";
+        toggleBtn.title = "Skjul dine tal";
+      } else {
+        updateSummary();
+        collapsible.classList.add("fp-collapsed");
+        summary.classList.add("fp-visible");
+        toggleBtn.textContent = "▼";
+        toggleBtn.title = "Vis dine tal";
+      }
+    }
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function() { setOpen(!isOpen); });
+    }
+
+    // Opdater summary når baseline-felter ændres
+    ["b-revenue","b-netprofit","b-conv","b-margin","b-tx","b-units","b-days","b-loy","b-loy-q2","b-loy-q3"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("input", function() { if (!isOpen) updateSummary(); });
+      if (el) el.addEventListener("blur",  function() { if (!isOpen) updateSummary(); });
+    });
+
+    setOpen(true); // start åben
+  })();
+
+  // Fixed cost saving — slider + text input
+  var slFixed = document.getElementById("sl-fixed");
+  var inFixed = document.getElementById("in-fixed");
+  if (slFixed && inFixed) {
+    var fmtSigned = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+    slFixed.addEventListener("input", function() {
+      var v = parseInt(slFixed.value, 10) || 0;
+      inFixed.value = v !== 0 ? (v < 0 ? "-" : "") + fmtSigned.format(Math.abs(v)) : "";
+      fillCenteredSlider("sl-fixed");
+      recalc();
+    });
+    inFixed.addEventListener("input", function() {
+      var s = String(inFixed.value).trim();
+      var neg = s.startsWith("-");
+      var n = parseInt(s.replace(/\./g, "").replace(/-/g, ""), 10);
+      if (isFinite(n)) {
+        var clamped = Math.max(parseFloat(slFixed.min), Math.min(parseFloat(slFixed.max), n));
+        slFixed.value = neg ? -Math.abs(clamped) : clamped;
+        fillCenteredSlider("sl-fixed");
+      }
+      recalc();
+    });
+  }
+  setupSignedMoneyInput("in-fixed");
+
+  // Print report
+  var printBtn = document.getElementById("fp-print-btn");
+  if (printBtn) printBtn.addEventListener("click", printReport);
+
+  // Individual lever resets
+  document.querySelectorAll(".fp-lever-reset").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      resetLever(btn.dataset.lever);
+      recalc();
+    });
+  });
+
+  // ─── MONEY INPUT FORMATTING ─────────────────────────────────────────────────
+  setupMoneyInput("b-revenue");
+  setupMoneyInput("b-netprofit");
+  setupMoneyInput("b-tx");
+  setupMoneyInput("b-units");
+
+  // ─── INITIAL RENDER ─────────────────────────────────────────────────────────
+  recalc();
+
+}());
+</script>

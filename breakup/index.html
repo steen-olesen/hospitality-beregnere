@@ -1,0 +1,622 @@
+<meta charset="utf-8">
+<!-- ============================================================
+     Break Up — embed-snippet
+     Beregn hvor mange NYE kunder du skal tiltrække bare for at
+     stå stille, når dine loyale kunder forsvinder.
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     ============================================================ -->
+<style>
+  #bu-widget {
+    --accent:  #C4581E;
+    --navy:    #0d1b2a;
+    --creme:   #f5f0e8;
+    --bg:      #ede8de;
+    --border:  #ddd7cc;
+    --muted:   #5c6b7a;
+    --white:   #ffffff;
+    --red:     #dc2626;
+    --green:   #059669;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--navy);
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  #bu-widget *, #bu-widget *::before, #bu-widget *::after { box-sizing: border-box; }
+
+  /* ── Card ── */
+  .bu-card {
+    position: relative;
+    background: linear-gradient(to right,
+      var(--creme) 0%,
+      var(--creme) calc(100% - 400px),
+      var(--navy)  calc(100% - 400px));
+    border-radius: 24px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,.08), 0 24px 48px rgba(13,27,42,.12);
+    border: 1px solid var(--border);
+    overflow: clip;
+  }
+  .bu-dogear {
+    position: absolute; bottom: 0; right: 0;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+
+  /* ── Layout ── */
+  .bu-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    align-items: start;
+  }
+  .bu-left    { padding: 48px; display: flex; flex-direction: column; }
+  .bu-sidebar { position: sticky; top: 0; padding: 44px 36px 48px; color: var(--white); }
+
+  /* ── Typography ── */
+  .bu-title {
+    font-size: 28px; font-weight: 800; letter-spacing: -.02em;
+    color: var(--navy); margin-bottom: 6px; line-height: 1;
+  }
+  .bu-tagline {
+    font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5;
+  }
+  .bu-section {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+    margin: 32px 0 16px;
+  }
+  .bu-section:first-of-type { margin-top: 0; }
+
+  /* ── Grid ── */
+  .bu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .bu-span { grid-column: 1 / -1; }
+
+  /* ── Fields ── */
+  .bu-field { display: flex; flex-direction: column; gap: 5px; }
+  .bu-field label {
+    font-size: 11.5px; font-weight: 600; color: var(--navy); line-height: 1.4;
+  }
+  .bu-help {
+    font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 3px;
+  }
+
+  /* ── Input shell ── */
+  .bu-shell {
+    display: flex; align-items: center; gap: 8px;
+    padding: 13px 14px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 12px;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .bu-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,.12);
+    background: var(--white);
+  }
+  .bu-shell input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 24px; font-weight: 600; color: var(--navy);
+    font-family: inherit; min-width: 0; padding: 0;
+  }
+  .bu-shell input::placeholder { font-weight: 400; color: #c4c9d4; }
+  .bu-unit {
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    flex-shrink: 0; user-select: none; white-space: nowrap;
+  }
+  .bu-unit--pre { order: -1; }
+
+  /* ── Helper ── */
+  #bu-helper {
+    font-size: 12px; font-weight: 600; color: var(--red);
+    min-height: 14px; margin-bottom: 10px;
+  }
+
+  /* ── Footer ── */
+  .bu-footer-note {
+    font-size: 11px; color: var(--muted); margin-top: 32px;
+    line-height: 1.6; opacity: .55;
+  }
+
+  /* ════════════════ SIDEBAR ════════════════ */
+
+  /* PDF btn */
+  .bu-pdf-btn {
+    float: right; clear: both; margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.6); font-size: 11px; font-weight: 600;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    font-family: inherit; transition: background .15s;
+  }
+  .bu-pdf-btn:hover { background: rgba(255,255,255,.14); }
+
+  /* Hero */
+  .bu-hero {
+    margin-bottom: 24px; padding-bottom: 22px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .bu-hero-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: rgba(255,255,255,.4);
+    margin-bottom: 6px;
+  }
+  .bu-hero-val {
+    font-size: 50px; font-weight: 900; line-height: 1;
+    letter-spacing: -.03em; color: var(--accent);
+    margin-bottom: 6px; transition: all .2s;
+    white-space: nowrap;
+  }
+  .bu-hero-val.bu-dash { color: rgba(255,255,255,.18); font-size: 36px; }
+  .bu-hero-sub { font-size: 13px; color: rgba(255,255,255,.45); }
+
+  /* KPI rows */
+  .bu-kpis { display: flex; flex-direction: column; }
+  .bu-kpi {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .bu-kpi:last-child { border-bottom: none; }
+  .bu-kpi-section-lbl {
+    font-size: 9px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+    padding-bottom: 6px; margin-bottom: 2px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .bu-kpi-lbl {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; opacity: .45; margin-bottom: 2px;
+  }
+  .bu-kpi-val { font-size: 15px; font-weight: 700; color: var(--white); }
+  .bu-kpi-sub { font-size: 10px; color: rgba(255,255,255,.32); margin-top: 2px; }
+
+  /* Ratio box — den ubehagelige sandhed */
+  .bu-ratio-box {
+    margin-top: 16px; padding: 14px 15px;
+    background: rgba(196,88,30,.15); border-radius: 10px;
+    border: 1px solid rgba(196,88,30,.25);
+    display: none;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .bu-ratio-box.bu-visible { display: block; opacity: 1; transform: translateY(0); }
+  .bu-ratio-lbl {
+    font-size: 9px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 5px;
+  }
+  .bu-ratio-val {
+    font-size: 13px; color: rgba(255,255,255,.7); line-height: 1.55;
+  }
+  .bu-ratio-val strong { color: var(--accent); font-size: 18px; font-weight: 900; }
+
+  /* Konklusion */
+  .bu-conclusion {
+    margin-top: 14px; padding: 12px 14px;
+    background: rgba(255,255,255,.05); border-radius: 9px;
+    font-size: 11px; color: rgba(255,255,255,.45); line-height: 1.65;
+    display: none;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .3s ease .1s, transform .3s ease .1s;
+  }
+  .bu-conclusion.bu-visible { display: block; opacity: 1; transform: translateY(0); }
+  .bu-conclusion strong { color: rgba(255,255,255,.82); }
+
+  /* ── Mobile ── */
+  @media (max-width: 720px) {
+    .bu-layout { grid-template-columns: 1fr; }
+    .bu-card   { background: var(--creme); }
+    .bu-sidebar { background: var(--navy); border-radius: 0 0 24px 24px; position: static; padding: 32px 24px 40px; }
+    .bu-left    { padding: 32px 24px; }
+    .bu-grid    { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .bu-title    { font-size: 22px; }
+    .bu-hero-val { font-size: 38px; }
+  }
+</style>
+
+<div id="bu-widget">
+  <div class="bu-card">
+    <div class="bu-layout">
+
+      <!-- ══════════════ LEFT ══════════════ -->
+      <div class="bu-left">
+
+        <div class="bu-title">Break Up</div>
+        <div class="bu-tagline">Faktum: Dine kunder "slår op" med dig. Spørgsmål: Hvor mange nye kunder skal du tiltrække for at være status quo?</div>
+        <div id="bu-helper"></div>
+
+        <!-- KUNDEGRUNDLAGET -->
+        <div class="bu-section">Din forretning i dag</div>
+        <div class="bu-grid">
+
+          <div class="bu-field bu-span">
+            <label for="bu-revenue">Omsætning pr. år *</label>
+            <div class="bu-shell">
+              <span class="bu-unit bu-unit--pre">kr.</span>
+              <input type="text" id="bu-revenue" inputmode="numeric" placeholder="2.000.000" required>
+            </div>
+          </div>
+
+          <div class="bu-field">
+            <label for="bu-aov">Gennemsnitlig ordreværdi *</label>
+            <div class="bu-shell">
+              <span class="bu-unit bu-unit--pre">kr.</span>
+              <input type="text" id="bu-aov" inputmode="numeric" placeholder="500" required>
+            </div>
+          </div>
+
+          <div class="bu-field">
+            <label for="bu-freq">Køb pr. år (stamkunder) *</label>
+            <div class="bu-shell">
+              <input type="number" id="bu-freq" inputmode="decimal"
+                placeholder="4" min="1" max="365" step="0.5" required>
+              <span class="bu-unit">gange</span>
+            </div>
+            <div class="bu-help">Hvor mange gange om året handler din typiske stamkunde?</div>
+          </div>
+
+          <div class="bu-field">
+            <label for="bu-life">Kundeforholdets længde *</label>
+            <div class="bu-shell">
+              <input type="number" id="bu-life" inputmode="decimal"
+                placeholder="3" min="0.5" max="30" step="0.5" required>
+              <span class="bu-unit">år</span>
+            </div>
+            <div class="bu-help">Hvor længe holder en stamkunde i gennemsnit?</div>
+          </div>
+
+          <div class="bu-field">
+            <label for="bu-loyal">Andel stamkunder *</label>
+            <div class="bu-shell">
+              <input type="number" id="bu-loyal" inputmode="decimal"
+                placeholder="30" min="1" max="100" step="1" required>
+              <span class="bu-unit">%</span>
+            </div>
+            <div class="bu-help">Stamkunder kommer igen — mere end én gang.</div>
+          </div>
+
+          <div class="bu-field bu-span" style="padding-top: 4px;">
+            <div style="font-size: 11px; color: var(--muted);">* Påkrævet felt</div>
+          </div>
+
+        </div><!-- /bu-grid -->
+
+        <div class="bu-footer-note">
+          Modellen erstatter kunder en-til-en: churnnede stamkunder erstattes af nye stamkunder,
+          engangskunder erstattes af nye engangskunder. Dette opretholder både kundetal og
+          kundesammensætning. Stamkunder defineres ved antal køb pr. år over kundeforholdets løbetid.
+        </div>
+
+        <div style="margin-top:auto; padding-top:32px; font-size:11px; color:var(--muted); font-weight:500;">En lille beregner af Steen Olesen<br>® Det Mindre Bureau</div>
+
+      </div><!-- /bu-left -->
+
+      <!-- ══════════════ SIDEBAR ══════════════ -->
+      <div class="bu-sidebar">
+
+        <button class="bu-pdf-btn" onclick="buPrint()">↗ Gem som PDF</button>
+
+        <!-- Hero -->
+        <div class="bu-hero">
+          <div class="bu-hero-eyebrow">NYE KUNDER FOR AT STÅ STILLE</div>
+          <div class="bu-hero-val bu-dash" id="bu-hero-val">–</div>
+          <div class="bu-hero-sub" id="bu-hero-sub">Udfyld dine tal for at se resultatet</div>
+        </div>
+
+        <!-- Kundebase i dag -->
+        <div class="bu-kpis" id="bu-base-section" style="display:none; margin-bottom:4px;">
+
+          <div class="bu-kpi-section-lbl">Din kundebase i dag</div>
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Stamkunder</div>
+            <div class="bu-kpi-val" id="bu-kpi-loyal-n">–</div>
+            <div class="bu-kpi-sub" id="bu-kpi-loyal-sub"></div>
+          </div>
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Engangskunder</div>
+            <div class="bu-kpi-val" id="bu-kpi-onetime-n">–</div>
+            <div class="bu-kpi-sub" id="bu-kpi-onetime-sub"></div>
+          </div>
+
+        </div>
+
+        <!-- KPIs -->
+        <div class="bu-kpis">
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Kunder der forsvinder hvert år</div>
+            <div class="bu-kpi-val" id="bu-kpi-churn">–</div>
+            <div class="bu-kpi-sub" id="bu-kpi-churn-sub"></div>
+          </div>
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Nye kunder om måneden</div>
+            <div class="bu-kpi-val" id="bu-kpi-monthly">–</div>
+          </div>
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Nye kunder om ugen</div>
+            <div class="bu-kpi-val" id="bu-kpi-weekly">–</div>
+            <div class="bu-kpi-sub" id="bu-kpi-weekly-sub"></div>
+          </div>
+
+          <div class="bu-kpi">
+            <div class="bu-kpi-lbl">Omsætning på spil hvert år</div>
+            <div class="bu-kpi-val" id="bu-kpi-revenue-at-risk">–</div>
+          </div>
+
+        </div>
+
+        <!-- Ratio box -->
+        <div class="bu-ratio-box" id="bu-ratio-box">
+          <div class="bu-ratio-lbl">Den ubehagelige ratio</div>
+          <div class="bu-ratio-val" id="bu-ratio-val"></div>
+        </div>
+
+        <!-- Konklusion -->
+        <div class="bu-conclusion" id="bu-conclusion"></div>
+
+      </div><!-- /bu-sidebar -->
+    </div><!-- /bu-layout -->
+
+    <div class="bu-dogear"></div>
+  </div><!-- /bu-card -->
+</div><!-- /bu-widget -->
+
+<script>
+(function () {
+  "use strict";
+
+  // ── Utils ────────────────────────────────────────────────────
+  function numRaw(id) {
+    var el = document.getElementById(id);
+    if (!el) return NaN;
+    var v = el.value.replace(/\./g, "").replace(",", ".");
+    return parseFloat(v);
+  }
+  function numF(id) {
+    var el = document.getElementById(id);
+    if (!el) return NaN;
+    return parseFloat(String(el.value).replace(",", "."));
+  }
+  function set(id, txt) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  }
+  function fmtN(n) {
+    return Math.round(n).toLocaleString("da-DK");
+  }
+  function fmtKr(n) {
+    return fmtN(n) + " kr.";
+  }
+  function fmtDec(n, d) {
+    return n.toLocaleString("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function showDash() {
+    var heroEl = document.getElementById("bu-hero-val");
+    if (heroEl) { heroEl.textContent = "–"; heroEl.className = "bu-hero-val bu-dash"; }
+    set("bu-hero-sub", "Udfyld dine tal for at se resultatet");
+    ["bu-kpi-churn","bu-kpi-churn-sub","bu-kpi-monthly","bu-kpi-weekly",
+     "bu-kpi-weekly-sub","bu-kpi-revenue-at-risk",
+     "bu-kpi-loyal-n","bu-kpi-loyal-sub","bu-kpi-onetime-n","bu-kpi-onetime-sub"].forEach(function(id){ set(id, "–"); });
+    var bs  = document.getElementById("bu-base-section");
+    var rb  = document.getElementById("bu-ratio-box");
+    var con = document.getElementById("bu-conclusion");
+    if (bs)  bs.style.display = "none";
+    if (rb)  { rb.className  = "bu-ratio-box"; setTimeout(function(){ rb.style.display = "none"; }, 0); }
+    if (con) { con.className = "bu-conclusion"; setTimeout(function(){ con.style.display = "none"; }, 0); }
+  }
+
+  function show(id, html) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  // ── Listeners ────────────────────────────────────────────────
+  ["bu-revenue","bu-aov","bu-freq","bu-life","bu-loyal"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // dot-separator: strip dots on focus, restore on blur
+    if (id === "bu-revenue" || id === "bu-aov") {
+      el.addEventListener("focus", function () {
+        el.value = String(el.value).replace(/\./g, "");
+      });
+      el.addEventListener("blur", function () {
+        var v = parseFloat(String(el.value).replace(/\./g,"").replace(",","."));
+        if (isFinite(v)) el.value = fmtN(v).replace(/\s/g, "").replace(",",".");
+      });
+    }
+    el.addEventListener("input",  recalc);
+    el.addEventListener("change", recalc);
+  });
+
+  // ── Main recalc ──────────────────────────────────────────────
+  function recalc() {
+    var helper = document.getElementById("bu-helper");
+    if (helper) helper.textContent = "";
+
+    var revenue = numRaw("bu-revenue");
+    var aov     = numRaw("bu-aov");
+    var freq    = numF("bu-freq");
+    var life    = numF("bu-life");
+    var loyalPct = numF("bu-loyal");
+
+    // Validate
+    var missing = [];
+    if (!isFinite(revenue) || revenue < 1)   missing.push("Omsætning");
+    if (!isFinite(aov)     || aov < 1)       missing.push("Gennemsnitlig ordreværdi");
+    if (!isFinite(freq)    || freq < 1)      missing.push("Køb pr. år");
+    if (!isFinite(life)    || life < 0.5)    missing.push("Kundeforholdets længde");
+    if (!isFinite(loyalPct)|| loyalPct <= 0 || loyalPct > 100) missing.push("Andel stamkunder");
+
+    if (missing.length) {
+      if (helper) helper.textContent = "Udfyld venligst: " + missing.join(", ");
+      showDash();
+      return;
+    }
+
+    if (loyalPct === 100 && helper) {
+      helper.style.color = "#d97706";
+      helper.textContent = "100% stamkunder er en sjælden situation — men vi beregner det alligevel.";
+    } else if (helper) {
+      helper.style.color = "";
+    }
+
+    // ── Core model ───────────────────────────────────────────
+    var loyalShare    = loyalPct / 100;
+
+    // Total transaktioner → kunder
+    // Loyale kunder handler freq gange, engangskunder 1 gang
+    // revenue = loyal_customers * aov * freq + onetime_customers * aov * 1
+    // Vi kender loyalShare som andel af kundeantal (ikke omsætning)
+    // Lad totalCustomers = C, loyal = loyalShare*C, onetime = (1-loyalShare)*C
+    // revenue = loyalShare*C*aov*freq + (1-loyalShare)*C*aov
+    // revenue = C * aov * (loyalShare*freq + (1-loyalShare))
+    var totalCustomers = revenue / (aov * (loyalShare * freq + (1 - loyalShare)));
+    var loyalCustomers = totalCustomers * loyalShare;
+
+    // Engangskunder: alle forsvinder hvert år (handler per definition kun én gang)
+    var onetimeCustomers = totalCustomers * (1 - loyalShare);
+
+    // Loyale: 1/life churner hvert år
+    var churnRate        = 1 / life;
+    var churnedPerYear   = loyalCustomers * churnRate;
+
+    // Total omsætning der forsvinder hvert år:
+    // 1) Fra churnnede loyale kunder (de tog freq × aov med sig)
+    // 2) Fra alle engangskunder (de vender ikke tilbage)
+    var revenueFromChurnedLoyal = churnedPerYear * aov * freq;
+    var revenueFromOnetime      = onetimeCustomers * aov;
+    var revenueAtRisk           = revenueFromChurnedLoyal + revenueFromOnetime;
+
+    // Nye kunder der skal til for at opretholde BÅDE kundetal OG sammensætning:
+    // erstat hver churnet loyal med en ny loyal, og hver engangskundes med en ny engangs.
+    var newNeededPerYear = churnedPerYear + onetimeCustomers;
+
+    // Ratio: nye kunder pr. tabt loyal
+    var ratio = newNeededPerYear / churnedPerYear;
+
+    // Tidsinddeling
+    var newPerMonth = newNeededPerYear / 12;
+    var newPerWeek  = newNeededPerYear / 52;
+
+    // ── Render ───────────────────────────────────────────────
+    var heroEl = document.getElementById("bu-hero-val");
+    if (heroEl) {
+      heroEl.textContent = fmtN(newNeededPerYear);
+      heroEl.className = "bu-hero-val";
+    }
+    set("bu-hero-sub", "nye kunder om året — bare for at stå stille");
+
+    // Kundebase i dag
+    var baseSection = document.getElementById("bu-base-section");
+    if (baseSection) baseSection.style.display = "block";
+    set("bu-kpi-loyal-n",   fmtN(loyalCustomers) + " kunder");
+    set("bu-kpi-loyal-sub", "handler " + fmtDec(freq, 1).replace(".", ",") + "x/år i " + fmtDec(life, 0) + " år");
+    set("bu-kpi-onetime-n", fmtN(onetimeCustomers) + " kunder");
+    set("bu-kpi-onetime-sub", "handler 1 gang — vender ikke tilbage");
+
+    set("bu-kpi-churn",     fmtDec(churnedPerYear, 0) + " stamkunder + " + fmtDec(onetimeCustomers, 0) + " engangskunder");
+    set("bu-kpi-churn-sub", fmtKr(revenueFromChurnedLoyal) + " + " + fmtKr(revenueFromOnetime) + " = " + fmtKr(revenueAtRisk));
+    set("bu-kpi-monthly",   fmtDec(newPerMonth, 1) + " kunder");
+    set("bu-kpi-weekly",    fmtDec(newPerWeek, 1) + " kunder");
+    set("bu-kpi-weekly-sub", newPerWeek >= 1
+      ? "det er ca. " + Math.round(newPerWeek) + " om ugen — hver uge"
+      : "det er ca. én ny kunde " + fmtDec(1 / newPerWeek, 1).replace(".", ",") + " uger");
+    set("bu-kpi-revenue-at-risk", fmtKr(revenueAtRisk));
+
+    // Ratio box
+    var rb = document.getElementById("bu-ratio-box");
+    var ratioText = "For hver stamkunde du mister, skal du tiltrække "
+      + "<strong>" + fmtDec(ratio, 1).replace(".", ",") + " nye</strong>"
+      + " kunder blot for at erstatte omsætningen.";
+    if (ratio < 1.05) {
+      ratioText = "Dine stamkunder handler kun <strong>1 gang om året</strong> — og nye kunder ligeså. "
+        + "Forskellen ligger i om de kommer tilbage.";
+    }
+    show("bu-ratio-val", ratioText);
+    if (rb) {
+      rb.style.display = "block";
+      setTimeout(function() { rb.className = "bu-ratio-box bu-visible"; }, 10);
+    }
+
+    // Konklusion
+    var con = document.getElementById("bu-conclusion");
+    var omsatningsPct = Math.round((revenueAtRisk / revenue) * 100);
+    var conText = "<strong>" + omsatningsPct + "% af din omsætning</strong> er på spil hvert år "
+      + "— ikke (kun) fordi noget er gået galt, men også fordi stamkunder forlader dig naturligt. "
+      + "Uden en aktiv plan for <strong>REPEAT</strong> (få dem til at blive) og <strong>ATTRACT</strong> "
+      + "(tiltræk nye systematisk) lever du af tilfældighederne.";
+    show("bu-conclusion", conText);
+    if (con) {
+      con.style.display = "block";
+      setTimeout(function() { con.className = "bu-conclusion bu-visible"; }, 10);
+    }
+  }
+
+  // ── Print ─────────────────────────────────────────────────────
+  window.buPrint = function () {
+    function v(id) { var el = document.getElementById(id); return el ? el.value : ""; }
+    function t(id) { var el = document.getElementById(id); return el ? el.textContent : "–"; }
+    var w = window.open("", "_blank", "width=800,height=600");
+    w.document.write('<!DOCTYPE html><html lang="da"><head>'
+      + '<meta charset="utf-8">'
+      + '<title>Break Up — beregning</title>'
+      + '<style>'
+      + 'body{font-family:system-ui,sans-serif;color:#0d1b2a;max-width:680px;margin:40px auto;padding:0 24px;}'
+      + 'h1{font-size:26px;font-weight:900;margin-bottom:4px;}'
+      + '.sub{color:#5c6b7a;font-size:13px;margin-bottom:32px;}'
+      + 'h2{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5c6b7a;margin:28px 0 10px;}'
+      + 'table{width:100%;border-collapse:collapse;font-size:13px;}'
+      + 'td{padding:8px 0;border-bottom:1px solid #ddd7cc;}'
+      + 'td:last-child{text-align:right;font-weight:700;}'
+      + '.hero{font-size:42px;font-weight:900;color:#C4581E;margin:16px 0 4px;letter-spacing:-.03em;}'
+      + '.herosub{color:#5c6b7a;font-size:13px;margin-bottom:24px;}'
+      + '.conclusion{margin-top:24px;padding:14px 16px;background:#f5f0e8;border-radius:8px;'
+      + '  font-size:12px;line-height:1.65;color:#5c6b7a;}'
+      + '.conclusion strong{color:#0d1b2a;}'
+      + '.footer{margin-top:40px;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:12px;}'
+      + '</style></head><body>'
+      + '<h1>Break Up</h1>'
+      + '<div class="sub">Nye kunder for at stå stille</div>'
+
+      + '<h2>Dine tal</h2>'
+      + '<table>'
+      + '<tr><td>Omsætning pr. år</td><td>' + v("bu-revenue") + ' kr.</td></tr>'
+      + '<tr><td>Gennemsnitlig ordreværdi</td><td>' + v("bu-aov") + ' kr.</td></tr>'
+      + '<tr><td>Køb pr. år (stamkunder)</td><td>' + v("bu-freq") + ' gange</td></tr>'
+      + '<tr><td>Kundeforholdets længde</td><td>' + v("bu-life") + ' år</td></tr>'
+      + '<tr><td>Andel stamkunder</td><td>' + v("bu-loyal") + '%</td></tr>'
+      + '</table>'
+
+      + '<h2>Resultater</h2>'
+      + '<div class="hero">' + t("bu-hero-val") + '</div>'
+      + '<div class="herosub">nye kunder om året — bare for at stå stille</div>'
+      + '<table>'
+      + '<tr><td>Kunder der forsvinder hvert år</td><td>' + t("bu-kpi-churn") + '</td></tr>'
+      + '<tr><td>Omsætning på spil hvert år</td><td>' + t("bu-kpi-revenue-at-risk") + '</td></tr>'
+      + '<tr><td>Nye kunder om måneden</td><td>' + t("bu-kpi-monthly") + '</td></tr>'
+      + '<tr><td>Nye kunder om ugen</td><td>' + t("bu-kpi-weekly") + '</td></tr>'
+      + '</table>'
+
+      + '<div class="conclusion">' + document.getElementById("bu-conclusion").innerHTML + '</div>'
+
+      + '<div class="footer">En lille beregner af Steen Olesen · ® Det Mindre Bureau</div>'
+      + '</body></html>');
+    w.document.close();
+    w.focus();
+    setTimeout(function () { w.print(); }, 400);
+  };
+
+})();
+</script>

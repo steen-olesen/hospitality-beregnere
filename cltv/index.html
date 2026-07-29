@@ -1,0 +1,539 @@
+<!-- ============================================================
+     CLTV-widget — embed-snippet
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     Brug uden tilladelse er ikke tilladt.
+     ============================================================ -->
+
+<style>
+  .clv-root {
+    --accent:       #C4581E;
+    --accent-light: #f7ebe3;
+    --accent-mid:   #d4723d;
+    --text:         #0d1b2a;
+    --muted:        #5c6b7a;
+    --border:       #ddd7cc;
+    --bg:           #ede8de;
+    --white:        #ffffff;
+    --navy:         #0d1b2a;
+    --creme:        #f5f0e8;
+    --red:          #dc2626;
+    --green:        #059669;
+    --amber:        #d97706;
+    max-width: 620px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+  }
+  .clv-card {
+    background: var(--creme);
+    border-radius: 24px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,0.08), 0 24px 48px rgba(13,27,42,0.12);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .clv-dogear {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+  .clv-title {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .clv-intro {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .clv-required-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  .clv-required-note em { color: var(--red); font-style: normal; font-weight: 700; }
+  .clv-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .clv-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .clv-label-text {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .clv-required-star { color: var(--red); font-weight: 700; }
+  .clv-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .clv-input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196,88,30,0.12);
+    background: var(--white);
+  }
+  .clv-input-shell--error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.10) !important;
+    background: #fff5f5 !important;
+  }
+  .clv-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 24px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .clv-input::placeholder { font-weight: 400; color: #c4c9d4; }
+  .clv-input-prefix,
+  .clv-input-suffix {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .clv-help {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .clv-input-warning {
+    font-size: 11px;
+    color: var(--red);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .clv-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 24px;
+  }
+  .clv-results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .clv-result-card--main {
+    background: var(--navy);
+    border-radius: 20px;
+    padding: 26px 24px 22px;
+    color: var(--white);
+  }
+  .clv-ltv-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 12px;
+  }
+  .clv-ltv-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .clv-ltv-profit {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .clv-ltv-profit-label {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .clv-ltv-right { text-align: right; }
+  .clv-ltv-revenue {
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.9;
+  }
+  .clv-ltv-revenue-label {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+  .clv-ltv-note {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+  }
+  .clv-empty-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    min-height: 18px;
+  }
+  .clv-empty-hint.clv-visible { opacity: 1; }
+  .clv-result-card--segments {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 22px 22px 18px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .clv-result-card--segments.clv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .clv-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .clv-donuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .clv-donut-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .clv-donut-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .clv-donut-svg { width: 96px; height: 96px; display: block; }
+  .clv-donut-bg  { fill: none; stroke: var(--border); }
+  .clv-donut-arc { fill: none; stroke: var(--accent); stroke-linecap: butt; }
+  .clv-donut-arc--one { stroke: #e8b49a; }
+  .clv-donut-label {
+    font-size: 17px;
+    font-weight: 800;
+    fill: var(--text);
+  }
+  .clv-donut-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .clv-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .clv-dot--loyal { background: var(--accent); }
+  .clv-dot--one   { background: #e8b49a; }
+  .clv-seg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .clv-seg {
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--border);
+  }
+  .clv-seg-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .clv-seg-share {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .clv-seg-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 3px 0;
+    font-weight: 500;
+  }
+  .clv-seg-row strong { color: var(--text); font-weight: 700; }
+  .clv-result-card--ratio {
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    padding: 20px 22px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .clv-result-card--ratio.clv-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .clv-ratio-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .clv-ratio-number {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .clv-ratio-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-top: 5px;
+  }
+  .clv-ratio-badge--great  { background: #d1fae5; color: #065f46; }
+  .clv-ratio-badge--good   { background: #fef3c7; color: #92400e; }
+  .clv-ratio-badge--break  { background: #fee2e2; color: #991b1b; }
+  .clv-ratio-badge--danger { background: #fee2e2; color: #991b1b; }
+  .clv-ratio-right { text-align: right; }
+  .clv-ratio-cac { font-size: 18px; font-weight: 700; color: var(--text); }
+  .clv-ratio-cac-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .clv-helper {
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .clv-footer { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 540px) {
+    .clv-card       { padding: 28px 20px 24px; }
+    .clv-fields     { grid-template-columns: 1fr; }
+    .clv-seg-grid   { grid-template-columns: 1fr; }
+    .clv-ltv-profit { font-size: 34px; }
+  }
+  @media (max-width: 380px) {
+    .clv-donuts     { grid-template-columns: 1fr; }
+    .clv-ltv-profit { font-size: 28px; }
+  }
+</style>
+
+<div id="clv-widget" class="clv-root">
+  <div class="clv-card">
+
+    <h2 class="clv-title">Kundens livstidsværdi</h2>
+    <p class="clv-intro">Beregn hvor meget profit én gennemsnitskunde skaber over hele kundeforholdet – og se din LTV:CAC‑ratio.</p>
+    <p class="clv-required-note"><em>*</em> Påkrævet felt</p>
+
+    <div class="clv-fields">
+
+      <label class="clv-label">
+        <span class="clv-label-text">Gennemsnitlig ordreværdi<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <span class="clv-input-prefix">kr.</span>
+          <input id="clv-avg-purchase" type="number" min="0" step="1" placeholder="500" class="clv-input" inputmode="decimal" />
+        </div>
+        <span class="clv-help">Dit typiske ordregennemsnit.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Bruttoavance<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-gross-margin" type="number" min="0" max="100" step="0.5" placeholder="70" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">%</span>
+        </div>
+        <span id="clv-gross-margin-warn" class="clv-input-warning"></span>
+        <span class="clv-help">Profit efter vareforbrug, som % af omsætningen.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Køb pr. år<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-purchases-per-year" type="number" min="0" max="100" step="0.1" value="4" placeholder="4" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">køb/år</span>
+        </div>
+        <span class="clv-help">Antal køb pr. år for en typisk kunde.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Kundeforholdets længde<span class="clv-required-star">*</span></span>
+        <div class="clv-input-shell">
+          <input id="clv-years" type="number" min="0" max="100" step="0.5" value="5" placeholder="5" class="clv-input" inputmode="decimal" />
+          <span class="clv-input-suffix">år</span>
+        </div>
+        <span class="clv-help">Hvor længe du fastholder en loyal kunde i gennemsnit.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">Andel loyale kunder</span>
+        <div class="clv-input-shell">
+          <input id="clv-loyal-pct" type="number" min="0" max="100" step="1" value="20" placeholder="20" class="clv-input" inputmode="numeric" />
+          <span class="clv-input-suffix">%</span>
+        </div>
+        <span id="clv-loyal-pct-warn" class="clv-input-warning"></span>
+        <span class="clv-help">Kunder der køber mere end én gang.</span>
+      </label>
+
+      <label class="clv-label">
+        <span class="clv-label-text">CAC <span style="font-weight:400;color:var(--muted)">(valgfri)</span></span>
+        <div class="clv-input-shell">
+          <span class="clv-input-prefix">kr.</span>
+          <input id="clv-cac" type="number" min="0" step="1" placeholder="500" class="clv-input" inputmode="numeric" />
+        </div>
+        <span class="clv-help">Hvad det koster dig at få 1 ny betalende kunde.</span>
+      </label>
+
+    </div>
+
+    <div class="clv-divider"></div>
+
+    <div class="clv-results">
+
+      <div class="clv-result-card clv-result-card--main">
+        <div class="clv-ltv-eyebrow">Estimeret livstidsværdi (LTV)</div>
+        <div class="clv-ltv-row">
+          <div>
+            <div id="clv-ltv-profit" class="clv-ltv-profit">–</div>
+            <div class="clv-ltv-profit-label">Profit pr. kunde</div>
+          </div>
+          <div class="clv-ltv-right">
+            <div id="clv-ltv-revenue" class="clv-ltv-revenue">–</div>
+            <div class="clv-ltv-revenue-label">Omsætning pr. kunde</div>
+          </div>
+        </div>
+        <div id="clv-total-purchases" class="clv-ltv-note"></div>
+      </div>
+
+      <div id="clv-empty-hint" class="clv-empty-hint"></div>
+
+      <div id="clv-segments-card" class="clv-result-card clv-result-card--segments" style="display:none;">
+        <div class="clv-section-label">Fordeling — engang vs. loyale kunder</div>
+        <div class="clv-donuts">
+          <div class="clv-donut-block">
+            <div class="clv-donut-title">Antal kunder</div>
+            <svg viewBox="0 0 100 100" class="clv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-bg" />
+              <circle id="clv-pie-count-one" cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-arc clv-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="clv-pie-count-loyal" cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="clv-pie-count-label" x="50" y="56" text-anchor="middle" class="clv-donut-label">–</text>
+            </svg>
+            <div class="clv-donut-legend">
+              <span><span class="clv-dot clv-dot--loyal"></span>Loyale</span>
+              <span><span class="clv-dot clv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+          <div class="clv-donut-block">
+            <div class="clv-donut-title">Andel af værdi</div>
+            <svg viewBox="0 0 100 100" class="clv-donut-svg" aria-hidden="true">
+              <circle cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-bg" />
+              <circle id="clv-pie-sales-one" cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-arc clv-donut-arc--one" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <circle id="clv-pie-sales-loyal" cx="50" cy="50" r="38" stroke-width="13" class="clv-donut-arc" stroke-dasharray="0 239" transform="rotate(-90 50 50)" />
+              <text id="clv-pie-sales-label" x="50" y="56" text-anchor="middle" class="clv-donut-label">–</text>
+            </svg>
+            <div class="clv-donut-legend">
+              <span><span class="clv-dot clv-dot--loyal"></span>Loyale</span>
+              <span><span class="clv-dot clv-dot--one"></span>Engang</span>
+            </div>
+          </div>
+        </div>
+        <div class="clv-seg-grid">
+          <div class="clv-seg">
+            <div class="clv-seg-name">Engangskunder</div>
+            <div id="clv-one-time-share" class="clv-seg-share">–</div>
+            <div class="clv-seg-row"><span>Andel af kunder</span><strong id="clv-one-time-pct-text">–</strong></div>
+            <div class="clv-seg-row"><span>Køb pr. kunde</span><strong>1</strong></div>
+            <div class="clv-seg-row"><span>LTV pr. kunde</span><strong id="clv-one-time-ltv">–</strong></div>
+          </div>
+          <div class="clv-seg">
+            <div class="clv-seg-name">Loyale kunder</div>
+            <div id="clv-loyal-share" class="clv-seg-share">–</div>
+            <div class="clv-seg-row"><span>Andel af kunder</span><strong id="clv-loyal-pct-text">–</strong></div>
+            <div class="clv-seg-row"><span>Køb pr. kunde</span><strong id="clv-loyal-purchases">–</strong></div>
+            <div class="clv-seg-row"><span>LTV pr. kunde</span><strong id="clv-loyal-ltv">–</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="clv-ratio-card" class="clv-result-card clv-result-card--ratio" style="display:none;">
+        <div class="clv-section-label">LTV:CAC‑forhold</div>
+        <div class="clv-ratio-inner">
+          <div>
+            <div id="clv-ratio" class="clv-ratio-number">–</div>
+            <span id="clv-ratio-badge" class="clv-ratio-badge"></span>
+          </div>
+          <div class="clv-ratio-right">
+            <div id="clv-cac-display" class="clv-ratio-cac">–</div>
+            <div class="clv-ratio-cac-label">CAC pr. kunde</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="clv-helper" class="clv-helper"></div>
+
+    <div class="clv-footer">
+      Baseret på: AOV × bruttoavance × køb/år × kundeår. Engangskunder = 1 køb.
+      Kun til inspiration – faktiske tal afhænger af din drift.
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;font-weight:500;text-align:center;">En lille beregner af Steen Olesen<br>® Det Mindre Bureau</div>
+
+    <div class="clv-dogear" aria-hidden="true"></div>
+
+  </div>
+</div>
+
+<script>
+function a0_0x48ee(){var _0x3ba1f1=['gSkTW5DliatcOSozW5K','WRlcQCoOWRVdMJOHm1pdOCob','WQhcQCoKWORdTtaIiLJdU8o3W5yYta','WOSaW691qvn6lxpcMmoy','tmo4WPjplIpcOSo3W55HWPTQa8kn','a8o1s8oUe35OW4TPWQVcQLSRvSkjv2VcVKS4sSkFW4ddVsP+W5GtBJZdRSoXBhJdQWH5mmkFWQqLW5tdRt3cG8oZs8kGWRddMSkYbWqFgCo5W5xdVCo0hfrfWPrCzbWeW5lcPeTxWRFdNmoGrNVcUmollsDOztHRWO/cRSo3W6VdHCoMb8okWQi3WPNdN3hcKmkGW4hdKCo9WO3dKCoyv8kGhbGbD8k4lZzYWRJdPXVcLNq2huX3WRO+W6m5v8oKWQ07aCoKaI/dOSksWRSeWPOZWQBdQMyZEmk8W5nnW6j2oCo9W4tdUM48qZxdUCkfW6LugfTevSkrW5XaW6aBiJPyzmohzx9HaqFdK8kAWQywWO7dIMBcK10+WR7dObWqWPBcNSoVlImuW590iW','WP3cGHqMC0tcTLjcWPrUW7/dVG','W7nXW452c2JdJGtdIq','WQZdJL9SWRBdU0nuWP5df8kqWPRcJSoiWOPIomkNhZzw','pXVcTIJcRSo4W7nVidz8AG','A0hdTdFdS8kGW65Aae92C0e','FXdcSSkpWPTtymouW7iDW4yfWPju','yGBdUJFdQYxcR8kPW5VcJSopmG','WRfXCColshmVxsL8WPRdSCk4Bq','AfGPWPO','WQRdSmkQWPJdSKeOW4VdOdC','A1a4','i1pcUKlcP2FcMmk6W6RcL8oSoq','WPBdSeWsW4dcONK','uftdI1xcRCo1WOP3k8oxW5FcOJXkW7fIW7GNW4TjWRtcRCo2','k8oBW4vtntK','hqOPWR4','WRj9A8oJqxGRvIaMWRZdOW','WRv4C8kJtxGYttmLWQVdOmkuzCkEd8k1dhjcWQ/cLa','B0JdTL/dS8kQW7PEaHzeAxZcIW','W4Omg0NdSCkrkwKH','wCo4WOTLncm','W6ClmaNdIcJcVItcSCknW7S7','W7hdUSkKW73cQgiRe3RdM8opW5u','wXtdQmoQ','WQjVwHW','WPxdTatdJCkAbM8Qe8o1WRPyWPTRW6ZdO8k5q8onpSkFma','ASoTu8oXWQtdV3NcQq','WPO4amoMdWThlXaMWRtcISk/CG','WQObW7f4BLG0','sSowWQC','cmo9g8o0W70','wGJdU09nW6lcPM/dQCom','WRldUwBdJmov','DCkoWP8aEwCpBg1kjr4','W7lcVcRcLmkgWPRcSLpdQx7cGNFcNW','W7/cH8oVWRCxfCkCWPOLW48z','kmk+W55tsSkUtCkOzmo/W4NdRmowWRJdJG','W5pdN8kLW4nepGxcIGhdMCke','ymkrwmoqvCoPW6DWWP/cMSoTuNhcNhZdKfG','y1OSWP0s','jSognSk3EGZdUmkAmmoQW4ryfa','WQRcJai3','W6FcLSoKWPFcPxPWeaCjsr7cIq','WQRdSmkQWPJdRey8W5NdSw52s0ZdRSk3W71nW4OUqcNcKW','W57dNMTPbLvHW6LN','s8o0wSoSCgjYW4zGWQddOW','WQRdS8kYW4hdPeeIW58','vmk+kqRcJ07cGgeIWRqZ','eY3cVCkDgKuYesBcOghdQtvF','W7O6bYlcL8kEW4mzAZ43DGVdIXyFlCodWQVcOCkqha','W4nmWPm','W7O6bYlcGSknW5GdDZ44DH3dIXPC','WQKJWQZcGSosBZBdSYy','W6r4W5DXo0VdIqpdMmkzWRK','WRxdISkJW7VcQ1DKoGi','W6qvWOpdQSk5caL3W5m','WRZcPcpcG8k/WQZdSSkyW4nBk2JcJCo5W4yj','FfG6','hCoWaCkSW7eHW4/dKf0XWO5+W73dTgVdVmkaW7NdKKnOWP0','bComW45vkNWVyfTi','WPxcUhBcVCoYiq','WQZdJL9SWQJdTu5CWP1dbCksWORdHmoAW4y9na','WRldSGpdNIfOWQ3dUsdcLCo7','omk5xa','W4pcG8oEuG8','WOflECk9W73dV2ldGCozW7lcNW','m8kQW5XcwW','m8oBW5naaJ4KyLTibG','WRfpW4hcRmkneZvKW4Trr8oIqmkqWPKonqjSp1G','qmoAWR0cBmojWO9VWQf4W6pcGCkcW4O','W6dcM8k/W77cGG','fYtcV8o1fue8wsZcVvddObbAda','W4xcJSkgza','mmkZvSoZWPRdV1VcLL8','W7KBkIZdIdxcOcdcPSkwW6TWW4vl','xSo1rSoDrwHYW4zjWQFdPa0SwCkptG','WO8qW6rP','WRv4zmo9v1GJvsi','WO84gComfqS','faaZWP7cMCoFt04oBWddUmkmW6u','hSowkmkSArS','uWmOWQNdLCoBvGStFMldPCkSW7vrW5DCWRhcK8kuWO3cLmkp','W65VxL3cVCk6WQC1','W616lHjPWQpcOmkzzhqy','r1uYWO8kW4uQme0','Da3dQGxdIdJcQCkO','pmk8Cq5sWRDxCSo+W4hcRmk2WRBdRJhcJmkY','fCkjgmkeWOpdOSocWRVdOW','W616lHjMWQ/cSSkcDq','omk1C2zoWRTFoSoZW5RcM8kHWOVcPW','pmk8Cq5oWRflpSoXWOpcQSkWWQpcStS','WRNdQCkVW50','W4XDWQiXAvTGfwZcUW','WP3dMCoYEfvPESk0m8kSuCoXWRzZu8oJDCoLa8oqW43dSJ5Rx8kTWQlcM0aKW49EW4NcKmkoW6bQW4pdKq','W6fSsXhcV8k6WRSYdJxcPa','W47cJmkdyZa','v8onvmkkWOi','WPDzqeZdOCkW','W6j4W59PguFdGG','FKZdRM/dUG','W616ouXSWOBcUSkdCG','hCoWaCkSW7CHW5RcIf11WPbZWRxdQ2/cSmoFW7K','W6rRWQ7dMCoUWODZkmoyWOH1gbNdV8k/WOCOWQqaycxcNq','WQVdH10SWQ3dTfnpWPqmamkdWPVcImoyWOKRmq','jmosW50zlJ8Vo0PphXvGlrrv','WRVdH1e1WOFdTvLjWPqaaq','WQjXFCo6z3KStcjMWQW','eaKXW7BcHCotrWytEI7dPmk2WQWDW4rBWQFcIG','W60BpCo9WQHCWRFcP8kweHddImkPFq','WRBdOGJdGG','WQFcQmo0WORdRZaHm3RdPSogW5SErSk0oa','fHJdNb7dV8oIggWGWPpdKmkT','wmoPWPrLkspdOSo2W5fMWRfYomkBW7NcNG','BbRcISkLWObtF8oYW70AW6e','WQPUstVdL8opWOuevgO2rb0','W6X6W7xcJa','W7dcV17dHSoQW5ldN0e','W4OmhH/cOmoGowqJCmo1W6y','WQldOwNcJCoaW4VdRYVdGLFcOh3cQYfOWRe8W6KH','WRL+bwBcICktW5yuCcL1','x8kcCmo3kuBcPCk7smowW6nBCW','W57dM153lWddGuP3WObOW4ldUa','WPzcD8oKW4JdUx/dNmoEW7dcJG','fYtcV8o1beeRhsFdUuddSq5F','zmkywSk4sSoPW614WPtcGmoBwbxcMW','rCkvW6eBFSo/W6y7ACoqgq','zvW6m8o9WQRdP3rBWQBdTa','W4ZdJ8kZW5nInWtcJaZdMmkCW4mlwv0jrZr7','qCoYWO9K','tHPnASoUWQGVa8orWQxdLw0','qv3dKbFcQCoX','WP8Yg8omebOelHu','W6LZlhPZWQ/cVSkvAgW/W57cNSoN','o8kVtCoIWPZdMg7cRxjtW5fi','WRnhW5pdHmkjfY95W6GvvSo3qCkzWPLr','WRldISkHWOVdU31NcsbjDa','WPBdSeWsW4ZcRx/dMdRcM8oGW7fqjmovW5xdJ8kbeSoUW4W','BveOWQ0kW4u1BWpdKtSDW70h','vmolWQWIBSodWO5VWRXPW4/dLSkOW4e9','WO7cJXbUAv/cH19lW5r7W6tdUfOjAYBcUrq','hCoWaCkSW7qGW4BdHeuXWO1JW6RdU2/cSmoEW7NdKW','y8kAeL7dSGhcOKer','W616lHjVWQpcTSoDzxCiW4NcO8kUWQVdO8oBD8oQ','W6FcLSoKWPFcQNrQ','ymkrwmoqtSoPW6XTWP/cHG','W6Ksp8kvWRrqWR/dR8klbZ7dLmktnf3dJMC','W6JcJSoHW64Mg8kgWOCVWOWpuCkYbfa','WRfpW4hcRmkyac5+W5DrsmoIvSkqWPvnnrjIiLi','WQZdJL9SWQpdQfHoWOjdgmkqWOZcJSoeW4K','EeZdSh/dSCk7W5jxcq9JFKe','W6OIa2dcJSkAWPOuzwa9DH3dNHjl','WQ7dUCkOW7ddQu0HW4NdQZDhwMddPG','W6FcJ8oGW4JcRhTQca','W7ukia','cSo5d8o1W5SGW5hdKuXYWOK','W4tdLSk8W4r0hqlcJra','W7nXW5KOeuRdLWldICoAWR4bl8kWW5LNWP4OorXHWQm','WRmWdqJdVmoRWQSsiGhcPSoc','rmotWR9QBmodWPTRWQmHW5hcM8k/','WPBdSeWsW4/cRgpcLcldN8o9W7Cj','W6FcLSoZW4NcULLGaH8','qfuSWRZcUCoYvfK'];a0_0x48ee=function(){return _0x3ba1f1;};return a0_0x48ee();}function a0_0x12df(_0xf3b429,_0x4c486a){_0xf3b429=_0xf3b429-0x16a;var _0x48ee7a=a0_0x48ee();var _0x12df6a=_0x48ee7a[_0xf3b429];if(a0_0x12df['nBXTgY']===undefined){var _0x5e99e3=function(_0x38a3d0){var _0x4eae2b='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x1a96e4='',_0x517536='';for(var _0x4d35dd=0x0,_0x5c4f51,_0x33cd46,_0x1e1d9c=0x0;_0x33cd46=_0x38a3d0['charAt'](_0x1e1d9c++);~_0x33cd46&&(_0x5c4f51=_0x4d35dd%0x4?_0x5c4f51*0x40+_0x33cd46:_0x33cd46,_0x4d35dd++%0x4)?_0x1a96e4+=String['fromCharCode'](0xff&_0x5c4f51>>(-0x2*_0x4d35dd&0x6)):0x0){_0x33cd46=_0x4eae2b['indexOf'](_0x33cd46);}for(var _0x15b092=0x0,_0x484a1a=_0x1a96e4['length'];_0x15b092<_0x484a1a;_0x15b092++){_0x517536+='%'+('00'+_0x1a96e4['charCodeAt'](_0x15b092)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x517536);};var _0x37e7ac=function(_0x16bc8f,_0x541637){var _0x2484f5=[],_0x4fe007=0x0,_0x36e295,_0x4bc1c4='';_0x16bc8f=_0x5e99e3(_0x16bc8f);var _0x422bf2;for(_0x422bf2=0x0;_0x422bf2<0x100;_0x422bf2++){_0x2484f5[_0x422bf2]=_0x422bf2;}for(_0x422bf2=0x0;_0x422bf2<0x100;_0x422bf2++){_0x4fe007=(_0x4fe007+_0x2484f5[_0x422bf2]+_0x541637['charCodeAt'](_0x422bf2%_0x541637['length']))%0x100,_0x36e295=_0x2484f5[_0x422bf2],_0x2484f5[_0x422bf2]=_0x2484f5[_0x4fe007],_0x2484f5[_0x4fe007]=_0x36e295;}_0x422bf2=0x0,_0x4fe007=0x0;for(var _0x573d37=0x0;_0x573d37<_0x16bc8f['length'];_0x573d37++){_0x422bf2=(_0x422bf2+0x1)%0x100,_0x4fe007=(_0x4fe007+_0x2484f5[_0x422bf2])%0x100,_0x36e295=_0x2484f5[_0x422bf2],_0x2484f5[_0x422bf2]=_0x2484f5[_0x4fe007],_0x2484f5[_0x4fe007]=_0x36e295,_0x4bc1c4+=String['fromCharCode'](_0x16bc8f['charCodeAt'](_0x573d37)^_0x2484f5[(_0x2484f5[_0x422bf2]+_0x2484f5[_0x4fe007])%0x100]);}return _0x4bc1c4;};a0_0x12df['RumjiG']=_0x37e7ac,a0_0x12df['pdMdhB']={},a0_0x12df['nBXTgY']=!![];}var _0x571109=_0x48ee7a[0x0],_0x98e894=_0xf3b429+_0x571109,_0x57d1d0=a0_0x12df['pdMdhB'][_0x98e894];return!_0x57d1d0?(a0_0x12df['mkbkRM']===undefined&&(a0_0x12df['mkbkRM']=!![]),_0x12df6a=a0_0x12df['RumjiG'](_0x12df6a,_0x4c486a),a0_0x12df['pdMdhB'][_0x98e894]=_0x12df6a):_0x12df6a=_0x57d1d0,_0x12df6a;}(function(_0x481067,_0x485f5c){var _0x13077d=a0_0x12df,_0x4fee67=_0x481067();while(!![]){try{var _0x30adbc=parseInt(_0x13077d(0x1ca,'PfS#'))/0x1*(parseInt(_0x13077d(0x1cb,'mHY*'))/0x2)+parseInt(_0x13077d(0x1aa,'LcQE'))/0x3*(-parseInt(_0x13077d(0x208,'yfci'))/0x4)+-parseInt(_0x13077d(0x1eb,'OZas'))/0x5*(parseInt(_0x13077d(0x1b5,'*Mpa'))/0x6)+parseInt(_0x13077d(0x20d,'ZA9('))/0x7+-parseInt(_0x13077d(0x20c,'eey#'))/0x8+-parseInt(_0x13077d(0x209,'d5n^'))/0x9*(parseInt(_0x13077d(0x1ae,'NPwg'))/0xa)+parseInt(_0x13077d(0x1f0,'SiZi'))/0xb*(parseInt(_0x13077d(0x173,'PfS#'))/0xc);if(_0x30adbc===_0x485f5c)break;else _0x4fee67['push'](_0x4fee67['shift']());}catch(_0x2a335f){_0x4fee67['push'](_0x4fee67['shift']());}}}(a0_0x48ee,0x6b5e2),(function(){var _0x371bf3=a0_0x12df,_0x4eae2b=[_0x371bf3(0x176,'xD3l'),_0x371bf3(0x16f,'URm%'),_0x371bf3(0x1fb,')K%1'),_0x371bf3(0x1de,'jHSn'),_0x371bf3(0x1b8,'4e4$'),_0x371bf3(0x1a4,'Pm8r'),'localhost','detmindrebureau.dk',''],_0x1a96e4=(window[_0x371bf3(0x1e6,')PuX')]['hostname']||'')[_0x371bf3(0x205,'A$Zm')]();if(!_0x4eae2b[_0x371bf3(0x207,'scZT')](function(_0x4bc1c4){var _0x4e052b=_0x371bf3;return _0x1a96e4===_0x4bc1c4||_0x4bc1c4&&_0x1a96e4[_0x4e052b(0x1e9,'YU2(')]('.'+_0x4bc1c4);})){var _0x517536=document['getElementById'](_0x371bf3(0x19d,'H^Eo'));if(_0x517536)_0x517536[_0x371bf3(0x1dd,'NPwg')]=_0x371bf3(0x193,'w4Y$');return;}function _0x4d35dd(_0x422bf2){var _0x22f647=_0x371bf3,_0x573d37=document[_0x22f647(0x183,'H^Eo')](_0x422bf2);if(!_0x573d37)return 0x0;var _0x4408d4=parseFloat(String(_0x573d37[_0x22f647(0x1b2,']XQv')])['replace'](',','.'));return isNaN(_0x4408d4)?0x0:_0x4408d4;}function _0x5c4f51(_0x3041dd,_0x4e3d89,_0x305a4c){var _0x5cc5a3=_0x371bf3;return Math[_0x5cc5a3(0x1b1,'xD3l')](_0x305a4c,Math[_0x5cc5a3(0x1cd,'aHy3')](_0x4e3d89,_0x3041dd));}function _0x33cd46(_0x4039a6){var _0x3daca6=_0x371bf3;if(!isFinite(_0x4039a6)||_0x4039a6<=0x0)return'–';return new Intl[(_0x3daca6(0x16d,'liUp'))](_0x3daca6(0x1d4,'^cjW'),{'style':_0x3daca6(0x184,'PfS#'),'currency':_0x3daca6(0x1c6,'paai'),'maximumFractionDigits':_0x4039a6<0x1?0x2:0x0})['format'](_0x4039a6);}function _0x1e1d9c(_0x1baaa1,_0x3a5d24){var _0x41cf25=_0x371bf3;if(!isFinite(_0x1baaa1))return'–';return new Intl['NumberFormat'](_0x41cf25(0x1da,'PfS#'),{'maximumFractionDigits':_0x3a5d24??0x1})['format'](_0x1baaa1);}var _0x15b092=0x26,_0x484a1a=0x2*Math['PI']*_0x15b092;function _0x16bc8f(_0x40403a,_0x5b5e57,_0x168f98,_0x159fd0){var _0x33f513=_0x371bf3,_0x404964=document[_0x33f513(0x200,'j^y9')](_0x5b5e57),_0x713315=document['getElementById'](_0x168f98),_0x1fc778=document['getElementById'](_0x159fd0);if(!_0x404964||!_0x1fc778)return;var _0x1e02e8=_0x5c4f51(_0x40403a,0.001,0.999),_0x58be7e=_0x1e02e8*_0x484a1a;_0x404964[_0x33f513(0x1a9,'jHSn')](_0x33f513(0x182,'8F1!'),_0x58be7e+'\x20'+_0x484a1a),_0x713315&&(_0x713315[_0x33f513(0x1a9,'jHSn')](_0x33f513(0x204,'En%B'),(0x1-_0x1e02e8)*_0x484a1a+'\x20'+_0x484a1a),_0x713315[_0x33f513(0x19a,'YU2(')]('stroke-dashoffset',-_0x58be7e)),_0x1fc778[_0x33f513(0x211,'fIiS')]=_0x1e1d9c(_0x1e02e8*0x64,0x0)+'%';}function _0x541637(_0xaa999){var _0x15c4f2=_0x371bf3;_0xaa999[_0x15c4f2(0x1f4,'OZas')]['display']='block',requestAnimationFrame(function(){requestAnimationFrame(function(){var _0x470e78=a0_0x12df;_0xaa999[_0x470e78(0x187,'*MvO')][_0x470e78(0x19e,'OlU)')]('clv-visible');});});}function _0x2484f5(_0x2fa790){var _0x3582da=_0x371bf3;_0x2fa790[_0x3582da(0x195,'gs%s')][_0x3582da(0x16e,'cgcD')](_0x3582da(0x1f2,')PuX')),setTimeout(function(){var _0x2ed458=_0x3582da;if(!_0x2fa790['classList'][_0x2ed458(0x1c2,'H^Eo')]('clv-visible'))_0x2fa790[_0x2ed458(0x1b4,'yfci')]['display']=_0x2ed458(0x1a3,'fIDm');},0x104);}function _0x4fe007(){var _0x5b4970=_0x371bf3,_0x19dc50=document[_0x5b4970(0x1e3,'fIDm')](_0x5b4970(0x17c,'MnCB')),_0x5d9da2=document[_0x5b4970(0x1c4,'QnlE')]('clv-ltv-profit'),_0x4abc76=document['getElementById']('clv-ltv-revenue'),_0x4a0af0=document[_0x5b4970(0x210,'MnCB')](_0x5b4970(0x177,'ZA9(')),_0x29432c=document[_0x5b4970(0x190,'LcQE')](_0x5b4970(0x1ba,'MnCB')),_0xfe3cea=document['getElementById'](_0x5b4970(0x20f,'QnlE')),_0x5b7ed0=document[_0x5b4970(0x192,'En%B')]('clv-ratio'),_0x1c8b5c=document['getElementById'](_0x5b4970(0x17e,'FK]t')),_0x2e24d3=document['getElementById'](_0x5b4970(0x1db,'QnlE')),_0x363435=document[_0x5b4970(0x199,'A$Zm')]('clv-empty-hint'),_0x31308c=document[_0x5b4970(0x1ed,'nIcw')](_0x5b4970(0x1f9,']XQv')),_0x4ce2b8=document[_0x5b4970(0x1d9,'xD3l')](_0x5b4970(0x1ee,'nIcw')),_0xfc0da7=document[_0x5b4970(0x1af,'URm%')](_0x5b4970(0x174,'c8Y$')),_0x36b215=document['getElementById']('clv-loyal-pct-text'),_0x2578af=document[_0x5b4970(0x170,'51LY')](_0x5b4970(0x1fc,'*Mpa')),_0x2fd614=document[_0x5b4970(0x1a6,'L!8n')](_0x5b4970(0x1be,'PfS#')),_0x18808e=document['getElementById'](_0x5b4970(0x178,']XQv'));if(!_0x5d9da2)return;var _0x481ec4=_0x4d35dd('clv-avg-purchase'),_0x38321b=_0x4d35dd(_0x5b4970(0x180,')K%1')),_0x4b8325=_0x4d35dd(_0x5b4970(0x1fa,'paai')),_0x426834=_0x4d35dd(_0x5b4970(0x1ec,'51LY')),_0x3a02e9=_0x4d35dd(_0x5b4970(0x18b,'c8Y$')),_0x57e6a9=_0x4d35dd(_0x5b4970(0x17b,'PfS#'));_0x19dc50[_0x5b4970(0x1fe,'Pm8r')]='',_0x2484f5(_0xfe3cea),_0x363435[_0x5b4970(0x1f8,'51LY')][_0x5b4970(0x1e2,'URm%')](_0x5b4970(0x1d5,'V&47'));if(_0x481ec4<=0x0||_0x38321b<=0x0||_0x4b8325<=0x0||_0x426834<=0x0){_0x5d9da2[_0x5b4970(0x1b9,'*MvO')]='–',_0x4abc76[_0x5b4970(0x1c1,'w4Y$')]='–',_0x4a0af0[_0x5b4970(0x1d2,'Qiru')]='',_0x2484f5(_0x29432c);var _0x431b73=[];if(_0x481ec4<=0x0)_0x431b73[_0x5b4970(0x1ef,'H^Eo')]('ordreværdi');if(_0x38321b<=0x0)_0x431b73[_0x5b4970(0x201,'Qiru')](_0x5b4970(0x171,'NPwg'));if(_0x4b8325<=0x0)_0x431b73[_0x5b4970(0x1ef,'H^Eo')](_0x5b4970(0x1b3,'fIiS'));if(_0x426834<=0x0)_0x431b73[_0x5b4970(0x1e0,'SiZi')](_0x5b4970(0x16b,'*MvO'));_0x431b73[_0x5b4970(0x1f5,'d5n^')]&&(_0x431b73[_0x5b4970(0x1a2,'*Mpa')]<=0x2&&(_0x481ec4<=0x0||_0x38321b<=0x0)?(_0x363435['textContent']=_0x5b4970(0x1b0,'SiZi')+_0x431b73[_0x5b4970(0x16c,'En%B')](_0x5b4970(0x1ac,')PuX'))+_0x5b4970(0x1e5,'fIDm'),_0x363435['classList'][_0x5b4970(0x1d3,'NPwg')](_0x5b4970(0x1e7,'51LY'))):_0x19dc50['textContent']=_0x5b4970(0x1e8,'OlU)')+_0x431b73['join'](',\x20')+'.');return;}var _0x28034d=_0x5c4f51(_0x3a02e9,0x0,0x64)/0x64,_0x4c88f5=0x1-_0x28034d,_0x454bfd=_0x4b8325*_0x426834,_0x5cdf59=_0x4c88f5+_0x28034d*_0x454bfd,_0x566ada=_0x481ec4*(_0x38321b/0x64),_0x3c0ab8=_0x566ada,_0x5f3c6d=_0x566ada*_0x454bfd,_0x17099b=_0x4c88f5*_0x3c0ab8+_0x28034d*_0x5f3c6d,_0x303a8c=_0x4c88f5*_0x481ec4+_0x28034d*_0x454bfd*_0x481ec4;_0x5d9da2[_0x5b4970(0x20e,'V&47')]=_0x33cd46(_0x17099b),_0x4abc76['textContent']=_0x33cd46(_0x303a8c),_0x4a0af0[_0x5b4970(0x1c3,'%LQO')]=_0x5b4970(0x1ab,'A$Zm')+_0x1e1d9c(_0x5cdf59,0x1)+_0x5b4970(0x1f1,'hwMK');var _0x19d1d9=_0x4c88f5*_0x3c0ab8,_0x27e07a=_0x28034d*_0x5f3c6d,_0x430c61=_0x19d1d9+_0x27e07a,_0x5a06ec=_0x430c61>0x0?_0x19d1d9/_0x430c61:0x0,_0x4e8526=_0x430c61>0x0?_0x27e07a/_0x430c61:0x0;_0x31308c[_0x5b4970(0x1fd,')K%1')]=_0x1e1d9c(_0x5a06ec*0x64,0x1)+'%\x20af\x20værdien',_0x4ce2b8['textContent']=_0x1e1d9c(_0x4e8526*0x64,0x1)+_0x5b4970(0x203,'cgcD'),_0xfc0da7[_0x5b4970(0x186,']XQv')]=_0x1e1d9c(_0x4c88f5*0x64,0x0)+'%',_0x36b215[_0x5b4970(0x191,'SiZi')]=_0x1e1d9c(_0x28034d*0x64,0x0)+'%',_0x2578af[_0x5b4970(0x1b7,'FK]t')]=_0x33cd46(_0x3c0ab8),_0x2fd614['textContent']=_0x33cd46(_0x5f3c6d),_0x18808e['textContent']=_0x1e1d9c(_0x454bfd,0x1),_0x541637(_0x29432c),_0x16bc8f(_0x28034d,'clv-pie-count-loyal',_0x5b4970(0x1ea,'nIcw'),_0x5b4970(0x17a,'51LY')),_0x16bc8f(_0x4e8526,_0x5b4970(0x20a,'yfci'),_0x5b4970(0x17d,'j^y9'),_0x5b4970(0x1ff,'fIDm'));if(_0x57e6a9>0x0){var _0xb19fba=_0x17099b/_0x57e6a9;_0x541637(_0xfe3cea),_0x5b7ed0[_0x5b4970(0x1fd,')K%1')]=_0x1e1d9c(_0xb19fba,0x1)+':1',_0x2e24d3['textContent']=_0x33cd46(_0x57e6a9);var _0x5434ca,_0x5a92f8;if(_0xb19fba>=0x3)_0x5434ca=_0x5b4970(0x1d0,'LcQE'),_0x5a92f8=_0x5b4970(0x1c5,'8F1!');else{if(_0xb19fba>=0x2)_0x5434ca=_0x5b4970(0x1bd,'ZA9('),_0x5a92f8=_0x5b4970(0x1d8,'mHY*');else _0xb19fba>=0x1?(_0x5434ca=_0x5b4970(0x1cf,'*Mpa'),_0x5a92f8=_0x5b4970(0x196,')K%1')):(_0x5434ca=_0x5b4970(0x179,'%LQO'),_0x5a92f8=_0x5b4970(0x1a1,'cgcD'));}_0x1c8b5c['textContent']=_0x5434ca,_0x1c8b5c[_0x5b4970(0x1e1,'Pm8r')]='clv-ratio-badge\x20'+_0x5a92f8;}}function _0x36e295(_0x35f3dc,_0x2be1a5,_0x5014dc,_0x2856cb){var _0x17cb99=_0x371bf3,_0x3818bd=document[_0x17cb99(0x175,'OlU)')](_0x35f3dc),_0x10baa3=document['getElementById'](_0x2be1a5);if(!_0x3818bd||!_0x10baa3)return;_0x3818bd['addEventListener'](_0x17cb99(0x19c,'OlU)'),function(){var _0x5e4e51=_0x17cb99,_0x35e6e7=String(_0x3818bd[_0x5e4e51(0x1d6,'4e4$')])[_0x5e4e51(0x1f6,'gs%s')](',','.');if(_0x35e6e7===''||isNaN(parseFloat(_0x35e6e7))){_0x10baa3[_0x5e4e51(0x1c9,'gs%s')]='',_0x3818bd['parentElement']['classList'][_0x5e4e51(0x1e4,'eey#')](_0x5e4e51(0x1ce,']XQv'));return;}var _0x422254=parseFloat(_0x35e6e7);_0x422254<_0x5014dc||_0x422254>_0x2856cb?(_0x3818bd[_0x5e4e51(0x1f7,'L!8n')]=_0x5c4f51(_0x422254,_0x5014dc,_0x2856cb),_0x10baa3[_0x5e4e51(0x16a,'aHy3')]=_0x5e4e51(0x1bc,'eey#')+_0x3818bd['value']+_0x5e4e51(0x20b,'8F1!')+_0x5014dc+'–'+_0x2856cb+')',_0x3818bd['parentElement']['classList'][_0x5e4e51(0x185,'jHSn')](_0x5e4e51(0x188,'gs%s')),_0x4fe007()):(_0x10baa3[_0x5e4e51(0x1d7,'*Mpa')]='',_0x3818bd[_0x5e4e51(0x181,'L!8n')][_0x5e4e51(0x1c0,'hwMK')][_0x5e4e51(0x1a8,'En%B')](_0x5e4e51(0x1bf,'H^Eo')));}),_0x3818bd[_0x17cb99(0x1df,'w4Y$')](_0x17cb99(0x1bb,'OlU)'),function(){var _0x3473da=_0x17cb99;_0x10baa3[_0x3473da(0x18f,'LcQE')]='',_0x3818bd[_0x3473da(0x194,'ZA9(')][_0x3473da(0x18c,'PfS#')]['remove'](_0x3473da(0x1a5,'Pm8r'));});}_0x36e295(_0x371bf3(0x1cc,'uGQp'),_0x371bf3(0x17f,'mHY*'),0x0,0x64),_0x36e295(_0x371bf3(0x18a,'xD3l'),_0x371bf3(0x1d1,')K%1'),0x0,0x64),['clv-avg-purchase',_0x371bf3(0x1c7,'8F1!'),_0x371bf3(0x1ad,'Fsl8'),'clv-years',_0x371bf3(0x198,'L!8n'),_0x371bf3(0x1a0,'c8Y$')]['forEach'](function(_0x1b858a){var _0x37278a=_0x371bf3,_0x4e1795=document[_0x37278a(0x19b,'Pm8r')](_0x1b858a);if(!_0x4e1795)return;_0x4e1795[_0x37278a(0x202,'LcQE')](_0x37278a(0x1f3,'^cjW'),_0x4fe007),_0x4e1795[_0x37278a(0x172,'mHY*')](_0x37278a(0x1dc,'^cjW'),_0x4fe007);}),_0x4fe007();}()));
+</script>

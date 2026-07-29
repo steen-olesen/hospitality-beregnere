@@ -1,0 +1,839 @@
+<meta charset="utf-8">
+<!-- ============================================================
+     Mersalgsberegneren — embed-snippet
+     Beregn effekten af mersalg og upsell pr. gæst/transaktion.
+     Indsæt dette i ethvert CMS-felt der accepterer HTML/kode.
+     Kræver ingen eksterne afhængigheder.
+     © Steen Olesen — steenolesen.com
+     ============================================================ -->
+<style>
+  #ms-widget {
+    --accent:  #C4581E;
+    --navy:    #0d1b2a;
+    --creme:   #f5f0e8;
+    --bg:      #ede8de;
+    --border:  #ddd7cc;
+    --muted:   #5c6b7a;
+    --white:   #ffffff;
+    --red:     #dc2626;
+    --green:   #059669;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--navy);
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  #ms-widget *, #ms-widget *::before, #ms-widget *::after { box-sizing: border-box; }
+
+  /* ── Card ── */
+  .ms-card {
+    position: relative;
+    background: linear-gradient(to right,
+      var(--creme) 0%,
+      var(--creme) calc(100% - 400px),
+      var(--navy)  calc(100% - 400px));
+    border-radius: 24px;
+    box-shadow: 0 4px 6px -1px rgba(13,27,42,.08), 0 24px 48px rgba(13,27,42,.12);
+    border: 1px solid var(--border);
+    overflow: clip;
+  }
+  .ms-dogear {
+    position: absolute; bottom: 0; right: 0;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 24px 0;
+    pointer-events: none;
+  }
+
+  /* ── Layout ── */
+  .ms-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    align-items: start;
+  }
+  .ms-left    { padding: 48px; }
+  .ms-sidebar { position: sticky; top: 0; padding: 44px 36px 48px; color: var(--white); }
+
+  /* ── Typography ── */
+  .ms-title {
+    font-size: 28px; font-weight: 800; letter-spacing: -.02em;
+    color: var(--navy); margin-bottom: 28px; line-height: 1;
+  }
+  .ms-section {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted);
+    margin: 36px 0 18px;
+  }
+  .ms-section:first-of-type { margin-top: 0; }
+
+  /* ── Grid ── */
+  .ms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .ms-span { grid-column: 1 / -1; }
+
+  /* ── Fields ── */
+  .ms-field { display: flex; flex-direction: column; gap: 5px; }
+  .ms-field label {
+    font-size: 11.5px; font-weight: 600; color: var(--navy); line-height: 1.4;
+  }
+  .ms-opt { font-weight: 400; opacity: .6; font-size: 11px; }
+  .ms-help {
+    font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 3px;
+  }
+
+  /* ── Input shell ── */
+  .ms-shell {
+    display: flex; align-items: center;
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    transition: border-color .15s;
+  }
+  .ms-shell:focus-within { border-color: var(--accent); }
+  .ms-shell input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 15px; font-weight: 700; color: var(--navy);
+    padding: 10px 10px; font-family: inherit; min-width: 0;
+  }
+  .ms-shell input::placeholder { font-weight: 400; color: #bbb; }
+  .ms-unit {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 0 10px; flex-shrink: 0; user-select: none;
+  }
+  .ms-unit--pre { padding-left: 10px; padding-right: 2px; }
+
+  /* ── Moms row ── */
+  .ms-moms-row {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin-top: -2px;
+  }
+  .ms-moms-label {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--muted); font-weight: 500;
+    cursor: pointer; user-select: none; flex: 1; min-width: 180px;
+  }
+  .ms-moms-label input[type="checkbox"] {
+    width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer;
+  }
+  .ms-moms-rate-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .ms-moms-rate-lbl  { font-size: 11.5px; font-weight: 600; color: var(--navy); }
+  .ms-moms-rate-shell {
+    display: flex; align-items: center;
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 8px; overflow: hidden; width: 80px;
+  }
+  .ms-moms-rate-shell input {
+    border: none; outline: none; background: transparent;
+    font-size: 14px; font-weight: 700; color: var(--navy);
+    padding: 6px 2px 6px 10px; width: 100%; font-family: inherit;
+  }
+  .ms-moms-hint {
+    font-size: 11px; color: var(--accent); font-weight: 600;
+    padding: 4px 8px; background: rgba(196,88,30,.08);
+    border-radius: 6px; display: inline-block;
+  }
+
+  /* ── Uptake block ── */
+  .ms-uptake-block { display: flex; flex-direction: column; gap: 10px; }
+  .ms-uptake-label { font-size: 11.5px; font-weight: 600; color: var(--navy); }
+
+  .ms-uptake-row { display: flex; align-items: center; gap: 14px; }
+  .ms-slider-wrap { flex: 1; }
+
+  .ms-slider {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+    background: linear-gradient(to right,
+      var(--accent) 0%, var(--accent) var(--fill, 18%),
+      var(--border) var(--fill, 18%));
+  }
+  .ms-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    box-shadow: 0 1px 4px rgba(13,27,42,.2);
+  }
+  .ms-slider::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    border: none; box-shadow: 0 1px 4px rgba(13,27,42,.2);
+  }
+
+  .ms-uptake-display {
+    display: flex; align-items: baseline; gap: 3px; flex-shrink: 0;
+  }
+  .ms-uptake-n {
+    font-size: 24px; font-weight: 800; color: var(--navy);
+    min-width: 32px; text-align: right; line-height: 1;
+  }
+  .ms-uptake-sfx { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+  .ms-uptake-sub {
+    display: flex; gap: 16px;
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* ── Divider ── */
+  .ms-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+
+  /* ── Helper ── */
+  #ms-helper {
+    font-size: 12px; font-weight: 600; color: var(--red);
+    min-height: 14px; margin-bottom: 10px;
+  }
+
+  /* ── Footer note ── */
+  .ms-footer-note {
+    font-size: 11px; color: var(--muted); margin-top: 32px;
+    line-height: 1.6; opacity: .55;
+  }
+
+  /* ════════════════ SIDEBAR ════════════════ */
+
+  /* PDF btn */
+  .ms-pdf-btn {
+    float: right; clear: both; margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.6); font-size: 11px; font-weight: 600;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    font-family: inherit; transition: background .15s;
+  }
+  .ms-pdf-btn:hover { background: rgba(255,255,255,.14); }
+
+  /* Hero */
+  .ms-hero {
+    margin-bottom: 24px; padding-bottom: 22px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .ms-hero-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: rgba(255,255,255,.4);
+    margin-bottom: 6px;
+  }
+  .ms-hero-val {
+    font-size: 50px; font-weight: 900; line-height: 1;
+    letter-spacing: -.03em; color: var(--accent);
+    margin-bottom: 6px; transition: all .2s;
+    white-space: nowrap;
+  }
+  .ms-hero-val.ms-dash { color: rgba(255,255,255,.18); font-size: 36px; }
+  .ms-hero-sub { font-size: 13px; color: rgba(255,255,255,.45); }
+
+  /* KPI rows */
+  .ms-kpis { display: flex; flex-direction: column; }
+  .ms-kpi {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .ms-kpi:last-child { border-bottom: none; }
+  /* Fremhævet KPI — løft i nettoresultat */
+  #ms-kpi-np-pct { border-top: 1px solid rgba(255,255,255,.12); margin-top: 4px; padding-top: 14px; }
+  #ms-kpi-np-pct .ms-kpi-lbl { color: rgba(255,255,255,.55); }
+  #ms-kpi-np-pct .ms-kpi-val {
+    font-size: 22px; font-weight: 900;
+    color: var(--accent); letter-spacing: -.02em;
+  }
+
+  .ms-kpi-lbl {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; opacity: .45; margin-bottom: 2px;
+  }
+  .ms-kpi-val { font-size: 15px; font-weight: 700; color: var(--white); }
+  .ms-kpi-sub { font-size: 10px; color: rgba(255,255,255,.32); margin-top: 2px; }
+  .ms-kpi--hidden { display: none; }
+
+  /* Framing box */
+  .ms-framing {
+    margin-top: 16px; padding: 11px 13px;
+    background: rgba(255,255,255,.05); border-radius: 9px;
+    font-size: 11px; color: rgba(255,255,255,.45); line-height: 1.6;
+    display: none;
+  }
+  .ms-framing strong { color: rgba(255,255,255,.82); font-weight: 700; }
+
+  /* Break-even */
+  .ms-breakeven {
+    margin-top: 14px; padding: 12px 14px;
+    background: rgba(196,88,30,.15); border-radius: 10px;
+    border: 1px solid rgba(196,88,30,.25); display: none;
+  }
+  .ms-be-lbl {
+    font-size: 9px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 3px;
+  }
+  .ms-be-val  { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .ms-be-sub  { font-size: 10px; color: rgba(255,255,255,.38); margin-top: 2px; }
+
+  /* ── Mobile ── */
+  @media (max-width: 720px) {
+    .ms-layout { grid-template-columns: 1fr; }
+    .ms-card   { background: var(--creme); }
+    .ms-sidebar { background: var(--navy); border-radius: 0 0 24px 24px; position: static; padding: 32px 24px 40px; }
+    .ms-left    { padding: 32px 24px; }
+    .ms-grid    { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .ms-title    { font-size: 22px; }
+    .ms-hero-val { font-size: 38px; }
+  }
+</style>
+
+<div id="ms-widget">
+  <div class="ms-card">
+    <div class="ms-layout">
+
+      <!-- ══════════════ LEFT ══════════════ -->
+      <div class="ms-left">
+
+        <div class="ms-title">Mersalgsberegneren</div>
+        <div id="ms-helper"></div>
+
+        <!-- BASELINE -->
+        <div class="ms-section">Dine tal i dag</div>
+        <div class="ms-grid">
+
+          <div class="ms-field">
+            <label for="ms-tx">Transaktioner pr. år</label>
+            <div class="ms-shell">
+              <input type="text" id="ms-tx" inputmode="numeric" placeholder="5.000" required>
+            </div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-group">Gæster pr. bon</label>
+            <div class="ms-shell">
+              <input type="number" id="ms-group" inputmode="decimal"
+                placeholder="1" value="1" min="1" max="30" step="0.1">
+              <span class="ms-unit">pers.</span>
+            </div>
+            <div class="ms-help">Skriv 1 for retail/webshop. I restaurant: typisk 2–4.</div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-revenue">Nuværende omsætning <span class="ms-opt">(valgfri)</span></label>
+            <div class="ms-shell">
+              <span class="ms-unit ms-unit--pre">kr.</span>
+              <input type="text" id="ms-revenue" inputmode="numeric" placeholder="2.000.000">
+            </div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-profit">Nuværende nettoresultat <span class="ms-opt">(valgfri)</span></label>
+            <div class="ms-shell">
+              <span class="ms-unit ms-unit--pre">kr.</span>
+              <input type="text" id="ms-profit" inputmode="numeric" placeholder="100.000">
+            </div>
+          </div>
+
+        </div><!-- /ms-grid baseline -->
+
+        <!-- MERSALGET -->
+        <div class="ms-section">Mersalget</div>
+        <div class="ms-grid">
+
+          <div class="ms-field">
+            <label for="ms-price">Salgspris</label>
+            <div class="ms-shell">
+              <span class="ms-unit ms-unit--pre">kr.</span>
+              <input type="number" id="ms-price" inputmode="decimal"
+                placeholder="59" min="0.01" step="0.5" required>
+            </div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-margin">Bruttoavance på varen</label>
+            <div class="ms-shell">
+              <input type="number" id="ms-margin" inputmode="decimal"
+                placeholder="70" min="0" max="100" step="1" required>
+              <span class="ms-unit">%</span>
+            </div>
+          </div>
+
+          <!-- Moms -->
+          <div class="ms-moms-row ms-span">
+            <label class="ms-moms-label" for="ms-moms">
+              <input type="checkbox" id="ms-moms">
+              Prisen er inkl. moms
+            </label>
+            <div class="ms-moms-rate-wrap">
+              <span class="ms-moms-rate-lbl">Momssats</span>
+              <div class="ms-moms-rate-shell">
+                <input type="number" id="ms-moms-rate" inputmode="decimal"
+                  value="25" min="1" max="99" step="0.1" placeholder="25">
+                <span class="ms-unit">%</span>
+              </div>
+            </div>
+          </div>
+          <div id="ms-moms-hint" class="ms-moms-hint ms-span" style="display:none;"></div>
+
+          <!-- Uptake -->
+          <div class="ms-uptake-block ms-span">
+            <div class="ms-uptake-label">Uptake — 1 ud af X <span id="ms-guest-word">gæster/kunder</span> siger ja</div>
+            <div class="ms-uptake-row">
+              <div class="ms-slider-wrap">
+                <input type="range" class="ms-slider" id="ms-uptake-sl"
+                  min="1" max="50" step="1" value="10">
+              </div>
+              <div class="ms-uptake-display">
+                <span class="ms-uptake-n" id="ms-uptake-n">10</span>
+                <span class="ms-uptake-sfx" id="ms-uptake-sfx"> gæster/kunder</span>
+              </div>
+            </div>
+            <div class="ms-uptake-sub">
+              <span id="ms-uptake-pct">= 10% af gæster/kunder</span>
+              <span id="ms-uptake-daily"></span>
+            </div>
+          </div>
+
+          <hr class="ms-divider ms-span">
+
+          <div class="ms-field">
+            <label for="ms-relevance">
+              Andel af besøg hvor tilbuddet er relevant
+              <span class="ms-opt">(valgfri)</span>
+            </label>
+            <div class="ms-shell">
+              <input type="number" id="ms-relevance" inputmode="decimal"
+                placeholder="100" value="100" min="1" max="100" step="1">
+              <span class="ms-unit">%</span>
+            </div>
+            <div class="ms-help">Gælder kun ved visse ordretyper? F.eks. 70% hvis kun relevant ved madordre.</div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-startup">
+              Opstartsomkostning
+              <span class="ms-opt">(valgfri)</span>
+            </label>
+            <div class="ms-shell">
+              <span class="ms-unit ms-unit--pre">kr.</span>
+              <input type="text" id="ms-startup" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="ms-help">Uddannelse, menukort, display — beregner break-even i dage.</div>
+          </div>
+
+          <div class="ms-field">
+            <label for="ms-days">Åbningsdage pr. år</label>
+            <div class="ms-shell">
+              <input type="number" id="ms-days" inputmode="numeric"
+                value="300" min="1" max="365" step="1">
+              <span class="ms-unit">dage</span>
+            </div>
+            <div class="ms-help">Bruges til daglige estimater og break-even. Retail: 300–365. Restaurant: 250–320.</div>
+          </div>
+
+        </div><!-- /ms-grid mersalget -->
+
+        <div class="ms-footer-note">
+          Alle beløb vises ekskl. moms medmindre andet er angivet.
+          Dækningsbidrag = ekstra omsætning × bruttoavance.
+          Break-even beregnes på baggrund af dækningsbidrag.
+        </div>
+
+      </div><!-- /ms-left -->
+
+      <!-- ══════════════ SIDEBAR ══════════════ -->
+      <div class="ms-sidebar">
+
+        <button class="ms-pdf-btn" onclick="msPrint()">↗ Gem som PDF</button>
+
+        <!-- Hero -->
+        <div class="ms-hero">
+          <div class="ms-hero-eyebrow">EKSTRA DÆKNINGSBIDRAG PR. ÅR</div>
+          <div class="ms-hero-val ms-dash" id="ms-hero-val">–</div>
+          <div class="ms-hero-sub" id="ms-hero-sub">Udfyld dine tal for at se resultatet</div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="ms-kpis">
+
+          <div class="ms-kpi">
+            <div class="ms-kpi-lbl">Ekstra omsætning pr. år</div>
+            <div class="ms-kpi-val" id="ms-r-rev">–</div>
+            <div class="ms-kpi-sub" id="ms-r-rev-sub"></div>
+          </div>
+
+          <div class="ms-kpi">
+            <div class="ms-kpi-lbl">Ekstra pr. bon</div>
+            <div class="ms-kpi-val" id="ms-r-bon">–</div>
+            <div class="ms-kpi-sub" id="ms-r-bon-sub"></div>
+          </div>
+
+          <div class="ms-kpi">
+            <div class="ms-kpi-lbl" id="ms-r-daily-lbl">Solgt om dagen</div>
+            <div class="ms-kpi-val" id="ms-r-daily">–</div>
+            <div class="ms-kpi-sub" id="ms-r-daily-sub"></div>
+          </div>
+
+          <div class="ms-kpi ms-kpi--hidden" id="ms-kpi-rev-pct">
+            <div class="ms-kpi-lbl">Andel af nuværende omsætning</div>
+            <div class="ms-kpi-val" id="ms-r-rev-pct">–</div>
+          </div>
+
+          <div class="ms-kpi ms-kpi--hidden" id="ms-kpi-np-pct">
+            <div class="ms-kpi-lbl">Løft i nettoresultat</div>
+            <div class="ms-kpi-val" id="ms-r-np-pct">–</div>
+          </div>
+
+        </div><!-- /ms-kpis -->
+
+        <!-- Framing -->
+        <div class="ms-framing" id="ms-framing"></div>
+
+        <!-- Break-even -->
+        <div class="ms-breakeven" id="ms-breakeven">
+          <div class="ms-be-lbl">Break-even på opstartsomkostning</div>
+          <div class="ms-be-val" id="ms-be-val">–</div>
+          <div class="ms-be-sub" id="ms-be-sub"></div>
+        </div>
+
+      </div><!-- /ms-sidebar -->
+
+    </div><!-- /ms-layout -->
+    <div class="ms-dogear"></div>
+  </div><!-- /ms-card -->
+</div><!-- /ms-widget -->
+
+<script>
+(function () {
+  // ── Formatters ───────────────────────────────────────────────
+  function fmt(v, dec) {
+    if (!isFinite(v)) return "–";
+    return new Intl.NumberFormat("da-DK", { maximumFractionDigits: dec != null ? dec : 0 }).format(v);
+  }
+  function fmtKr(v) { return isFinite(v) ? fmt(Math.round(v), 0) + " kr." : "–"; }
+  function fmtPct(v, d) { return isFinite(v) ? fmt(v, d != null ? d : 1) + "%" : "–"; }
+
+  // ── Read helpers ─────────────────────────────────────────────
+  function num(id) {
+    var el = document.getElementById(id);
+    if (!el) return NaN;
+    // Handle thousand-separator (text inputs) and decimal comma
+    return parseFloat(String(el.value).replace(/\./g, "").replace(",", "."));
+  }
+  function numF(id) {
+    // Direct float parse (number inputs, no thousand sep)
+    var el = document.getElementById(id);
+    if (!el) return NaN;
+    return parseFloat(String(el.value).replace(",", "."));
+  }
+  function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+  function show(id, vis) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = vis ? "" : "none";
+    if (el) el.classList.toggle("ms-kpi--hidden", !vis);
+  }
+
+  // ── Money inputs (thousand separator on blur) ────────────────
+  ["ms-tx","ms-revenue","ms-profit","ms-startup"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var fmt0 = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 0 });
+    el.addEventListener("blur", function () {
+      var n = parseInt(String(el.value).replace(/\./g, ""), 10);
+      if (!isNaN(n)) el.value = fmt0.format(n);
+      recalc();
+    });
+    el.addEventListener("focus", function () {
+      el.value = String(el.value).replace(/\./g, "");
+    });
+    el.addEventListener("input", recalc);
+  });
+
+  // ── Slider fill util ─────────────────────────────────────────
+  function fillSlider(sl) {
+    if (!sl) return;
+    var mn = parseFloat(sl.min) || 0, mx = parseFloat(sl.max) || 1;
+    var pct = Math.max(0, Math.min(100, (parseFloat(sl.value) - mn) / (mx - mn) * 100));
+    sl.style.setProperty("--fill", pct + "%");
+  }
+
+  // ── Uptake slider ────────────────────────────────────────────
+  var sl = document.getElementById("ms-uptake-sl");
+
+  function updateUptakeUI(n, guestWord) {
+    set("ms-uptake-n",    n);
+    set("ms-uptake-sfx",  " " + guestWord);
+    set("ms-guest-word",  guestWord);
+    set("ms-uptake-pct",  "= " + fmt(100 / n, 1) + "% af gæster/kunder");
+    fillSlider(sl);
+  }
+
+  if (sl) {
+    sl.addEventListener("input", function () { recalc(); });
+    fillSlider(sl);
+  }
+
+  // ── Moms ────────────────────────────────────────────────────
+  var momsEl     = document.getElementById("ms-moms");
+  var momsRateEl = document.getElementById("ms-moms-rate");
+  if (momsEl)     momsEl.addEventListener("change", recalc);
+  if (momsRateEl) { momsRateEl.addEventListener("input", recalc); momsRateEl.addEventListener("change", recalc); }
+
+  // ── Other listeners ──────────────────────────────────────────
+  ["ms-group","ms-price","ms-margin","ms-relevance","ms-days"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener("input", recalc); el.addEventListener("change", recalc); }
+  });
+
+  // ── Main recalc ──────────────────────────────────────────────
+  function recalc() {
+    var helper = document.getElementById("ms-helper");
+    if (helper) helper.textContent = "";
+
+    // Moms
+    var momsOn   = momsEl ? momsEl.checked : false;
+    var momsRate = numF("ms-moms-rate");
+    if (!isFinite(momsRate) || momsRate <= 0 || momsRate >= 100) momsRate = 25;
+    var momsDiv  = momsOn ? (1 + momsRate / 100) : 1;
+    var dispDiv  = 1 + momsRate / 100; // always use for inkl.-hints
+
+    // Baseline
+    var tx      = num("ms-tx");
+    var gs      = numF("ms-group");
+    var revenue = num("ms-revenue");
+    var profit  = num("ms-profit");
+    if (!isFinite(gs) || gs < 1) gs = 1;
+
+    // Product
+    var rawPrice   = numF("ms-price");
+    var marginPct  = numF("ms-margin");
+
+    // Validate
+    var missing = [];
+    if (!isFinite(tx) || tx < 1)             missing.push("Transaktioner pr. år");
+    if (!isFinite(rawPrice) || rawPrice <= 0) missing.push("Salgspris");
+    if (!isFinite(marginPct) || marginPct < 0) missing.push("Bruttoavance");
+
+    if (missing.length) {
+      if (helper) helper.textContent = "Udfyld venligst: " + missing.join(", ");
+      showDash();
+      updateUptakeUI(parseInt(sl ? sl.value : 10) || 10, "gæster/kunder");
+      return;
+    }
+
+    var exPrice   = rawPrice / momsDiv;
+    var margin    = marginPct / 100;
+    var dbPerUnit = exPrice * margin;
+
+    var guestWord  = "gæster/kunder";
+    var uptakeN    = parseInt(sl ? sl.value : 10) || 10;
+    var relevPct   = numF("ms-relevance");
+    var relev      = (isFinite(relevPct) && relevPct > 0 && relevPct <= 100) ? relevPct / 100 : 1;
+    var startCost  = num("ms-startup");
+    var daysRaw    = numF("ms-days");
+    var days       = (isFinite(daysRaw) && daysRaw >= 1 && daysRaw <= 365) ? daysRaw : 300;
+
+    updateUptakeUI(uptakeN, guestWord);
+
+    // ── Calculations ────────────────────────────────────────────
+    var guestsPerYear    = tx * gs;
+    var relevGuests      = guestsPerYear * relev;
+    var upselledPerYear  = relevGuests / uptakeN;      // actual upsell events/year
+    var extraRevYear     = upselledPerYear * exPrice;
+    var extraDbYear      = upselledPerYear * dbPerUnit;
+
+    var upselledPerTx    = gs * relev / uptakeN;       // average upsells per transaction
+    var extraRevPerTx    = upselledPerTx * exPrice;
+
+    var upselledPerDay   = upselledPerYear / days;
+    var extraDbPerDay    = extraDbYear / days;
+
+    // ── Moms hint ────────────────────────────────────────────────
+    var hintEl = document.getElementById("ms-moms-hint");
+    if (hintEl) {
+      if (momsOn) {
+        hintEl.textContent = "= " + fmtKr(exPrice) + " ekskl. moms";
+        hintEl.style.display = "inline-block";
+      } else {
+        hintEl.style.display = "none";
+      }
+    }
+
+    // Uptake daily preview (above fold)
+    set("ms-uptake-daily",
+      isFinite(upselledPerDay) && isFinite(tx)
+        ? "≈ " + fmt(upselledPerDay, 1) + " stk./dag"
+        : "");
+
+    // ── Hero ─────────────────────────────────────────────────────
+    var heroEl = document.getElementById("ms-hero-val");
+    if (heroEl) {
+      heroEl.classList.remove("ms-dash");
+      heroEl.textContent = fmtKr(extraDbYear);
+    }
+    set("ms-hero-sub", "= " + fmtKr(extraDbPerDay) + " ekstra om dagen");
+
+    // ── KPI rows ─────────────────────────────────────────────────
+    set("ms-r-rev",     fmtKr(extraRevYear));
+    set("ms-r-rev-sub", "inkl. moms: " + fmtKr(extraRevYear * dispDiv));
+
+    set("ms-r-bon",     fmtKr(extraRevPerTx));
+    if (gs > 1.05) {
+      set("ms-r-bon-sub",
+        fmt(upselledPerTx, 2) + " ekstra " +
+        (upselledPerTx < 1.5 ? "enhed" : "enheder") + " pr. bord");
+    } else {
+      set("ms-r-bon-sub", "");
+    }
+
+    set("ms-r-daily-lbl", guestWord.charAt(0).toUpperCase() + guestWord.slice(1) +
+      " der siger ja — om dagen");
+    set("ms-r-daily",     fmt(upselledPerDay, 1) + " stk.");
+    set("ms-r-daily-sub", "= " + fmt(Math.round(upselledPerYear), 0) + " om året");
+
+    // Optional: andel af omsætning
+    var revPctRow = document.getElementById("ms-kpi-rev-pct");
+    if (isFinite(revenue) && revenue > 0) {
+      set("ms-r-rev-pct", fmtPct(extraRevYear / revenue * 100, 1) + " af omsætningen");
+      if (revPctRow) revPctRow.classList.remove("ms-kpi--hidden");
+    } else {
+      if (revPctRow) revPctRow.classList.add("ms-kpi--hidden");
+    }
+
+    // Optional: løft i nettoresultat
+    var npPctRow = document.getElementById("ms-kpi-np-pct");
+    if (isFinite(profit) && profit !== 0) {
+      var impact = extraDbYear / Math.abs(profit) * 100;
+      set("ms-r-np-pct",
+        (profit > 0 ? "+" : "") + fmtPct(impact, 1) +
+        " (" + fmtKr(extraDbYear) + " ekstra DB)");
+      if (npPctRow) npPctRow.classList.remove("ms-kpi--hidden");
+    } else {
+      if (npPctRow) npPctRow.classList.add("ms-kpi--hidden");
+    }
+
+    // ── Framing box ───────────────────────────────────────────────
+    var framingEl = document.getElementById("ms-framing");
+    if (framingEl) {
+      var perDayRounded = Math.round(upselledPerDay * 10) / 10;
+      var priceLabel = "til mersalg på " + fmt(rawPrice, 2) + " kr.";
+      var line1 = "1 ud af " + uptakeN + " " + guestWord + " siger ja " + priceLabel;
+      if (gs > 1.05) {
+        var bordeUdAf = Math.round(gs * relev);
+        line1 += " — <strong>" + bordeUdAf + " ud af " + uptakeN + " borde</strong>" +
+          " = " + fmtKr(extraRevPerTx) + " pr. bon i gennemsnit";
+      } else {
+        line1 += " = <strong>" + fmtKr(extraRevPerTx) + " ekstra pr. transaktion</strong> i gennemsnit";
+      }
+      var line2 = "<strong>" + fmt(perDayRounded, 1) + " solgt om dagen</strong>" +
+        " × " + fmt(exPrice, 2) + " kr. × " + fmtPct(marginPct, 0) + " avance" +
+        " = " + fmtKr(extraDbPerDay) + " DB/dag";
+
+      framingEl.innerHTML = line1 + "<br>" + line2;
+      framingEl.style.display = "block";
+    }
+
+    // ── Break-even ─────────────────────────────────────────────────
+    var beBlock = document.getElementById("ms-breakeven");
+    if (isFinite(startCost) && startCost > 0 && extraDbPerDay > 0) {
+      var beDays = Math.ceil(startCost / extraDbPerDay);
+      set("ms-be-val", beDays + " dage");
+      set("ms-be-sub", "Du tjener " + fmtKr(startCost) +
+        " hjem på " + beDays + " dage (" +
+        fmt(beDays / 30.4, 1) + " måneder)");
+      if (beBlock) beBlock.style.display = "block";
+    } else {
+      if (beBlock) beBlock.style.display = "none";
+    }
+  }
+
+  function showDash() {
+    var heroEl = document.getElementById("ms-hero-val");
+    if (heroEl) { heroEl.textContent = "–"; heroEl.classList.add("ms-dash"); }
+    set("ms-hero-sub", "Udfyld dine tal for at se resultatet");
+    ["ms-r-rev","ms-r-bon","ms-r-daily"].forEach(function (id) { set(id, "–"); });
+    ["ms-r-rev-sub","ms-r-bon-sub","ms-r-daily-sub"].forEach(function (id) { set(id, ""); });
+    var framingEl = document.getElementById("ms-framing");
+    if (framingEl) framingEl.style.display = "none";
+    var beBlock = document.getElementById("ms-breakeven");
+    if (beBlock) beBlock.style.display = "none";
+    var hintEl = document.getElementById("ms-moms-hint");
+    if (hintEl) hintEl.style.display = "none";
+  }
+
+  // ── Initial render ───────────────────────────────────────────
+  fillSlider(sl);
+  recalc();
+
+  // ── PDF / Print ──────────────────────────────────────────────
+  window.msPrint = function () {
+    function v(id) { var el = document.getElementById(id); return el ? el.value : ""; }
+    function t(id) { var el = document.getElementById(id); return el ? el.textContent : "–"; }
+    var momsOn   = document.getElementById("ms-moms") && document.getElementById("ms-moms").checked;
+    var momsRate = v("ms-moms-rate") || "25";
+    var revPctHidden = document.getElementById("ms-kpi-rev-pct") &&
+      document.getElementById("ms-kpi-rev-pct").classList.contains("ms-kpi--hidden");
+    var npPctHidden  = document.getElementById("ms-kpi-np-pct") &&
+      document.getElementById("ms-kpi-np-pct").classList.contains("ms-kpi--hidden");
+    var beHidden = document.getElementById("ms-breakeven") &&
+      document.getElementById("ms-breakeven").style.display === "none";
+
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+      '<title>Mersalgsberegneren — rapport</title><style>' +
+      'body{font-family:system-ui,sans-serif;color:#0d1b2a;max-width:680px;margin:40px auto;padding:0 24px;}' +
+      'h1{font-size:22px;font-weight:800;margin-bottom:2px;}' +
+      '.date{color:#5c6b7a;font-size:12px;margin-bottom:28px;}' +
+      '.hero{background:#0d1b2a;color:#fff;border-radius:12px;padding:22px 24px;margin-bottom:20px;' +
+        'print-color-adjust:exact;-webkit-print-color-adjust:exact;}' +
+      '.hero-lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.45;margin-bottom:4px;}' +
+      '.hero-val{font-size:34px;font-weight:900;color:#C4581E;line-height:1;}' +
+      '.hero-sub{font-size:12px;opacity:.4;margin-top:4px;}' +
+      '.framing{background:#f5f0e8;border-radius:8px;padding:12px 16px;font-size:12px;color:#5c6b7a;line-height:1.7;margin-bottom:20px;}' +
+      '.framing strong{color:#0d1b2a;}' +
+      'h2{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5c6b7a;margin:20px 0 8px;}' +
+      'table{width:100%;border-collapse:collapse;}' +
+      'td{padding:7px 0;border-bottom:1px solid #eee;font-size:12px;}' +
+      'td:last-child{text-align:right;font-weight:600;}' +
+      '</style></head><body>' +
+      '<h1>Mersalgsberegneren</h1>' +
+      '<div class="date">Rapport — ' +
+        new Date().toLocaleDateString("da-DK", {day:"numeric",month:"long",year:"numeric"}) +
+      '</div>' +
+      '<div class="hero">' +
+        '<div class="hero-lbl">Ekstra dækningsbidrag pr. år</div>' +
+        '<div class="hero-val">' + t("ms-hero-val") + '</div>' +
+        '<div class="hero-sub">' + t("ms-hero-sub") + '</div>' +
+      '</div>' +
+      '<div class="framing">' + (document.getElementById("ms-framing").innerHTML || "–") + '</div>' +
+      '<h2>Resultater</h2><table>' +
+        '<tr><td>Ekstra omsætning pr. år</td><td>' + t("ms-r-rev") + '</td></tr>' +
+        '<tr><td>Ekstra pr. bon</td><td>' + t("ms-r-bon") + '</td></tr>' +
+        '<tr><td>' + t("ms-r-daily-lbl") + '</td><td>' + t("ms-r-daily") + '</td></tr>' +
+        (!revPctHidden ? '<tr><td>Andel af omsætning</td><td>' + t("ms-r-rev-pct") + '</td></tr>' : '') +
+        (!npPctHidden  ? '<tr><td>Løft i nettoresultat</td><td>' + t("ms-r-np-pct") + '</td></tr>' : '') +
+      '</table>' +
+      '<h2>Dine tal</h2><table>' +
+        '<tr><td>Transaktioner pr. år</td><td>' + v("ms-tx") + '</td></tr>' +
+        '<tr><td>Gæster pr. bon</td><td>' + v("ms-group") + '</td></tr>' +
+        (v("ms-revenue") ? '<tr><td>Omsætning</td><td>' + v("ms-revenue") + ' kr.</td></tr>' : '') +
+        (v("ms-profit")  ? '<tr><td>Nettoresultat</td><td>' + v("ms-profit")  + ' kr.</td></tr>' : '') +
+      '</table>' +
+      '<h2>Mersalget</h2><table>' +
+        '<tr><td>Salgspris</td><td>' + v("ms-price") + ' kr.' +
+          (momsOn ? ' (inkl. ' + momsRate + '% moms)' : '') + '</td></tr>' +
+        '<tr><td>Bruttoavance</td><td>' + v("ms-margin") + '%</td></tr>' +
+        '<tr><td>Uptake</td><td>1 ud af ' + v("ms-uptake-sl") + ' ' + t("ms-guest-word") + '</td></tr>' +
+        '<tr><td>Relevante besøg</td><td>' + v("ms-relevance") + '%</td></tr>' +
+        '<tr><td>Åbningsdage pr. år</td><td>' + v("ms-days") + ' dage</td></tr>' +
+        (v("ms-startup")
+          ? '<tr><td>Opstartsomkostning</td><td>' + v("ms-startup") + ' kr.</td></tr>' : '') +
+        (v("ms-startup") && !beHidden
+          ? '<tr><td>Break-even</td><td>' + t("ms-be-val") + ' — ' + t("ms-be-sub") + '</td></tr>' : '') +
+      '</table>' +
+      '</body></html>';
+
+    var w = window.open("", "_blank");
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      setTimeout(function () { w.print(); }, 400);
+    }
+  };
+
+})();
+</script>
