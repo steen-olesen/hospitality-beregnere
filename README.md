@@ -40,8 +40,12 @@ Hver `index.html` er skrevet til at kunne indsættes direkte i et CMS-felt der a
 2. Kopiér hele filens indhold.
 3. Indsæt det i CMS'ets HTML-blok på siden, hvor beregneren skal vises.
 
-Når beregnerne bliver hostet et fast sted (se forslag nedenfor), kan embed i stedet ske via en `<iframe>` der peger på den hostede URL — så opdateres alle indlejringer automatisk, uden manuel copy-paste, når filen ændres.
+Når en beregners domæne er whitelistet (se domain-lock nedenfor), kan embed i stedet ske via en `<iframe>` der peger på den hostede URL — så opdateres alle indlejringer automatisk, uden manuel copy-paste, når filen ændres.
+
+## Domain-lock
+
+Hver beregners script tjekker `window.location.hostname` mod en indbygget whitelist. På et ikke-godkendt domæne viser widgeten kun en byline ("Denne beregner er udviklet af Steen Olesen.") i stedet for selve beregneren — det er tilsigtet kopibeskyttelse, ikke en fejl. `detmindrebureau.dk` (og `localhost`) er bekræftet whitelistet i `cltv/` og `fpl/`; resten obfuskerer listen i scriptet, så tjek/udvid den pr. beregner før et nyt domæne (fx en GitHub Pages-URL eller en klients CMS-domæne) skal kunne vise widgeten.
 
 ## Status / hosting
 
-Endnu ikke hostet et fast sted — beregnerne bruges i dag ved manuel copy-paste af HTML'en ind i hvert CMS. Se anbefaling til statisk hosting (GitHub Pages/Vercel/Netlify) i det tilhørende værktøjsoversigt-dokument.
+Hostet via GitHub Pages: `https://steen-olesen.github.io/hospitality-beregnere/<mappe>/`. Bemærk domain-lock ovenfor — den rå GitHub Pages-URL virker kun hvis `steen-olesen.github.io` er whitelistet i den enkelte beregner.
