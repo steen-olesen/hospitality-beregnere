@@ -44,8 +44,12 @@ Når en beregners domæne er whitelistet (se domain-lock nedenfor), kan embed i 
 
 ## Domain-lock
 
-Hver beregners script tjekker `window.location.hostname` mod en indbygget whitelist. På et ikke-godkendt domæne viser widgeten kun en byline ("Denne beregner er udviklet af Steen Olesen.") i stedet for selve beregneren — det er tilsigtet kopibeskyttelse, ikke en fejl. `detmindrebureau.dk` (og `localhost`) er bekræftet whitelistet i `cltv/` og `fpl/`; resten obfuskerer listen i scriptet, så tjek/udvid den pr. beregner før et nyt domæne (fx en GitHub Pages-URL eller en klients CMS-domæne) skal kunne vise widgeten.
+`cltv`, `leadvalue`, `evc`, `fpl` og `mgc` tjekker `window.location.hostname` mod en indbygget whitelist. På et ikke-godkendt domæne viser widgeten kun en byline ("Denne beregner er udviklet af Steen Olesen.") i stedet for selve beregneren — det er tilsigtet kopibeskyttelse, ikke en fejl. Bekræftet whitelist (afkodet fra den obfuskerede kilde) for `cltv`, `leadvalue`, `evc` og `mgc`: `localhost`, `detmindrebureau.dk`, `booost.dk`, `dinmening.dk`, `mundtilmund.dk`, `mundtilmund.com`, `steenolesen.com` (enkelte af disse fem mangler et enkelt domæne fra listen — se `vaerktoejsoversigt.md` for detaljer pr. fil). `fpl` bruger en anden scriptstruktur der ikke kunne afkodes automatisk, men indeholder samme `detmindrebureau.dk`-streng.
+
+`breakup` og `mersalg` har **intet** domain-lock og virker på ethvert domæne.
+
+`steen-olesen.github.io` står ikke på nogen whitelist. Skal et låst værktøj bruges via iframe fra GitHub Pages, skal enten whitelisten udvides, eller der skal bruges et custom domain der matcher en allerede godkendt (fx en subdomain af `detmindrebureau.dk`).
 
 ## Status / hosting
 
-Hostet via GitHub Pages: `https://steen-olesen.github.io/hospitality-beregnere/<mappe>/`. Bemærk domain-lock ovenfor — den rå GitHub Pages-URL virker kun hvis `steen-olesen.github.io` er whitelistet i den enkelte beregner.
+Hostet via GitHub Pages: `https://steen-olesen.github.io/hospitality-beregnere/<mappe>/`. Kun `breakup` og `mersalg` virker fuldt ud på den rå Pages-URL i dag; de øvrige fem kræver whitelist-arbejde først (se Domain-lock ovenfor).
