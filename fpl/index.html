@@ -113,7 +113,7 @@
   .fp-baseline-collapsible {
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.25s ease;
-    max-height: 1000px;
+    max-height: 2400px;
     opacity: 1;
   }
   .fp-baseline-collapsible.fp-collapsed {
@@ -799,6 +799,10 @@
     .fp-lever-reset { margin-left: auto; }
     .fp-kpi-row-top { flex-wrap: wrap; }
     .fp-kpi-values { flex-wrap: wrap; }
+    .fp-left { padding: 18px 14px; }
+    .fp-sidebar { padding: 24px 18px 30px; }
+    .fp-lever-header { padding: 12px 14px 10px; }
+    .fp-lever-body { padding: 14px 14px 12px; }
   }
   @media (max-width: 420px) {
     .fp-seg-grid { grid-template-columns: minmax(0, 1fr); }
@@ -825,7 +829,7 @@
         </div>
         <div class="fp-baseline-summary" id="fp-baseline-summary"></div>
         <div class="fp-baseline-collapsible" id="fp-baseline-collapsible">
-        <div class="fp-help fp-example-note" style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:16px;color:var(--navy);font-size:12.5px;"><strong>Eksempel:</strong> en forretning med 5 mio. kr. i omsætning og 250.000 kr. i overskud. Skift tallene ud med dine egne.</div>
+        <div class="fp-help fp-example-note" id="fp-example-note" style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:16px;color:var(--navy);font-size:12.5px;"><strong>Eksempel:</strong> en forretning med 5 mio. kr. i omsætning og 250.000 kr. i overskud. Skift tallene ud med dine egne.</div>
         <div class="fp-baseline-grid">
 
           <!-- Række 1: Omsætning + Nettoresultat side om side -->
@@ -2550,6 +2554,18 @@
     });
   }
 
+  // Eksempel-mærkaten skjules, så snart brugeren retter i egne tal
+  var baselineWrap = document.getElementById("fp-baseline-collapsible");
+  if (baselineWrap) {
+    var hideExampleNote = function (e) {
+      if (!e.isTrusted) return;
+      var noteEl = document.getElementById("fp-example-note");
+      if (noteEl) noteEl.style.display = "none";
+    };
+    baselineWrap.addEventListener("input", hideExampleNote);
+    baselineWrap.addEventListener("change", hideExampleNote);
+  }
+
   var rBaseBtn = document.getElementById("fp-reset-baseline");
   if (rBaseBtn) {
     rBaseBtn.addEventListener("click", function () {
@@ -2575,6 +2591,8 @@
       var momsEl = document.getElementById("fp-moms-toggle");
       if (momsEl) momsEl.checked = false;
       setRaw("fp-moms-rate", "25");
+      var noteEl = document.getElementById("fp-example-note");
+      if (noteEl) noteEl.style.display = "";
       recalc();
     });
   }
