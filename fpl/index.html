@@ -808,6 +808,7 @@
         </div>
         <div class="fp-baseline-summary" id="fp-baseline-summary"></div>
         <div class="fp-baseline-collapsible" id="fp-baseline-collapsible">
+        <div class="fp-help fp-example-note" style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:16px;color:var(--navy);font-size:12.5px;"><strong>Eksempel:</strong> en forretning med 5 mio. kr. i omsætning og 250.000 kr. i overskud. Skift tallene ud med dine egne.</div>
         <div class="fp-baseline-grid">
 
           <!-- Række 1: Omsætning + Nettoresultat side om side -->
@@ -817,6 +818,7 @@
               <span class="fp-unit">kr.</span>
               <input type="text" id="b-revenue" inputmode="numeric" placeholder="5.000.000" value="5000000" required>
             </div>
+            <div class="fp-help">Fra seneste årsregnskab, ekskl. moms. Taster du inkl. moms, så sæt flueben nedenfor.</div>
           </div>
 
           <div class="fp-field">
@@ -825,6 +827,7 @@
               <span class="fp-unit">kr.</span>
               <input type="text" id="b-netprofit" inputmode="numeric" placeholder="250.000" value="250000" required>
             </div>
+            <div class="fp-help">Overskud før skat fra seneste årsregnskab.</div>
           </div>
 
           <!-- Række 2: Moms toggle + momssats — spans full grid width -->
@@ -849,6 +852,7 @@
               <input type="number" id="b-conv" inputmode="decimal" placeholder="25" value="25" min="0" max="100" required>
               <span class="fp-unit">%</span>
             </div>
+            <div class="fp-help">Hvor mange af dem, der overvejede dig, endte med at købe? Restaurant med fulde borde: tæt på 100 %. Tomme borde og mange forbipasserende: lavere. Gæt.</div>
           </div>
 
           <div class="fp-field">
@@ -857,6 +861,7 @@
               <input type="number" id="b-margin" inputmode="decimal" placeholder="50" value="50" min="0" max="100" required>
               <span class="fp-unit">%</span>
             </div>
+            <div class="fp-help">(Omsætning − vareforbrug) ÷ omsætning. Står i dit regnskab.</div>
           </div>
 
           <div class="fp-field">
@@ -864,6 +869,7 @@
             <div class="fp-input-shell">
               <input type="text" id="b-tx" inputmode="numeric" placeholder="5.000" value="5000" required>
             </div>
+            <div class="fp-help">Antal bonner/regninger pr. år.</div>
           </div>
 
           <div class="fp-field">
@@ -871,6 +877,7 @@
             <div class="fp-input-shell">
               <input type="text" id="b-units" inputmode="numeric" placeholder="7.500" value="7500">
             </div>
+            <div class="fp-help">Antal solgte varer i alt — retter, drikkevarer, produkter. Ved du det ikke, så spring over.</div>
             <div class="fp-help" id="units-warning" style="display:none;color:var(--red);margin-top:6px;">⚠ Antal solgte enheder er lavere end antal transaktioner — det giver under 1 enhed pr. køb, hvilket ikke er muligt.</div>
           </div>
 
@@ -879,6 +886,7 @@
             <div class="fp-input-shell">
               <input type="number" id="b-days" inputmode="numeric" placeholder="300" value="300" min="1" max="365">
             </div>
+            <div class="fp-help">Retail: 300–365. Restaurant: 250–320.</div>
           </div>
 
           <div class="fp-field">
@@ -887,6 +895,7 @@
               <input type="number" id="b-loy" inputmode="decimal" placeholder="33" value="33" min="0" max="100">
               <span class="fp-unit">%</span>
             </div>
+            <div class="fp-help">Hvor stor en del af dine kunder kommer igen? Gæt.</div>
           </div>
 
           <div class="fp-field">
@@ -895,6 +904,7 @@
               <input type="number" id="b-loy-q2" inputmode="decimal" placeholder="4" value="4" min="1" max="52" step="0.1">
               <span class="fp-unit">køb</span>
             </div>
+            <div class="fp-help">Hvor mange gange om året kommer en stamkunde?</div>
           </div>
 
           <div class="fp-field">
@@ -903,6 +913,7 @@
               <input type="number" id="b-loy-q3" inputmode="decimal" placeholder="5" value="5" min="0.5" max="25" step="0.5">
               <span class="fp-unit">år</span>
             </div>
+            <div class="fp-help">Hvor mange år bliver en stamkunde typisk ved med at komme?</div>
           </div>
 
         </div><!-- /fp-baseline-grid -->
@@ -1706,7 +1717,7 @@
   }
 
   function resetAll() {
-    ["conv","upt","price","loy","new","margin"].forEach(resetLever);
+    ["conv","upt","price","loy","new","margin","fixed"].forEach(resetLever);
     leverAdjusted.conv = false;
     leverAdjusted.upt = false;
     leverAdjusted.price = false;
