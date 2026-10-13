@@ -1304,7 +1304,7 @@
 
             <div class="fp-kpi-row">
               <div class="fp-kpi-row-top">
-                <div class="fp-kpi-label">Besøgende</div>
+                <div class="fp-kpi-label">Besøg</div>
                 <span class="fp-kpi-badge" id="r-vis-badge"></span>
               </div>
               <div class="fp-kpi-values">
@@ -1543,11 +1543,10 @@
     // Step G — target transactions
     var targetTx = transactions + convLift + loyLift + newLift;
 
-    // Step H — target visitors
-    var targetVisitors = baseVisitors;
-    if (targetConv > 0 && newInc > 0) {
-      targetVisitors = baseVisitors + newInc / (targetConv / 100);
-    }
+    // Step H — target visits: hver transaktion kræver et besøg, så besøg efter =
+    // transaktioner efter ÷ konverteringsrate. Tæller også stamkunders ekstra
+    // besøg og nye kunders genbesøg (før kun nye kunders første besøg).
+    var targetVisitors = targetConv > 0 ? targetTx / (targetConv / 100) : baseVisitors;
 
     // Step I — target AOV
     var tUpt   = (t.upt      !== null && t.upt      !== undefined && isFinite(t.upt))      ? t.upt      : b.baseUpt;
