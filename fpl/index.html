@@ -1680,6 +1680,49 @@
     }
   }
 
+  // ─── FOLLOW BASELINE ────────────────────────────────────────────────────────
+  // Når grundtallene ændres (fx "Omsætning er inkl. moms"), skal levers, brugeren
+  // allerede har flyttet, følge med i stedet for at blive stående på deres gamle
+  // tal. Pris og enheder bevarer forholdet (165 af 166,67 = −1 %), procent- og
+  // loyalitetsfelter bevarer forskellen (90 → 92 = +2 point).
+  var prevBaseKey = null;
+  var leverOffset = { conv: 0, upt: 1, price: 1, margin: 0, loy1: 0, loy2: 0, loy3: 0 };
+
+  function followBaseline(bConv, bUpt, bPrice, bMargin) {
+    if (!leversInited) return;
+    var bLoy1 = num("b-loy");    bLoy1 = isFinite(bLoy1) && bLoy1 >= 0 ? bLoy1 : 35;
+    var bLoy2 = num("b-loy-q2"); bLoy2 = isFinite(bLoy2) && bLoy2 >= 1 ? bLoy2 : 4;
+    var bLoy3 = num("b-loy-q3"); bLoy3 = isFinite(bLoy3) && bLoy3 >= 0.5 ? bLoy3 : 5;
+    var key = [bConv, bUpt, bPrice, bMargin, bLoy1, bLoy2, bLoy3].join("|");
+    var r = function (v, d) { var f = Math.pow(10, d); return Math.round(v * f) / f; };
+
+    if (prevBaseKey !== null && key !== prevBaseKey) {
+      // Grundtal ændret → flyt levers med (ikke-justerede levers har neutral offset)
+      var o = leverOffset;
+      setField("sl-conv",   "in-conv",   r(Math.min(100, Math.max(0, bConv + (leverAdjusted.conv ? o.conv : 0))), 1));
+      setField("sl-upt",    "in-upt",    r(bUpt * (leverAdjusted.upt ? o.upt : 1), 2));
+      setField("sl-price",  "in-price",  r(bPrice * (leverAdjusted.price ? o.price : 1), 2));
+      setField("sl-margin", "in-margin", r(Math.min(99, bMargin + (leverAdjusted.margin ? o.margin : 0)), 1));
+      setField("sl-loy-q1", "in-loy-q1", r(Math.min(100, Math.max(0, bLoy1 + (leverAdjusted.loy ? o.loy1 : 0))), 1));
+      setField("sl-loy-q2", "in-loy-q2", r(Math.max(1, bLoy2 + (leverAdjusted.loy ? o.loy2 : 0)), 2));
+      setField("sl-loy-q3", "in-loy-q3", r(Math.max(0.5, bLoy3 + (leverAdjusted.loy ? o.loy3 : 0)), 1));
+    } else {
+      // Grundtal uændret → brugeren har evt. flyttet en lever; gem ændringen
+      var tConv = num("in-conv"), tUpt = num("in-upt"), tPrice = num("in-price"), tMargin = num("in-margin");
+      var tL1 = num("in-loy-q1"), tL2 = num("in-loy-q2"), tL3 = num("in-loy-q3");
+      leverOffset = {
+        conv:   leverAdjusted.conv   && isFinite(tConv)   ? tConv - bConv     : 0,
+        upt:    leverAdjusted.upt    && isFinite(tUpt)   && bUpt > 0   ? tUpt / bUpt     : 1,
+        price:  leverAdjusted.price  && isFinite(tPrice) && bPrice > 0 ? tPrice / bPrice : 1,
+        margin: leverAdjusted.margin && isFinite(tMargin) ? tMargin - bMargin : 0,
+        loy1:   leverAdjusted.loy    && isFinite(tL1)     ? tL1 - bLoy1       : 0,
+        loy2:   leverAdjusted.loy    && isFinite(tL2)     ? tL2 - bLoy2       : 0,
+        loy3:   leverAdjusted.loy    && isFinite(tL3)     ? tL3 - bLoy3       : 0
+      };
+    }
+    prevBaseKey = key;
+  }
+
   // ─── RESET HELPERS ──────────────────────────────────────────────────────────
   function getBaseline() {
     var turnover     = num("b-revenue");
@@ -1833,6 +1876,9 @@
     if (!leversInited) {
       initLevers(bConvPct, bUpt, bPrice, grossMarginPct);
     }
+
+    // Levers follow the baseline (fx momsflueben): samme relative ændring bevares
+    followBaseline(bConvPct, bUpt, bPrice, grossMarginPct);
 
     // Update slider max for price if baseline changes significantly
     // Also sync slider to new bPrice if lever hasn't been manually adjusted
