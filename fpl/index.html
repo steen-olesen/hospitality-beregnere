@@ -807,6 +807,40 @@
   @media (max-width: 420px) {
     .fp-seg-grid { grid-template-columns: minmax(0, 1fr); }
   }
+
+  /* Vækstplan: handlinger pr. knap */
+  #fp-widget .fp-actions { border-top: 1px dashed var(--border); padding: 12px 20px 14px; }
+  #fp-widget .fp-action-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  #fp-widget .fp-action-item { display: flex; gap: 10px; align-items: flex-start; background: var(--creme); border-radius: 8px; padding: 8px 10px; }
+  #fp-widget .fp-action-text { flex: 1; min-width: 0; }
+  #fp-widget .fp-action-what { font-size: 13px; color: var(--navy); white-space: pre-wrap; overflow-wrap: anywhere; }
+  #fp-widget .fp-action-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  #fp-widget .fp-action-btns { display: flex; gap: 4px; flex-shrink: 0; }
+  #fp-widget .fp-action-btns button { background: none; border: 0; padding: 2px 4px; font-size: 11px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+  #fp-widget .fp-action-btns button:hover { color: var(--accent); }
+  #fp-widget .fp-action-add { background: none; border: 1px dashed var(--accent); color: var(--accent); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  #fp-widget .fp-action-add:hover { background: rgba(196,88,30,0.06); }
+  #fp-widget .fp-action-form { display: flex; flex-direction: column; gap: 6px; background: var(--creme); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 4px; }
+  #fp-widget .fp-action-form label, #fp-widget .fp-modal label { font-size: 11px; font-weight: 700; color: var(--muted); }
+  #fp-widget .fp-action-form textarea, #fp-widget .fp-action-form input,
+  #fp-widget .fp-modal textarea, #fp-widget .fp-modal input { width: 100%; font: inherit; font-size: 13px; color: var(--navy); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+  #fp-widget .fp-action-form textarea:focus, #fp-widget .fp-action-form input:focus,
+  #fp-widget .fp-modal textarea:focus, #fp-widget .fp-modal input:focus { outline: 2px solid rgba(196,88,30,0.35); border-color: var(--accent); }
+  #fp-widget .fp-af-invalid { border-color: var(--red) !important; }
+  #fp-widget .fp-af-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  #fp-widget .fp-af-row > div { display: flex; flex-direction: column; gap: 6px; }
+  #fp-widget .fp-af-btns { display: flex; gap: 8px; margin-top: 4px; }
+  #fp-widget .fp-af-save { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  #fp-widget .fp-af-save:disabled { opacity: 0.4; cursor: not-allowed; }
+  #fp-widget .fp-af-cancel { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 8px 14px; font-size: 12px; cursor: pointer; }
+  #fp-widget .fp-modal-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,0.55); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  #fp-widget .fp-modal { background: var(--white); border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 24px 48px rgba(13,27,42,0.3); }
+  #fp-widget .fp-modal-title { font-size: 20px; font-weight: 800; color: var(--navy); }
+  #fp-widget .fp-modal-sub { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+  @media (max-width: 480px) {
+    #fp-widget .fp-actions { padding: 10px 14px 12px; }
+    #fp-widget .fp-af-row { grid-template-columns: 1fr; }
+  }
 </style>
 <div id="fp-widget">
   <div class="fp-card">
@@ -1157,7 +1191,7 @@
           Omsætning = besøgende &times; konverteringsrate &times; enheder &times; enhedspris. Resultat beregnes med konstante faste omkostninger. Kun til inspiration.
         </div>
         <div class="fp-attribution">
-          En lille beregner af Steen Olesen<br>&reg; Det Mindre Bureau
+          Et godt værktøj fra Steen Olesen<br>&reg; Det Mindre Bureau
         </div>
 
       </div><!-- /fp-left -->
@@ -1166,8 +1200,8 @@
       <div class="fp-sidebar">
         <div class="fp-results-panel">
 
-          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-            <button id="fp-print-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);cursor:pointer;letter-spacing:0.03em;">⬇ Gem som PDF</button>
+          <div style="display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+            <button id="fp-plan-btn" style="background:#C4581E;border:1px solid #C4581E;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:0.02em;">Min vækstplan →</button>
           </div>
 
           <div class="fp-results-hero">
@@ -2265,287 +2299,500 @@
   }
 
   // ─── PRINT REPORT ───────────────────────────────────────────────────────────
-  function printReport() {
+  // ─── VÆKSTPLAN: HANDLINGER PR. KNAP + RAPPORT ───────────────────────────────
+  // Brugeren tilføjer handlinger (hvad, ansvarlig, deadline) direkte under hver
+  // knap. De gemmes kun i brugerens egen browser (localStorage). "Min vækstplan"
+  // laver til sidst en rapport med de aktuelle tal + handlingerne.
+  var PLAN_KEY = "loeftestangen-vaekstplan-v1";
+  var PLAN_CTA_URL = "detmindrebureau.dk/levers";
+  var PLAN_LEVERS = [
+    { key: "conv",   nr: 1, title: "Konverteringsrate",        hint: "Fx: Vi tæller i 4 uger, hvor mange der kommer ind, før vi sætter et mål." },
+    { key: "upt",    nr: 2, title: "Enheder pr. transaktion",  hint: "Fx: Alle kunder tilbydes et relevant tilkøb. Personalet trænes i mersalg." },
+    { key: "price",  nr: 3, title: "Gennemsnitlig enhedspris", hint: "Fx: Vi gennemgår menukort/sortiment: de dyreste varer øverst, de mest rentable fremhæves." },
+    { key: "loy",    nr: 4, title: "Loyalitetsprofil",         hint: "Fx: Velkomstmails til alle nye på nyhedsbrevet og et årshjul med faste udsendelser." },
+    { key: "new",    nr: 5, title: "Find nye kunder",          hint: "Fx: En konkurrence, der skal give 2.500 nye tilmeldte til nyhedsbrevet." },
+    { key: "margin", nr: 6, title: "Bruttoavance",             hint: "Fx: Vi følger vareforbruget op hver måned." },
+    { key: "fixed",  nr: 7, title: "Faste omkostninger",       hint: "Fx: Vi gennemgår de faste udgifter hvert kvartal." }
+  ];
+  var plan = { actions: {}, info: { virksomhed: "", maal: "", periode: "" } };
+  var planEditing = { lever: null, id: null };   // id null = ny handling
+
+  function loadPlan() {
+    try {
+      var raw = window.localStorage.getItem(PLAN_KEY);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && p.actions) plan.actions = p.actions;
+        if (p && p.info) plan.info = p.info;
+      }
+    } catch (e) { /* privat vindue o.l. — kører videre uden lagring */ }
+    PLAN_LEVERS.forEach(function (l) { if (!Array.isArray(plan.actions[l.key])) plan.actions[l.key] = []; });
+  }
+  function savePlan() {
+    try { window.localStorage.setItem(PLAN_KEY, JSON.stringify(plan)); } catch (e) {}
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function fmtDeadline(v, long) {
+    if (!v) return "";
+    var d = new Date(v + "T00:00:00");
+    if (isNaN(d)) return v;
+    return d.toLocaleDateString("da-DK", long ? { day: "numeric", month: "long", year: "numeric" }
+                                              : { day: "numeric", month: "short", year: "numeric" });
+  }
+  function sortedActions(key) {
+    return plan.actions[key].slice().sort(function (a, b) {
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0;
+    });
+  }
+
+  function renderActions(key) {
+    var box = document.querySelector('#fp-widget .fp-actions[data-lever="' + key + '"]');
+    if (!box) return;
+    var html = "";
+    var list = sortedActions(key);
+    if (list.length) {
+      html += '<ul class="fp-action-list">' + list.map(function (a) {
+        if (planEditing.lever === key && planEditing.id === a.id) return '<li>' + actionForm(key, a) + '</li>';
+        var meta = [a.who ? esc(a.who) : "", a.deadline ? "Deadline " + esc(fmtDeadline(a.deadline)) : ""]
+          .filter(Boolean).join(" · ");
+        return '<li class="fp-action-item">' +
+          '<div class="fp-action-text"><div class="fp-action-what">' + esc(a.what) + '</div>' +
+          (meta ? '<div class="fp-action-meta">' + meta + '</div>' : '') + '</div>' +
+          '<div class="fp-action-btns">' +
+            '<button type="button" data-act="edit" data-lever="' + key + '" data-id="' + a.id + '">Ret</button>' +
+            '<button type="button" data-act="delete" data-lever="' + key + '" data-id="' + a.id + '">Slet</button>' +
+          '</div></li>';
+      }).join("") + '</ul>';
+    }
+    if (planEditing.lever === key && planEditing.id === null) {
+      html += actionForm(key, null);
+    } else {
+      html += '<button type="button" class="fp-action-add" data-act="add" data-lever="' + key + '">+ Tilføj handling</button>';
+    }
+    box.innerHTML = html;
+    if (planEditing.lever === key) {
+      var ta = box.querySelector(".fp-af-what");
+      if (ta) ta.focus();
+    }
+  }
+
+  function actionForm(key, a) {
+    var uid = "fp-af-" + key;
+    var hint = PLAN_LEVERS.filter(function (l) { return l.key === key; })[0].hint;
+    return '<div class="fp-action-form" data-lever="' + key + '">' +
+      '<label for="' + uid + '-what">Hvad gør vi?</label>' +
+      '<textarea id="' + uid + '-what" class="fp-af-what" rows="3" placeholder="' + esc(hint) + '">' + esc(a ? a.what : "") + '</textarea>' +
+      '<div class="fp-af-row">' +
+        '<div><label for="' + uid + '-who">Ansvarlig</label>' +
+        '<input id="' + uid + '-who" class="fp-af-who" type="text" placeholder="Navn" value="' + esc(a ? a.who : "") + '"></div>' +
+        '<div><label for="' + uid + '-deadline">Deadline</label>' +
+        '<input id="' + uid + '-deadline" class="fp-af-deadline" type="date" value="' + esc(a ? a.deadline : "") + '"></div>' +
+      '</div>' +
+      '<div class="fp-af-btns">' +
+        '<button type="button" class="fp-af-save" data-act="save" data-lever="' + key + '">Gem handling</button>' +
+        '<button type="button" class="fp-af-cancel" data-act="cancel" data-lever="' + key + '">Annuller</button>' +
+      '</div></div>';
+  }
+
+  function initActions() {
+    loadPlan();
+    document.querySelectorAll("#fp-widget .fp-lever-card").forEach(function (card) {
+      var reset = card.querySelector(".fp-lever-reset");
+      var key = reset && reset.dataset.lever;
+      if (!key || card.querySelector(".fp-actions")) return;
+      var box = document.createElement("div");
+      box.className = "fp-actions";
+      box.dataset.lever = key;
+      card.appendChild(box);
+    });
+    PLAN_LEVERS.forEach(function (l) { renderActions(l.key); });
+
+    var widget = document.getElementById("fp-widget");
+    if (!widget) return;
+    widget.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-act]");
+      if (!btn || !widget.contains(btn)) return;
+      var act = btn.dataset.act, key = btn.dataset.lever, id = btn.dataset.id;
+      if (!key || !plan.actions[key]) return;
+      var prev = planEditing.lever;
+
+      if (act === "add")    { planEditing = { lever: key, id: null }; }
+      if (act === "edit")   { planEditing = { lever: key, id: id }; }
+      if (act === "cancel") { planEditing = { lever: null, id: null }; }
+      if (act === "delete") {
+        var victim = plan.actions[key].filter(function (a) { return a.id === id; })[0];
+        if (victim && !confirm("Slet handlingen \"" + victim.what.slice(0, 60) + "\"?")) return;
+        plan.actions[key] = plan.actions[key].filter(function (a) { return a.id !== id; });
+        savePlan();
+      }
+      if (act === "save") {
+        var form = btn.closest(".fp-action-form");
+        var whatEl = form.querySelector(".fp-af-what");
+        var what = whatEl.value.trim();
+        if (!what) { whatEl.classList.add("fp-af-invalid"); whatEl.focus(); return; }
+        var rec = {
+          id: planEditing.id || ("a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
+          what: what,
+          who: form.querySelector(".fp-af-who").value.trim(),
+          deadline: form.querySelector(".fp-af-deadline").value
+        };
+        if (planEditing.id) {
+          plan.actions[key] = plan.actions[key].map(function (a) { return a.id === rec.id ? rec : a; });
+        } else {
+          plan.actions[key].push(rec);
+        }
+        savePlan();
+        planEditing = { lever: null, id: null };
+      }
+      if (prev && prev !== key) renderActions(prev);
+      renderActions(key);
+    });
+  }
+
+  // ── Nulstil sletter også handlinger: bekræft ved at skrive NULSTIL ──
+  // key = én knap, null = "Nulstil alle" (alle handlinger + virksomhed/mål/periode)
+  function guardedReset(key, doReset) {
+    var keys = key ? [key] : PLAN_LEVERS.map(function (l) { return l.key; });
+    var count = keys.reduce(function (sum, k) { return sum + (plan.actions[k] ? plan.actions[k].length : 0); }, 0);
+    var finish = function () {
+      keys.forEach(function (k) { plan.actions[k] = []; });
+      if (!key) plan.info = { virksomhed: "", maal: "", periode: "" };
+      if (!planEditing.lever || keys.indexOf(planEditing.lever) !== -1) planEditing = { lever: null, id: null };
+      savePlan();
+      keys.forEach(renderActions);
+      doReset();
+    };
+    if (!count) { finish(); return; }
+
+    var lever = key ? PLAN_LEVERS.filter(function (l) { return l.key === key; })[0] : null;
+    var what = count === 1 ? "1 handling" : count + " handlinger";
+    var where = lever ? 'ved knap ' + lever.nr + ', ' + esc(lever.title) : "ved alle 7 knapper";
+    var old = document.getElementById("fp-reset-modal");
+    if (old) old.remove();
+    var m = document.createElement("div");
+    m.id = "fp-reset-modal";
+    m.className = "fp-modal-backdrop";
+    m.innerHTML =
+      '<div class="fp-modal" role="dialog" aria-modal="true" aria-labelledby="fp-reset-title">' +
+        '<div class="fp-modal-title" id="fp-reset-title">Nulstil og slet handlinger?</div>' +
+        '<p class="fp-modal-sub">Det sletter ' + what + ' ' + where + '. Det kan ikke fortrydes.</p>' +
+        '<label for="fp-reset-input">Skriv NULSTIL for at fortsætte</label>' +
+        '<input id="fp-reset-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">' +
+        '<div class="fp-af-btns">' +
+          '<button type="button" class="fp-af-save" id="fp-reset-go" disabled>Nulstil</button>' +
+          '<button type="button" class="fp-af-cancel" id="fp-reset-cancel">Annuller</button>' +
+        '</div>' +
+      '</div>';
+    document.getElementById("fp-widget").appendChild(m);
+    var input = document.getElementById("fp-reset-input");
+    var go = document.getElementById("fp-reset-go");
+    var ok = function () { return input.value.trim().toUpperCase() === "NULSTIL"; };
+    var close = function () { m.remove(); };
+    input.addEventListener("input", function () { go.disabled = !ok(); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && ok()) { close(); finish(); }
+      if (e.key === "Escape") close();
+    });
+    m.addEventListener("click", function (e) { if (e.target === m) close(); });
+    document.getElementById("fp-reset-cancel").addEventListener("click", close);
+    go.addEventListener("click", function () { if (ok()) { close(); finish(); } });
+    input.focus();
+  }
+
+  // ── Dialog før rapporten: virksomhed, mål, periode ──
+  function openPlanDialog() {
+    var old = document.getElementById("fp-plan-modal");
+    if (old) old.remove();
+    var m = document.createElement("div");
+    m.id = "fp-plan-modal";
+    m.className = "fp-modal-backdrop";
+    m.innerHTML =
+      '<div class="fp-modal" role="dialog" aria-modal="true" aria-labelledby="fp-modal-title">' +
+        '<div class="fp-modal-title" id="fp-modal-title">Min vækstplan</div>' +
+        '<p class="fp-modal-sub">Udfyld gerne, så står det øverst i rapporten. Alle felter er valgfrie.</p>' +
+        '<label for="fp-pm-virk">Virksomhed</label>' +
+        '<input id="fp-pm-virk" type="text" value="' + esc(plan.info.virksomhed) + '">' +
+        '<label for="fp-pm-maal">Vores mål</label>' +
+        '<textarea id="fp-pm-maal" rows="2" placeholder="Fx: 20 % mere i overskud inden for 12 måneder.">' + esc(plan.info.maal) + '</textarea>' +
+        '<label for="fp-pm-periode">Periode</label>' +
+        '<input id="fp-pm-periode" type="text" placeholder="Fx: 1. november 2026 – 31. januar 2027" value="' + esc(plan.info.periode) + '">' +
+        '<div class="fp-af-btns">' +
+          '<button type="button" class="fp-af-save" id="fp-pm-go">Lav rapport</button>' +
+          '<button type="button" class="fp-af-cancel" id="fp-pm-cancel">Annuller</button>' +
+        '</div>' +
+      '</div>';
+    document.getElementById("fp-widget").appendChild(m);
+    var close = function () { m.remove(); };
+    m.addEventListener("click", function (e) { if (e.target === m) close(); });
+    document.getElementById("fp-pm-cancel").addEventListener("click", close);
+    document.getElementById("fp-pm-go").addEventListener("click", function () {
+      plan.info = {
+        virksomhed: document.getElementById("fp-pm-virk").value.trim(),
+        maal:       document.getElementById("fp-pm-maal").value.trim(),
+        periode:    document.getElementById("fp-pm-periode").value.trim()
+      };
+      savePlan();
+      close();
+      openPlanReport();
+    });
+    document.getElementById("fp-pm-virk").focus();
+  }
+
+  // ── Selve rapporten ──
+  function planLeverStatus() {
+    var nf = new Intl.NumberFormat("da-DK", { maximumFractionDigits: 2 });
+    function n(v) { return isFinite(v) ? nf.format(v) : "–"; }
+    var momsOn   = document.getElementById("fp-moms-toggle") && document.getElementById("fp-moms-toggle").checked;
+    var momsRate = parseFloat((document.getElementById("fp-moms-rate") || {}).value);
+    if (!(momsRate > 0 && momsRate < 100)) momsRate = 25;
+    var turnover = num("b-revenue") / (momsOn ? 1 + momsRate / 100 : 1);
+    var bTx = num("b-tx"), bUnits = num("b-units");
+    var bUpt   = (bUnits > 0 && bTx > 0) ? bUnits / bTx : 1;
+    var bPrice = bTx > 0 ? turnover / bTx / bUpt : NaN;
+    var bLoy1 = num("b-loy");    if (!(bLoy1 >= 0)) bLoy1 = 35;
+    var bLoy2 = num("b-loy-q2"); if (!(bLoy2 >= 1)) bLoy2 = 4;
+    var bLoy3 = num("b-loy-q3"); if (!(bLoy3 >= 0.5)) bLoy3 = 5;
+    var tNew = num("in-new"), tCac = num("in-cac"), tFixed = num("in-fixed");
+
+    function moved(base, target) { return isFinite(target) && Math.abs(target - base) >= 0.005; }
+    function line(label, base, target, unit) {
+      return (label ? label + ": " : "") + (moved(base, target)
+        ? n(base) + unit + " → <strong>" + n(target) + unit + "</strong>"
+        : n(base) + unit + " (uændret)");
+    }
+    var r = {};
+    r.conv   = { changed: moved(num("b-conv"), num("in-conv")),     lines: [line("", num("b-conv"), num("in-conv"), " %")] };
+    r.upt    = { changed: moved(bUpt, num("in-upt")),               lines: [line("", bUpt, num("in-upt"), " stk.")] };
+    r.price  = { changed: moved(bPrice, num("in-price")),           lines: [line("", bPrice, num("in-price"), " kr. ekskl. moms")] };
+    r.loy    = { changed: moved(bLoy1, num("in-loy-q1")) || moved(bLoy2, num("in-loy-q2")) || moved(bLoy3, num("in-loy-q3")),
+                 lines: [line("Andel loyale", bLoy1, num("in-loy-q1"), " %"),
+                         line("Køb pr. år", bLoy2, num("in-loy-q2"), ""),
+                         line("Antal år som kunde", bLoy3, num("in-loy-q3"), "")] };
+    r["new"] = { changed: tNew > 0,
+                 lines: [tNew > 0 ? "<strong>" + n(tNew) + " nye kunder pr. år</strong>" + (tCac > 0 ? " · " + n(tCac) + " kr. pr. ny kunde" : "")
+                                  : "Ingen ekstra nye kunder (uændret)"] };
+    r.margin = { changed: moved(num("b-margin"), num("in-margin")), lines: [line("", num("b-margin"), num("in-margin"), " %")] };
+    r.fixed  = { changed: isFinite(tFixed) && tFixed !== 0,
+                 lines: [isFinite(tFixed) && tFixed !== 0
+                   ? (tFixed > 0 ? "<strong>Spar " + n(tFixed) + " kr. om året</strong>" : "<strong>" + n(-tFixed) + " kr. mere om året</strong>")
+                   : "0 kr. (uændret)"] };
+    r.base = [
+      ["Omsætning", fmtCurrency(Math.round(turnover)) + " ekskl. moms"],
+      ["Nettoresultat", fmtCurrency(num("b-netprofit"))],
+      ["Konverteringsrate", n(num("b-conv")) + " %"],
+      ["Bruttoavance", n(num("b-margin")) + " %"],
+      ["Transaktioner pr. år", n(bTx)],
+      ["Antal solgte enheder", bUnits > 0 ? n(bUnits) : "–"],
+      ["Andel loyale kunder", n(bLoy1) + " %"],
+      ["Køb pr. år, loyale", n(bLoy2)],
+      ["Antal år som kunde", n(bLoy3)]
+    ];
+    return r;
+  }
+
+  function openPlanReport() {
     function txt(id) { var e = document.getElementById(id); return e ? e.textContent.trim() : "–"; }
-    function val(id) { var e = document.getElementById(id); return e ? e.value.trim() : ""; }
-
+    var st = planLeverStatus();
+    var info = plan.info;
     var date = new Date().toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" });
+    var title = info.virksomhed ? "Vækstplan – " + info.virksomhed : "Min vækstplan";
 
-    function donutSvg(loyId, oneId, lblId) {
-      var loy = document.getElementById(loyId);
-      var one = document.getElementById(oneId);
-      var lbl = document.getElementById(lblId);
-      if (!loy) return "";
-      return '<svg viewBox="0 0 100 100" width="88" height="88">' +
-        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#e5dfd5"/>' +
-        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#e8b49a"' +
-          ' stroke-dasharray="' + (one ? one.getAttribute("stroke-dasharray") : "0 239") + '"' +
-          ' stroke-dashoffset="' + (one ? (one.getAttribute("stroke-dashoffset") || 0) : 0) + '"' +
-          ' transform="rotate(-90 50 50)"/>' +
-        '<circle cx="50" cy="50" r="38" stroke-width="13" fill="none" stroke="#C4581E"' +
-          ' stroke-dasharray="' + loy.getAttribute("stroke-dasharray") + '"' +
-          ' transform="rotate(-90 50 50)"/>' +
-        '<text x="50" y="56" text-anchor="middle" font-size="16" font-weight="800" fill="#0d1b2a">' +
-          (lbl ? lbl.textContent : "–") + '</text>' +
-        '</svg>';
-    }
-
-    var segVisible = document.getElementById("fp-seg-card") &&
-                     document.getElementById("fp-seg-card").style.display !== "none";
-
-    var kpiRows = [
-      ["Nettoresultat",    txt("r-np-today"),    txt("r-np-after"),    txt("r-np-badge")],
-      ["Omsætning",        txt("r-rev-today"),   txt("r-rev-after"),   txt("r-rev-badge")],
-      ["Ordreværdi (AOV)", txt("r-aov-today"),   txt("r-aov-after"),   ""],
-      ["CLTV år 1",        txt("r-cltv1-today"), txt("r-cltv1-after"), ""],
-      ["CLTV livstid",     txt("r-cltvL-today"), txt("r-cltvL-after"), ""],
-      ["Transaktioner",    txt("r-tx-today"),    txt("r-tx-after"),    txt("r-tx-badge")],
-      ["Besøgende",        txt("r-vis-today"),   txt("r-vis-after"),   ""]
+    var kpis = [
+      ["Overskud",  txt("r-np-today"),  txt("r-np-after"),  txt("r-np-badge")],
+      ["Omsætning", txt("r-rev-today"), txt("r-rev-after"), txt("r-rev-badge")],
+      ["Gennemsnitligt køb inkl. moms", txt("r-aov-moms-today"), txt("r-aov-moms-after"), ""]
     ];
 
-    var printMomsEl   = document.getElementById("fp-moms-toggle");
-    var printMoms     = printMomsEl && printMomsEl.checked;
-    var printMomsRate = parseFloat((document.getElementById("fp-moms-rate") || {}).value) || 25;
-    var baselineRows = [
-      ["Omsætning",              val("b-revenue") + " kr." + (printMoms ? " (inkl. " + printMomsRate + "% moms)" : "")],
-      ["Nettoresultat",          val("b-netprofit") + " kr."],
-      ["Konverteringsrate",      val("b-conv") + "%"],
-      ["Bruttoavance",           val("b-margin") + "%"],
-      ["Transaktioner pr. år",   val("b-tx")],
-      ["Antal solgte enheder",   val("b-units")],
-      ["Åbningsdage pr. år",     val("b-days")],
-      ["Andel loyale kunder",    val("b-loy") + "%"]
-    ];
-
-    var leverRows = [
-      ["Konverteringsrate",        val("in-conv") + "%",    txt("d-conv")],
-      ["Enheder pr. transaktion",  val("in-upt") + " stk",  txt("d-upt")],
-      ["Gennemsnitlig enhedspris", val("in-price") + " kr.", txt("d-price")],
-      ["Loyale kunder (andel)",    val("in-loy-q1") + "%",  ""],
-      ["Find nye kunder",          val("in-new") + "/år",   ""],
-      ["Bruttoavance",             val("in-margin") + "%",  txt("d-margin")],
-      ["Besparelse faste omk.",    val("in-fixed") ? val("in-fixed") + " kr." : "0 kr.", ""]
-    ];
-
-    var kpiHtml = kpiRows.map(function(r) {
-      var badge = r[3] ? '<span style="font-size:11px;background:#f0f8f4;color:#065f46;padding:2px 7px;border-radius:99px;margin-left:6px;">' + r[3] + '</span>' : "";
-      return '<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#666;font-size:13px;">' + r[0] + '</td>' +
-        '<td style="padding:8px 0;border-bottom:1px solid #eee;font-size:13px;text-align:right;">' + r[1] + '</td>' +
-        '<td style="padding:8px 0;border-bottom:1px solid #eee;font-size:13px;text-align:right;">→ <strong>' + r[2] + '</strong>' + badge + '</td></tr>';
+    var allActions = [];
+    var leversHtml = PLAN_LEVERS.map(function (l) {
+      var s = st[l.key];
+      var acts = sortedActions(l.key);
+      acts.forEach(function (a) { allActions.push({ a: a, lever: l }); });
+      var pill = s.changed ? '<span class="pill pill-on">Mål sat</span>' : '<span class="pill">Uændret</span>';
+      var body;
+      if (acts.length) {
+        body = '<table class="acts"><thead><tr><th>Handling</th><th class="w-who">Ansvarlig</th><th class="w-dl">Deadline</th></tr></thead><tbody>' +
+          acts.map(function (a) {
+            return '<tr><td class="what">' + esc(a.what) + '</td><td>' + (esc(a.who) || '<span class="dash">–</span>') + '</td>' +
+                   '<td class="dl">' + (a.deadline ? esc(fmtDeadline(a.deadline, true)) : '<span class="dash">–</span>') + '</td></tr>';
+          }).join("") + '</tbody></table>';
+      } else if (s.changed) {
+        body = '<p class="missing">Mål sat, men ingen handling endnu.</p>';
+      } else {
+        body = '<p class="none">Ingen handlinger.</p>';
+      }
+      return '<section class="lever">' +
+        '<div class="lever-head"><span class="num">' + l.nr + '</span><h3>' + l.title + '</h3>' + pill + '</div>' +
+        '<div class="vals">' + s.lines.map(function (x) { return '<div>' + x + '</div>'; }).join("") + '</div>' +
+        body + '</section>';
     }).join("");
 
-    var baseHtml = baselineRows.map(function(r) {
-      return '<tr><td style="padding:6px 0;color:#666;font-size:12px;border-bottom:1px solid #f0ebe2;">' + r[0] +
-        '</td><td style="padding:6px 0;font-size:12px;text-align:right;font-weight:600;border-bottom:1px solid #f0ebe2;">' + r[1] + '</td></tr>';
-    }).join("");
+    var timeline = allActions.filter(function (x) { return x.a.deadline; })
+      .sort(function (x, y) { return x.a.deadline < y.a.deadline ? -1 : x.a.deadline > y.a.deadline ? 1 : 0; });
+    var timelineHtml = timeline.length >= 2
+      ? '<section class="timeline"><h2>Overblik efter deadline</h2><table class="acts"><thead><tr><th class="w-dl">Deadline</th><th>Handling</th><th class="w-knap">Knap</th><th class="w-who">Ansvarlig</th></tr></thead><tbody>' +
+        timeline.map(function (x) {
+          return '<tr><td class="dl">' + esc(fmtDeadline(x.a.deadline, true)) + '</td><td class="what">' + esc(x.a.what) + '</td>' +
+                 '<td>' + x.lever.nr + '. ' + x.lever.title + '</td><td>' + (esc(x.a.who) || '<span class="dash">–</span>') + '</td></tr>';
+        }).join("") + '</tbody></table></section>'
+      : "";
 
-    var leverHtml = leverRows.map(function(r) {
-      var today = r[2] ? '<span style="color:#999;font-size:11px;"> (' + r[2] + ')</span>' : "";
-      return '<tr><td style="padding:6px 0;color:#666;font-size:12px;border-bottom:1px solid #f0ebe2;">' + r[0] +
-        '</td><td style="padding:6px 0;font-size:12px;text-align:right;font-weight:600;border-bottom:1px solid #f0ebe2;">' + r[1] + today + '</td></tr>';
-    }).join("");
+    var css =
+      '@page{size:A4;margin:16mm 16mm 18mm;' +
+        '@bottom-left{content:"' + title.replace(/["\\\n\r]/g, "") + ' · Løftestangen";font:8pt system-ui,sans-serif;color:#8a94a0}' +
+        '@bottom-right{content:"Side " counter(page) " af " counter(pages);font:8pt system-ui,sans-serif;color:#8a94a0}}' +
+      '*{box-sizing:border-box}' +
+      'html{-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+      'body{margin:0;background:#ede8de;color:#0d1b2a;font:10.5pt/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+      '.toolbar{position:sticky;top:0;z-index:5;background:#0d1b2a;padding:12px 20px;display:flex;gap:10px;justify-content:center}' +
+      '.toolbar button{font:600 13px system-ui,sans-serif;border-radius:8px;padding:9px 16px;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff}' +
+      '.toolbar .primary{background:#C4581E;border-color:#C4581E}' +
+      '.sheet{max-width:210mm;margin:24px auto;background:#fff;padding:18mm 16mm;box-shadow:0 10px 30px rgba(13,27,42,.15)}' +
+      '@media print{body{background:#fff}.toolbar{display:none}.sheet{margin:0;padding:0;box-shadow:none;max-width:none}}' +
+      '.eyebrow{font-size:8pt;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C4581E}' +
+      'h1{font-size:26pt;line-height:1.1;margin:4px 0 6px;letter-spacing:-.01em}' +
+      '.meta{color:#5c6b7a;font-size:9.5pt}' +
+      '.goal{margin:18px 0 0;padding:12px 16px;border-left:4px solid #C4581E;background:#f5f0e8;border-radius:0 8px 8px 0}' +
+      '.goal .eyebrow{color:#5c6b7a;margin-bottom:2px}.goal p{margin:0;font-size:11.5pt;font-weight:600;white-space:pre-wrap}' +
+      '.result{margin:20px 0 6px;background:#0d1b2a;color:#fff;border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:6px 28px;align-items:center;break-inside:avoid}' +
+      '.hero{grid-row:span 3;padding-right:24px;border-right:1px solid rgba(255,255,255,.15)}' +
+      '.hero .eyebrow{color:#9fb0c0}.hero .big{font-size:34pt;font-weight:800;color:#4ade9a;line-height:1.05}' +
+      '.kpi{display:flex;justify-content:space-between;gap:12px;font-size:9.5pt;border-bottom:1px solid rgba(255,255,255,.1);padding:4px 0}' +
+      '.kpi:last-child{border-bottom:0}.kpi .l{color:#9fb0c0}.kpi .v{font-weight:700;text-align:right}.kpi .b{color:#4ade9a;font-weight:700;margin-left:8px}' +
+      '.caveat{font-size:8.5pt;color:#5c6b7a;font-style:italic;margin:6px 0 0}' +
+      'h2{font-size:14pt;margin:26px 0 4px;break-after:avoid}' +
+      '.intro{margin:0 0 10px;color:#33414f}' +
+      '.lever{border-top:1px solid #ddd7cc;padding:14px 0 12px;break-inside:avoid}' +
+      '.lever-head{display:flex;align-items:center;gap:10px;break-after:avoid}' +
+      '.num{width:22px;height:22px;border-radius:50%;background:#C4581E;color:#fff;font-weight:700;font-size:10pt;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}' +
+      'h3{font-size:12.5pt;margin:0;flex:1}' +
+      '.pill{font-size:8pt;font-weight:700;border-radius:99px;padding:2px 9px;background:#ede8de;color:#5c6b7a}.pill-on{background:#fbe6da;color:#C4581E}' +
+      '.vals{margin:6px 0 8px 32px;font-size:9.5pt;color:#33414f}.vals strong{color:#C4581E}' +
+      '.acts{width:100%;border-collapse:collapse;font-size:9.5pt}' +
+      '.lever .acts{margin-left:32px;width:calc(100% - 32px)}' +
+      '.acts th{text-align:left;font-size:7.5pt;letter-spacing:.08em;text-transform:uppercase;color:#5c6b7a;border-bottom:1.5px solid #0d1b2a;padding:4px 8px 4px 0}' +
+      '.acts td{border-bottom:1px solid #ece6dc;padding:6px 8px 6px 0;vertical-align:top}' +
+      '.acts tr{break-inside:avoid}.acts thead{display:table-header-group}' +
+      '.what{white-space:pre-wrap}.w-who{width:22%}.w-dl{width:20%}.w-knap{width:24%}.dl{white-space:nowrap}.dash{color:#aab}' +
+      '.missing{margin:0 0 0 32px;color:#C4581E;font-weight:600;font-size:9.5pt}' +
+      '.none{margin:0 0 0 32px;color:#8a94a0;font-size:9.5pt}' +
+            '.timeline .acts{margin-top:8px}' +
+      '.closing{break-inside:avoid;margin-top:24px}' +
+      '.base{display:grid;grid-template-columns:1fr 1fr;gap:2px 32px;font-size:9.5pt;margin:6px 0 18px}' +
+      '.base div{display:flex;justify-content:space-between;border-bottom:1px solid #ece6dc;padding:3px 0}.base span{color:#5c6b7a}' +
+      '.cta{background:#0d1b2a;color:#fff;border-radius:12px;padding:16px 20px}' +
+      '.cta b{display:block;font-size:12.5pt;margin-bottom:2px}.cta .url{color:#f0a070;font-weight:700}' +
+      '.sig{margin-top:14px;text-align:center;font-size:8pt;color:#8a94a0}';
 
-    var segHtml = "";
-    if (segVisible) {
-      segHtml = '<div style="margin-top:32px;">' +
-        '<div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:14px;">Fordeling — engang vs. loyale kunder</div>' +
-        '<div style="display:flex;gap:24px;justify-content:center;margin-bottom:16px;">' +
-          '<div style="text-align:center;">' +
-            '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px;">Antal kunder</div>' +
-            donutSvg("fp-pie-count-loyal","fp-pie-count-one","fp-pie-count-label") +
-          '</div>' +
-          '<div style="text-align:center;">' +
-            '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#999;margin-bottom:8px;">Andel af værdi</div>' +
-            donutSvg("fp-pie-val-loyal","fp-pie-val-one","fp-pie-val-label") +
-          '</div>' +
+    var html = '<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8"><title>' + esc(title) + '</title>' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1"><style>' + css + '</style></head><body>' +
+      '<div class="toolbar"><button class="primary" onclick="window.print()">Print / gem som PDF</button>' +
+      '<button onclick="window.close()">Luk</button></div>' +
+      '<div class="sheet">' +
+        '<div class="eyebrow">Vækstplan · bygget på de 7 knapper</div>' +
+        '<h1>' + esc(info.virksomhed || "Min vækstplan") + '</h1>' +
+        '<div class="meta">' + (info.periode ? "Periode: " + esc(info.periode) + " · " : "") + "Lavet " + date + '</div>' +
+        (info.maal ? '<div class="goal"><div class="eyebrow">Vores mål</div><p>' + esc(info.maal) + '</p></div>' : '') +
+        '<div class="result">' +
+          '<div class="hero"><div class="eyebrow">Vækst i overskud</div><div class="big">' + esc(txt("fp-r-pct")) + '</div></div>' +
+          kpis.map(function (k) {
+            return '<div class="kpi"><span class="l">' + k[0] + '</span><span class="v">' + esc(k[1]) + ' → ' + esc(k[2]) +
+              (k[3] ? '<span class="b">' + esc(k[3]) + '</span>' : '') + '</span></div>';
+          }).join("") +
         '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
-          '<div style="background:#f8f5f0;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:12px;font-weight:700;margin-bottom:2px;">Engangskunder</div>' +
-            '<div style="font-size:11px;color:#C4581E;font-weight:700;margin-bottom:8px;">' + txt("fp-seg-one-share") + '</div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Andel af kunder</span><strong>' + txt("fp-seg-one-pct") + '</strong></div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Køb pr. kunde</span><strong>1</strong></div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>LTV/kunde</span><strong>' + txt("fp-seg-one-ltv") + '</strong></div>' +
-          '</div>' +
-          '<div style="background:#f8f5f0;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:12px;font-weight:700;margin-bottom:2px;">Loyale kunder</div>' +
-            '<div style="font-size:11px;color:#C4581E;font-weight:700;margin-bottom:8px;">' + txt("fp-seg-loy-share") + '</div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Andel af kunder</span><strong>' + txt("fp-seg-loy-pct") + '</strong></div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>Køb pr. kunde</span><strong>' + txt("fp-seg-loy-purchases") + '</strong></div>' +
-            '<div style="font-size:11px;color:#666;display:flex;justify-content:space-between;"><span>LTV/kunde</span><strong>' + txt("fp-seg-loy-ltv") + '</strong></div>' +
-          '</div>' +
-        '</div></div>';
-    }
-
-    var isNeg = txt("fp-r-pct").startsWith("-");
-    var pctColor = isNeg ? "#fca5a5" : "#6ee7b7";
-
-    var css = [
-      '*{box-sizing:border-box;margin:0;padding:0;}',
-      'html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}',
-      'body{font-family:system-ui,-apple-system,sans-serif;color:#0d1b2a;background:#f5f0e8;min-height:100vh;}',
-
-      /* page header */
-      '.ph{background:#0d1b2a;padding:22px 40px;display:flex;align-items:center;justify-content:space-between;}',
-      '.ph-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.01em;}',
-      '.ph-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;}',
-      '.ph-date{font-size:11px;color:rgba(255,255,255,.5);text-align:right;}',
-
-      /* hero band */
-      '.hero{background:#0d1b2a;padding:28px 40px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;border-bottom:3px solid #C4581E;}',
-      '.hero-left{}',
-      '.hero-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:6px;}',
-      '.hero-pct{font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1;color:' + pctColor + ';}',
-      '.hero-right{text-align:right;padding-bottom:6px;}',
-      '.hero-delta-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px;}',
-      '.hero-delta-val{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;}',
-
-      /* body */
-      '.body{padding:32px 40px 40px;}',
-
-      /* two-col */
-      '.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}',
-
-      /* cards */
-      '.card{background:#fff;border-radius:14px;padding:20px 22px;border:1px solid #e5dfd5;}',
-      '.card-dark{background:#0d1b2a;border-radius:14px;padding:20px 22px;}',
-      '.card-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b0a898;margin-bottom:14px;}',
-      '.card-dark .card-label{color:rgba(255,255,255,.35);}',
-
-      /* baseline / lever table */
-      '.dt{width:100%;border-collapse:collapse;}',
-      '.dt td{padding:6px 0;font-size:12px;border-bottom:1px solid #f0ebe2;}',
-      '.dt td:last-child{text-align:right;font-weight:700;color:#0d1b2a;}',
-      '.dt td:first-child{color:#888;}',
-
-      /* KPI table (dark card) */
-      '.kt{width:100%;border-collapse:collapse;}',
-      '.kt td{padding:7px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.08);}',
-      '.kt .k-label{color:rgba(255,255,255,.5);}',
-      '.kt .k-today{text-align:right;color:rgba(255,255,255,.5);white-space:nowrap;}',
-      '.kt .k-after{text-align:right;font-weight:800;color:#fff;white-space:nowrap;padding-left:8px;}',
-      '.kt .k-badge{text-align:right;padding-left:6px;}',
-      '.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:rgba(110,231,183,.18);color:#6ee7b7;}',
-      '.badge.neg{background:rgba(252,165,165,.18);color:#fca5a5;}',
-
-      /* segment */
-      '.seg-wrap{background:#fff;border-radius:14px;padding:20px 22px;border:1px solid #e5dfd5;}',
-      '.seg-donuts{display:flex;gap:32px;justify-content:center;margin:16px 0;}',
-      '.seg-donut-block{text-align:center;}',
-      '.seg-donut-title{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b0a898;margin-bottom:10px;}',
-      '.seg-items{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}',
-      '.seg-item{background:#f8f5f0;border-radius:10px;padding:12px 14px;}',
-      '.seg-item-name{font-size:12px;font-weight:700;margin-bottom:2px;}',
-      '.seg-item-share{font-size:11px;font-weight:700;color:#C4581E;margin-bottom:8px;}',
-      '.seg-row{display:flex;justify-content:space-between;font-size:11px;color:#888;padding:2px 0;}',
-      '.seg-row strong{color:#0d1b2a;font-weight:700;}',
-
-      /* footer */
-      '.footer{margin-top:28px;padding-top:14px;border-top:1px solid #e5dfd5;font-size:10px;color:#b0a898;line-height:1.6;}',
-
-      '@media print{',
-        'body{background:#f5f0e8;}',
-        '@page{margin:0;size:A4;}',
-        '.body{padding:24px 32px 32px;}',
-        '.ph,.hero{padding-left:32px;padding-right:32px;}',
-      '}'
-    ].join('');
-
-    var kpiHtml = kpiRows.map(function(r) {
-      var badgeHtml = r[3] ? '<td class="k-badge"><span class="badge' + (r[3].startsWith("-") ? " neg" : "") + '">' + r[3] + '</span></td>' : '<td></td>';
-      return '<tr><td class="k-label">' + r[0] + '</td><td class="k-today">' + r[1] + '</td><td class="k-after">→ ' + r[2] + '</td>' + badgeHtml + '</tr>';
-    }).join("");
-
-    var baseHtml = baselineRows.map(function(r) {
-      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
-    }).join("");
-
-    var leverHtml = leverRows.map(function(r) {
-      var today = r[2] ? ' <span style="color:rgba(255,255,255,.35);font-size:10px;font-weight:400;">(' + r[2] + ')</span>' : "";
-      return '<tr><td class="k-label">' + r[0] + '</td><td class="k-after" style="text-align:right;">' + r[1] + today + '</td></tr>';
-    }).join("");
-
-    var segHtml = "";
-    if (segVisible) {
-      segHtml = '<div class="seg-wrap">' +
-        '<div class="card-label">Fordeling — engang vs. loyale kunder</div>' +
-        '<div class="seg-donuts">' +
-          '<div class="seg-donut-block"><div class="seg-donut-title">Antal kunder</div>' +
-            donutSvg("fp-pie-count-loyal","fp-pie-count-one","fp-pie-count-label") + '</div>' +
-          '<div class="seg-donut-block"><div class="seg-donut-title">Andel af værdi</div>' +
-            donutSvg("fp-pie-val-loyal","fp-pie-val-one","fp-pie-val-label") + '</div>' +
+        '<p class="caveat">Tallene er pr. år og forudsætter uændrede faste omkostninger. Det er et regnestykke, ikke et løfte.</p>' +
+        '<h2>Handlingsplanen</h2>' +
+        '<p class="intro">Alt, hvad I gør for at tjene flere penge, skal flytte mindst én af de 7 knapper.</p>' +
+        leversHtml +
+        timelineHtml +
+        '<div class="closing"><h2>Tallene, planen bygger på</h2><div class="base">' +
+          st.base.map(function (b) { return '<div><span>' + b[0] + '</span><strong>' + esc(b[1]) + '</strong></div>'; }).join("") +
         '</div>' +
-        '<div class="seg-items">' +
-          '<div class="seg-item"><div class="seg-item-name">Engangskunder</div>' +
-            '<div class="seg-item-share">' + txt("fp-seg-one-share") + '</div>' +
-            '<div class="seg-row"><span>Antal kunder</span><strong>' + txt("fp-seg-one-count") + '</strong></div>' +
-            '<div class="seg-row"><span>Andel af kunder</span><strong>' + txt("fp-seg-one-pct") + '</strong></div>' +
-            '<div class="seg-row"><span>Køb pr. kunde</span><strong>1</strong></div>' +
-            '<div class="seg-row"><span>LTV/kunde</span><strong>' + txt("fp-seg-one-ltv") + '</strong></div>' +
-          '</div>' +
-          '<div class="seg-item"><div class="seg-item-name">Loyale kunder</div>' +
-            '<div class="seg-item-share">' + txt("fp-seg-loy-share") + '</div>' +
-            '<div class="seg-row"><span>Antal kunder</span><strong>' + txt("fp-seg-loy-count") + '</strong></div>' +
-            '<div class="seg-row"><span>Andel af kunder</span><strong>' + txt("fp-seg-loy-pct") + '</strong></div>' +
-            '<div class="seg-row"><span>Køb pr. kunde</span><strong>' + txt("fp-seg-loy-purchases") + '</strong></div>' +
-            '<div class="seg-row"><span>LTV/kunde</span><strong>' + txt("fp-seg-loy-ltv") + '</strong></div>' +
-          '</div>' +
-        '</div></div>';
-    }
+        '<div class="cta"><b>Vil du have hjælp til planen?</b>Book 20 gratis minutter med Steen. Så finder vi ud af, hvilke knapper du skal starte med.<br><span class="url">' + PLAN_CTA_URL + '</span></div>' +
+        '<div class="sig">Løftestangen · Et godt værktøj fra Steen Olesen · Det Mindre Bureau</div></div>' +
+      '</div></body></html>';
 
-    var html = '<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8">' +
-      '<title>Løftestangen — Vækstrapport</title>' +
-      '<style>' + css + '</style></head><body>' +
-
-      '<div class="ph">' +
-        '<div><div class="ph-title">Løftestangen</div>' +
-        '<div class="ph-sub">Det Mindre Bureau</div></div>' +
-        '<div class="ph-date">Beregnet ' + date + '</div>' +
-      '</div>' +
-
-      '<div class="hero">' +
-        '<div class="hero-left">' +
-          '<div class="hero-eyebrow">Vækst i nettoresultat</div>' +
-          '<div class="hero-pct">' + txt("fp-r-pct") + '</div>' +
-        '</div>' +
-        '<div class="hero-right">' +
-          '<div class="hero-delta-label">Ekstra nettoresultat</div>' +
-          '<div class="hero-delta-val">' + txt("fp-r-delta-np") + '</div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="body">' +
-        '<div class="cols">' +
-          '<div>' +
-            '<div class="card">' +
-              '<div class="card-label">Dine tal i dag</div>' +
-              '<table class="dt">' + baseHtml + '</table>' +
-            '</div>' +
-          '</div>' +
-          '<div style="display:flex;flex-direction:column;gap:16px;">' +
-            '<div class="card-dark">' +
-              '<div class="card-label">Estimeret effekt</div>' +
-              '<table class="kt">' + kpiHtml + '</table>' +
-            '</div>' +
-            '<div class="card-dark">' +
-              '<div class="card-label">Lever-indstillinger</div>' +
-              '<table class="kt">' + leverHtml + '</table>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        (segVisible ? '<div style="margin-bottom:24px;">' + segHtml + '</div>' : '') +
-        '<div class="footer">Omsætning = besøgende × konverteringsrate × enheder × enhedspris. ' +
-          'Resultat beregnes med konstante faste omkostninger. Kun til inspiration.</div>' +
-      '</div>' +
-
-      '</body></html>';
-
-    var w = window.open("", "_blank", "width=820,height=1000");
-    if (!w) { alert("Tillad pop-ups for at åbne rapporten."); return; }
+    var w = window.open("", "_blank");
+    if (!w) { alert("Tillad pop-ups for at åbne din vækstplan."); return null; }
+    w.document.open();
     w.document.write(html);
     w.document.close();
-    setTimeout(function() { w.focus(); w.print(); }, 400);
+    return html;
   }
+
+  // ─── HUSK TALLENE (kun i brugerens egen browser) ────────────────────────────
+  var NUM_KEY = "loeftestangen-tal-v1";
+  var NUM_FIELDS = ["b-revenue","b-netprofit","b-conv","b-margin","b-tx","b-units","b-days","b-loy","b-loy-q2","b-loy-q3","fp-moms-rate",
+                    "in-conv","in-upt","in-price","in-loy-q1","in-loy-q2","in-loy-q3","in-new","in-cac","in-margin","in-fixed"];
+  var SLIDER_OF = { "in-conv": "sl-conv", "in-upt": "sl-upt", "in-price": "sl-price", "in-loy-q1": "sl-loy-q1",
+                    "in-loy-q2": "sl-loy-q2", "in-loy-q3": "sl-loy-q3", "in-new": "sl-new", "in-margin": "sl-margin" };
+  var numbersTouched = false;   // gem først, når brugeren selv har rørt noget
+  var restoringNumbers = false;
+
+  function saveNumbers() {
+    if (!numbersTouched || restoringNumbers) return;
+    var vals = {};
+    NUM_FIELDS.forEach(function (id) { var e = document.getElementById(id); if (e) vals[id] = e.value; });
+    var note = document.getElementById("fp-example-note");
+    var momsEl = document.getElementById("fp-moms-toggle");
+    try {
+      window.localStorage.setItem(NUM_KEY, JSON.stringify({
+        vals: vals,
+        moms: !!(momsEl && momsEl.checked),
+        adjusted: leverAdjusted,
+        noteHidden: !!(note && note.style.display === "none")
+      }));
+    } catch (e) {}
+  }
+
+  function restoreNumbers(baseRecalc) {
+    var saved;
+    try { saved = JSON.parse(window.localStorage.getItem(NUM_KEY) || "null"); } catch (e) { saved = null; }
+    if (!saved || !saved.vals) return false;
+    restoringNumbers = true;
+    // 1) grundtal + moms, så levers initialiseres ud fra dem
+    NUM_FIELDS.forEach(function (id) {
+      if (id.indexOf("in-") === 0 || !(id in saved.vals)) return;
+      var e = document.getElementById(id); if (e) e.value = saved.vals[id];
+    });
+    var momsEl = document.getElementById("fp-moms-toggle");
+    if (momsEl) momsEl.checked = !!saved.moms;
+    baseRecalc();
+    // 2) levers + hvilke der er justeret
+    NUM_FIELDS.forEach(function (id) {
+      if (id.indexOf("in-") !== 0 || !(id in saved.vals)) return;
+      if (SLIDER_OF[id]) setField(SLIDER_OF[id], id, saved.vals[id]);
+      else { var e = document.getElementById(id); if (e) e.value = saved.vals[id]; }
+    });
+    if (saved.adjusted) Object.keys(leverAdjusted).forEach(function (k) { leverAdjusted[k] = !!saved.adjusted[k]; });
+    var note = document.getElementById("fp-example-note");
+    if (note && saved.noteHidden) note.style.display = "none";
+    baseRecalc();
+    restoringNumbers = false;
+    numbersTouched = true;   // brugeren har tidligere rørt tallene
+    return true;
+  }
+
+  // Alle kald til recalc gemmer også tallene (wrappes før event-wiring, så
+  // listeners der får recalc som reference også får den gemmende version)
+  var baseRecalc = recalc;
+  recalc = function () { baseRecalc(); saveNumbers(); };
+  (function () {
+    var w = document.getElementById("fp-widget");
+    if (!w) return;
+    var touch = function (e) { if (e.isTrusted) numbersTouched = true; };
+    w.addEventListener("input", touch, true);
+    w.addEventListener("change", touch, true);
+    w.addEventListener("click", touch, true);
+  })();
 
   // ─── EVENT WIRING ───────────────────────────────────────────────────────────
 
@@ -2595,8 +2842,10 @@
   var rAllBtn = document.getElementById("fp-reset-all");
   if (rAllBtn) {
     rAllBtn.addEventListener("click", function () {
-      resetAll();
-      recalc();
+      guardedReset(null, function () {
+        resetAll();
+        recalc();
+      });
     });
   }
 
@@ -2741,15 +2990,18 @@
   }
   setupSignedMoneyInput("in-fixed");
 
-  // Print report
-  var printBtn = document.getElementById("fp-print-btn");
-  if (printBtn) printBtn.addEventListener("click", printReport);
+  // Vækstplan: handlinger pr. knap + rapport
+  initActions();
+  var planBtn = document.getElementById("fp-plan-btn");
+  if (planBtn) planBtn.addEventListener("click", openPlanDialog);
 
   // Individual lever resets
   document.querySelectorAll(".fp-lever-reset").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      resetLever(btn.dataset.lever);
-      recalc();
+      guardedReset(btn.dataset.lever, function () {
+        resetLever(btn.dataset.lever);
+        recalc();
+      });
     });
   });
 
@@ -2760,7 +3012,7 @@
   setupMoneyInput("b-units");
 
   // ─── INITIAL RENDER ─────────────────────────────────────────────────────────
-  recalc();
+  if (!restoreNumbers(baseRecalc)) baseRecalc();
 
 }());
 </script>
