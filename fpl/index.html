@@ -1000,6 +1000,7 @@
               </div>
             </div>
             <div class="fp-help">Konverteringsrate — en stigning giver ekstra salg fra eksisterende besøgende uden ekstra markedsføring.</div>
+            <div class="fp-help" id="conv-equiv" style="display:none;color:var(--accent);font-weight:600;margin-top:6px;"></div>
           </div>
         </div>
 
@@ -2166,6 +2167,20 @@
       true
     );
 
+    // Knap 1: oversæt konverteringen til ekstra ekspeditioner (Δ konvertering × besøg i dag;
+    // samme tal som modellens konverteringsløft — nye kunder og stamkunders køb tælles i deres egne knapper)
+    (function () {
+      var el = document.getElementById("conv-equiv");
+      if (!el) return;
+      var tc = (tConv !== null && isFinite(tConv)) ? tConv : bConvPct;
+      var extra = result.baseVisitors * (tc - bConvPct) / 100;
+      if (!isFinite(extra) || Math.abs(tc - bConvPct) < 0.005) { el.style.display = "none"; return; }
+      var days = num("b-days");
+      el.textContent = "Konverteringen: " + (extra > 0 ? "+" : "−") + fmtNum(Math.abs(Math.round(extra)), 0) +
+        " ekspeditioner om året" + (isFinite(days) && days > 0 ? ", ca. " + fmtNum(Math.abs(extra) / days, 1) + " pr. åbningsdag." : ".");
+      el.style.display = "block";
+    })();
+
     // Knap 2: oversæt mersalget til solgte enheder (Δ enheder pr. køb × transaktioner EFTER alle knapper,
     // så mersalget også gælder nye kunders og stamkunders ekstra køb)
     (function () {
@@ -2641,6 +2656,8 @@
     }
     var r = {};
     r.conv   = { changed: moved(num("b-conv"), num("in-conv")),     lines: [line("", num("b-conv"), num("in-conv"), " %")] };
+    var convEq = document.getElementById("conv-equiv");
+    if (r.conv.changed && convEq && convEq.style.display !== "none") r.conv.lines.push(convEq.textContent.replace(/\.$/, ""));
     r.upt    = { changed: moved(bUpt, num("in-upt")),               lines: [line("", bUpt, num("in-upt"), " stk.")] };
     if (r.upt.changed && bTx > 0) {
       var txAfterEl = document.getElementById("r-tx-after");
