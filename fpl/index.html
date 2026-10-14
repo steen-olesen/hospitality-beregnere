@@ -992,10 +992,10 @@
           <div class="fp-lever-body">
             <div class="fp-slider-row">
               <div class="fp-slider-wrap">
-                <input type="range" class="fp-slider" id="sl-conv" min="0" max="50" step="0.1">
+                <input type="range" class="fp-slider" id="sl-conv" min="0" max="100" step="0.1">
               </div>
               <div class="fp-num-shell">
-                <input type="number" id="in-conv" inputmode="decimal" step="0.1">
+                <input type="number" id="in-conv" inputmode="decimal" step="0.1" min="0" max="100">
                 <span class="fp-num-unit">%</span>
               </div>
             </div>
@@ -1071,7 +1071,7 @@
                   <input type="range" class="fp-slider" id="sl-loy-q1" min="0" max="100" step="0.1">
                 </div>
                 <div class="fp-num-shell">
-                  <input type="number" id="in-loy-q1" inputmode="decimal" step="0.1">
+                  <input type="number" id="in-loy-q1" inputmode="decimal" step="0.1" min="0" max="100">
                   <span class="fp-num-unit">%</span>
                 </div>
               </div>
@@ -1156,7 +1156,7 @@
                 <input type="range" class="fp-slider" id="sl-margin" min="0" max="90" step="0.1">
               </div>
               <div class="fp-num-shell">
-                <input type="number" id="in-margin" inputmode="decimal" step="0.1">
+                <input type="number" id="in-margin" inputmode="decimal" step="0.1" min="0" max="100">
                 <span class="fp-num-unit">%</span>
               </div>
             </div>
@@ -1663,7 +1663,7 @@
   // ─── INIT LEVERS (once, when first valid baseline) ──────────────────────────
   function initLevers(bConv, bUpt, bPrice, bMargin) {
     var slConv = document.getElementById("sl-conv");
-    if (slConv) slConv.max = Math.max(50, Math.ceil(bConv * 2));
+    if (slConv) slConv.max = 100;   // en konverteringsrate kan aldrig overstige 100 %
     setField("sl-conv",    "in-conv",    bConv);
 
     setField("sl-upt",     "in-upt",     bUpt);
@@ -1909,6 +1909,14 @@
       if (helperEl) helperEl.textContent = "Udfyld venligst: " + missing.join(", ");
       return;
     }
+    var overMax = [];
+    if (bConvPct > 100)                         overMax.push("Konverteringsrate");
+    if (grossMarginPct > 100)                   overMax.push("Bruttoavance");
+    if (isFinite(bLoyPct) && bLoyPct > 100)     overMax.push("Andel loyale kunder");
+    if (overMax.length > 0) {
+      if (helperEl) helperEl.textContent = "Kan højst være 100 %: " + overMax.join(", ");
+      return;
+    }
 
     var grossMargin = grossMarginPct / 100;
 
@@ -1982,6 +1990,11 @@
     setVal("d-margin", "I dag: " + fmtPct(grossMarginPct, 1));
 
     // Read lever targets (null = not changed / use baseline)
+    [["sl-conv", "in-conv"], ["sl-loy-q1", "in-loy-q1"], ["sl-margin", "in-margin"]].forEach(function (f) {
+      var v = num(f[1]);
+      if (isFinite(v) && v > 100) setField(f[0], f[1], 100);
+      if (isFinite(v) && v < 0)   setField(f[0], f[1], 0);
+    });
     var tConvRaw  = num("in-conv");
     var tUptRaw   = num("in-upt");
     // Only use price lever value if user has manually adjusted it —
