@@ -2289,7 +2289,7 @@
   // knap. De gemmes kun i brugerens egen browser (localStorage). "Min vækstplan"
   // laver til sidst en rapport med de aktuelle tal + handlingerne.
   var PLAN_KEY = "loeftestangen-vaekstplan-v1";
-  var PLAN_CTA_URL = "detmindrebureau.dk/levers";
+  var PLAN_CTA_URL = "detmindrebureau.dk/booking";
   var PLAN_LEVERS = [
     { key: "conv",   nr: 1, title: "Konverteringsrate",        hint: "Fx: Vi tæller i 4 uger, hvor mange der kommer ind, før vi sætter et mål." },
     { key: "upt",    nr: 2, title: "Enheder pr. transaktion",  hint: "Fx: Alle kunder tilbydes et relevant tilkøb. Personalet trænes i mersalg." },
@@ -2729,9 +2729,9 @@
               (k[3] ? '<span class="b">' + esc(k[3]) + '</span>' : '') + '</span></div>';
           }).join("") +
         '</div>' +
-        '<p class="caveat">Tallene er pr. år og forudsætter uændrede faste omkostninger. Det er et regnestykke, ikke et løfte.</p>' +
+        '<p class="caveat">Tallene er pr. år. Det er et regnestykke, ikke et løfte. Kapacitetsforhold er individuelle.</p>' +
         '<h2>Handlingsplanen</h2>' +
-        '<p class="intro">Alt, hvad I gør for at tjene flere penge, skal flytte mindst én af de 7 knapper.</p>' +
+        '<p class="intro">Herunder kan du se hvilke knapper der er skruet på og de respektive handlinger for hver knap.</p>' +
         leversHtml +
         timelineHtml +
         '<div class="closing"><h2>Nøgletal før og efter</h2>' +
