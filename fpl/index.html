@@ -2166,15 +2166,16 @@
       true
     );
 
-    // Knap 2: oversæt ændringen til solgte enheder, alt andet lige (Δ enheder pr. køb × transaktioner)
+    // Knap 2: oversæt mersalget til solgte enheder (Δ enheder pr. køb × transaktioner EFTER alle knapper,
+    // så mersalget også gælder nye kunders og stamkunders ekstra køb)
     (function () {
       var el = document.getElementById("upt-equiv");
       if (!el) return;
       var tu = (tUpt !== null && isFinite(tUpt)) ? tUpt : bUpt;
-      var extra = (tu - bUpt) * transactions;
+      var extra = (tu - bUpt) * result.targetTx;
       if (!isFinite(extra) || Math.abs(tu - bUpt) < 0.005) { el.style.display = "none"; return; }
       var days = num("b-days");
-      el.textContent = "Alt andet lige: " + (extra > 0 ? "+" : "−") + fmtNum(Math.abs(Math.round(extra)), 0) +
+      el.textContent = "Mersalget: " + (extra > 0 ? "+" : "−") + fmtNum(Math.abs(Math.round(extra)), 0) +
         " solgte enheder om året" + (isFinite(days) && days > 0 ? ", ca. " + fmtNum(Math.abs(extra) / days, 1) + " pr. åbningsdag." : ".");
       el.style.display = "block";
     })();
@@ -2642,9 +2643,11 @@
     r.conv   = { changed: moved(num("b-conv"), num("in-conv")),     lines: [line("", num("b-conv"), num("in-conv"), " %")] };
     r.upt    = { changed: moved(bUpt, num("in-upt")),               lines: [line("", bUpt, num("in-upt"), " stk.")] };
     if (r.upt.changed && bTx > 0) {
-      var extraUnits = (num("in-upt") - bUpt) * bTx;
+      var txAfterEl = document.getElementById("r-tx-after");
+      var txAfter = txAfterEl ? parseFloat(txAfterEl.textContent.replace(/\./g, "").replace(",", ".")) : NaN;
+      var extraUnits = (num("in-upt") - bUpt) * (isFinite(txAfter) && txAfter > 0 ? txAfter : bTx);
       var daysU = num("b-days");
-      r.upt.lines.push("Alt andet lige: " + (extraUnits > 0 ? "+" : "−") + n(Math.abs(Math.round(extraUnits))) + " solgte enheder om året" +
+      r.upt.lines.push("Mersalget: " + (extraUnits > 0 ? "+" : "−") + n(Math.abs(Math.round(extraUnits))) + " solgte enheder om året" +
         (daysU > 0 ? ", ca. " + nf.format(Math.round(Math.abs(extraUnits) / daysU * 10) / 10) + " pr. åbningsdag" : ""));
     }
     r.price  = { changed: moved(bPrice, num("in-price")),           lines: [line("", bPrice, num("in-price"), " kr. ekskl. moms")] };
