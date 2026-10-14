@@ -1024,6 +1024,7 @@
             </div>
             <div class="fp-help">Mersalg og bundling kan løfte kurvestørrelsen — selv 0,1 ekstra enhed pr. køb gør en forskel.</div>
             <div class="fp-help" id="upt-warning" style="display:none;color:var(--red);margin-top:6px;">⚠ En transaktion indeholder altid mindst 1 enhed. En værdi under 1 er ikke realistisk.</div>
+            <div class="fp-help" id="upt-equiv" style="display:none;color:var(--accent);font-weight:600;margin-top:6px;"></div>
           </div>
         </div>
 
@@ -1287,6 +1288,24 @@
                 <span class="fp-kpi-today" id="r-tx-today">–</span>
                 <span class="fp-kpi-arrow">→</span>
                 <span class="fp-kpi-after" id="r-tx-after">–</span>
+              </div>
+            </div>
+
+            <div class="fp-kpi-row" id="r-units-row" style="display:none;">
+              <div class="fp-kpi-row-top">
+                <div class="fp-kpi-label">Solgte enheder</div>
+                <span class="fp-kpi-badge" id="r-units-badge"></span>
+              </div>
+              <div class="fp-kpi-values">
+                <span class="fp-kpi-today" id="r-units-today">–</span>
+                <span class="fp-kpi-arrow">→</span>
+                <span class="fp-kpi-after" id="r-units-after">–</span>
+              </div>
+              <div class="fp-kpi-moms" id="r-units-day" style="display:none;">
+                <span class="fp-kpi-moms-label">pr. åbningsdag:</span>
+                <span class="fp-kpi-moms-val" id="r-units-day-today">–</span>
+                <span>→</span>
+                <span class="fp-kpi-moms-val" id="r-units-day-after">–</span>
               </div>
             </div>
 
@@ -1708,6 +1727,9 @@
   // loyalitetsfelter bevarer forskellen (90 → 92 = +2 point).
   var prevBaseKey = null;
   var leverOffset = { conv: 0, upt: 1, price: 1, margin: 0, loy1: 0, loy2: 0, loy3: 0 };
+  // Værdier, followBaseline selv har sat (afrundet). Står et felt stadig på den
+  // værdi, beholdes den præcise offset, så afrunding ikke sniger sig ind.
+  var followSet = {};
 
   function followBaseline(bConv, bUpt, bPrice, bMargin) {
     if (!leversInited) return;
@@ -1727,11 +1749,15 @@
       setField("sl-loy-q1", "in-loy-q1", r(Math.min(100, Math.max(0, bLoy1 + (leverAdjusted.loy ? o.loy1 : 0))), 1));
       setField("sl-loy-q2", "in-loy-q2", r(Math.max(1, bLoy2 + (leverAdjusted.loy ? o.loy2 : 0)), 2));
       setField("sl-loy-q3", "in-loy-q3", r(Math.max(0.5, bLoy3 + (leverAdjusted.loy ? o.loy3 : 0)), 1));
+      followSet = {};
+      ["in-conv","in-upt","in-price","in-margin","in-loy-q1","in-loy-q2","in-loy-q3"].forEach(function (id) {
+        followSet[id] = document.getElementById(id).value;
+      });
     } else {
       // Grundtal uændret → brugeren har evt. flyttet en lever; gem ændringen
       var tConv = num("in-conv"), tUpt = num("in-upt"), tPrice = num("in-price"), tMargin = num("in-margin");
       var tL1 = num("in-loy-q1"), tL2 = num("in-loy-q2"), tL3 = num("in-loy-q3");
-      leverOffset = {
+      var fresh = {
         conv:   leverAdjusted.conv   && isFinite(tConv)   ? tConv - bConv     : 0,
         upt:    leverAdjusted.upt    && isFinite(tUpt)   && bUpt > 0   ? tUpt / bUpt     : 1,
         price:  leverAdjusted.price  && isFinite(tPrice) && bPrice > 0 ? tPrice / bPrice : 1,
@@ -1740,6 +1766,16 @@
         loy2:   leverAdjusted.loy    && isFinite(tL2)     ? tL2 - bLoy2       : 0,
         loy3:   leverAdjusted.loy    && isFinite(tL3)     ? tL3 - bLoy3       : 0
       };
+      var fieldOf = { conv: "in-conv", upt: "in-upt", price: "in-price", margin: "in-margin",
+                      loy1: "in-loy-q1", loy2: "in-loy-q2", loy3: "in-loy-q3" };
+      Object.keys(fresh).forEach(function (k) {
+        var id = fieldOf[k];
+        var untouched = (id in followSet) && document.getElementById(id).value === followSet[id];
+        var adj = { conv: "conv", upt: "upt", price: "price", margin: "margin", loy1: "loy", loy2: "loy", loy3: "loy" }[k];
+        if (untouched && leverAdjusted[adj]) return;   // behold præcis offset
+        leverOffset[k] = fresh[k];
+        delete followSet[id];
+      });
     }
     prevBaseKey = key;
   }
@@ -2116,6 +2152,42 @@
       fmtNum(transactions, 0),       fmtNum(result.targetTx, 0),
       true
     );
+
+    // Knap 2: oversæt ændringen til solgte enheder, alt andet lige (Δ enheder pr. køb × transaktioner)
+    (function () {
+      var el = document.getElementById("upt-equiv");
+      if (!el) return;
+      var tu = (tUpt !== null && isFinite(tUpt)) ? tUpt : bUpt;
+      var extra = (tu - bUpt) * transactions;
+      if (!isFinite(extra) || Math.abs(tu - bUpt) < 0.005) { el.style.display = "none"; return; }
+      var days = num("b-days");
+      el.textContent = "Alt andet lige: " + (extra > 0 ? "+" : "−") + fmtNum(Math.abs(Math.round(extra)), 0) +
+        " solgte enheder om året" + (isFinite(days) && days > 0 ? ", ca. " + fmtNum(Math.abs(extra) / days, 1) + " pr. åbningsdag." : ".");
+      el.style.display = "block";
+    })();
+
+    // Solgte enheder = transaktioner × enheder pr. transaktion (kun når enheder er udfyldt)
+    (function () {
+      var row = document.getElementById("r-units-row");
+      if (!row) return;
+      var hasUnits = isFinite(bUnitsRaw) && bUnitsRaw > 0;
+      row.style.display = hasUnits ? "" : "none";
+      if (!hasUnits) return;
+      var uptAfter   = (tUpt !== null && isFinite(tUpt)) ? tUpt : bUpt;
+      var unitsAfter = result.targetTx * uptAfter;
+      updateKpiRow("r-units", bUnitsRaw, unitsAfter, fmtNum(bUnitsRaw, 0), fmtNum(unitsAfter, 0), true);
+      var days = num("b-days");
+      var dayRow = document.getElementById("r-units-day");
+      if (dayRow) {
+        if (isFinite(days) && days > 0) {
+          setVal("r-units-day-today", fmtNum(bUnitsRaw / days, 1));
+          setVal("r-units-day-after", fmtNum(unitsAfter / days, 1));
+          dayRow.style.display = "flex";
+        } else {
+          dayRow.style.display = "none";
+        }
+      }
+    })();
     updateKpiRow("r-vis",
       result.baseVisitors,  result.targetVisitors,
       fmtNum(result.baseVisitors, 0), fmtNum(result.targetVisitors, 0),
@@ -2556,6 +2628,12 @@
     var r = {};
     r.conv   = { changed: moved(num("b-conv"), num("in-conv")),     lines: [line("", num("b-conv"), num("in-conv"), " %")] };
     r.upt    = { changed: moved(bUpt, num("in-upt")),               lines: [line("", bUpt, num("in-upt"), " stk.")] };
+    if (r.upt.changed && bTx > 0) {
+      var extraUnits = (num("in-upt") - bUpt) * bTx;
+      var daysU = num("b-days");
+      r.upt.lines.push("Alt andet lige: " + (extraUnits > 0 ? "+" : "−") + n(Math.abs(Math.round(extraUnits))) + " solgte enheder om året" +
+        (daysU > 0 ? ", ca. " + nf.format(Math.round(Math.abs(extraUnits) / daysU * 10) / 10) + " pr. åbningsdag" : ""));
+    }
     r.price  = { changed: moved(bPrice, num("in-price")),           lines: [line("", bPrice, num("in-price"), " kr. ekskl. moms")] };
     r.loy    = { changed: moved(bLoy1, num("in-loy-q1")) || moved(bLoy2, num("in-loy-q2")) || moved(bLoy3, num("in-loy-q3")),
                  lines: [line("Andel loyale", bLoy1, num("in-loy-q1"), " %"),
@@ -2595,7 +2673,11 @@
       kpi("Nettoresultat", "r-np"),
       kpi("Omsætning, ekskl. moms", "r-rev"),
       kpi("Transaktioner", "r-tx"),
-      kpi("Besøg", "r-vis"),
+      kpi("Besøg", "r-vis")
+    ].concat(bUnits > 0 ? [
+      kpi("Solgte enheder", "r-units"),
+      ["Solgte enheder pr. åbningsdag", txt("r-units-day-today"), txt("r-units-day-after"), txt("r-units-badge").replace(/(\d)\s*%/g, "$1 %")]
+    ] : []).concat([
       { group: "Pr. køb og pr. kunde" },
       kpi("Gennemsnitligt køb (AOV), ekskl. moms", "r-aov"),
       ["Gennemsnitligt køb (AOV), inkl. moms", txt("r-aov-moms-today"), txt("r-aov-moms-after"), txt("r-aov-badge").replace(/(\d)\s*%/g, "$1 %")],
@@ -2611,7 +2693,7 @@
       ["Antal år som kunde", n(bLoy3), n(loy3), pct(bLoy3, loy3)],
       ["Ekstra nye kunder pr. år", "0", n(newN), newN > 0 ? "+" + n(newN) : ""],
       ["Besparelse på faste omkostninger", "0 kr.", (isFinite(tFixed) ? n(tFixed) : "0") + " kr.", ""]
-    ];
+    ]);
     return r;
   }
 
